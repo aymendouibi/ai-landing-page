@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\V1\AiController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BillingController;
+use App\Http\Controllers\Api\V1\BillingWebhookController;
 use App\Http\Controllers\Api\V1\DomainController;
 use App\Http\Controllers\Api\V1\FormController;
 use App\Http\Controllers\Api\V1\ProjectController;
@@ -29,6 +31,9 @@ Route::prefix('v1')->group(function () {
 
     // Public Website Form Submission
     Route::post('/forms/{form}/submit', [FormController::class, 'submit'])->middleware('throttle:30,1');
+
+    // Public Billing Webhooks
+    Route::post('/billing/webhook/stripe', [BillingWebhookController::class, 'stripe']);
 
     // Authenticated API (Sanctum)
     Route::middleware('auth:sanctum')->group(function () {
@@ -83,6 +88,15 @@ Route::prefix('v1')->group(function () {
             Route::post('/remix', [AiController::class, 'remix']);
             Route::post('/edit', [AiController::class, 'edit']);
             Route::get('/jobs/{job}', [AiController::class, 'getJob']);
+        });
+
+        // Billing & Monetization
+        Route::prefix('billing')->group(function () {
+            Route::get('/plans', [BillingController::class, 'plans']);
+            Route::get('/subscription', [BillingController::class, 'subscription']);
+            Route::post('/checkout', [BillingController::class, 'checkout']);
+            Route::post('/portal', [BillingController::class, 'portal']);
+            Route::post('/google-play/verify', [BillingController::class, 'verifyGooglePlay']);
         });
     });
 });

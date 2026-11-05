@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Domain;
 use App\Models\Website;
+use App\Services\Billing\SubscriptionEntitlementService;
 use App\Services\Hosting\CloudflareHostingService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +15,8 @@ use Illuminate\Support\Facades\Gate;
 class DomainController extends Controller
 {
     public function __construct(
-        protected CloudflareHostingService $hostingService
+        protected CloudflareHostingService $hostingService,
+        protected SubscriptionEntitlementService $entitlementService
     ) {}
 
     /**
@@ -37,6 +39,7 @@ class DomainController extends Controller
     public function store(Website $website, Request $request): JsonResponse
     {
         Gate::authorize('update', $website);
+        $this->entitlementService->assertCan($request->user(), 'custom_domain');
 
         $validated = $request->validate([
             'domain' => ['required', 'string', 'max:255'],

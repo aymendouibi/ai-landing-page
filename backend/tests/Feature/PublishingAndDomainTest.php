@@ -4,9 +4,12 @@ namespace Tests\Feature;
 
 use App\Enums\DeploymentStatus;
 use App\Enums\DomainStatus;
+use App\Enums\SubscriptionStatus;
 use App\Enums\WebsiteStatus;
 use App\Models\Deployment;
 use App\Models\Project;
+use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
 use App\Models\User;
 use App\Models\Website;
 use App\Services\Documents\DefaultDocumentFactory;
@@ -31,6 +34,27 @@ class PublishingAndDomainTest extends TestCase
 
         $this->user = User::factory()->create();
         $this->otherUser = User::factory()->create();
+
+        $proPlan = SubscriptionPlan::create([
+            'name' => 'Pro',
+            'slug' => 'pro',
+            'limits' => [
+                'max_websites' => 5,
+                'max_published' => 5,
+                'ai_generations_monthly' => 50,
+                'ai_edits_monthly' => 100,
+                'custom_domains' => 5,
+            ],
+            'price_monthly' => 29.00,
+        ]);
+
+        Subscription::create([
+            'user_id' => $this->user->id,
+            'plan_id' => $proPlan->id,
+            'status' => SubscriptionStatus::Active,
+            'provider' => 'stripe',
+            'current_period_end' => now()->addMonth(),
+        ]);
 
         $this->project = Project::create([
             'user_id' => $this->user->id,

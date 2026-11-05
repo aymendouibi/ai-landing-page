@@ -14,6 +14,7 @@ use App\Models\Project;
 use App\Models\Template;
 use App\Models\Website;
 use App\Models\WebsiteRevision;
+use App\Services\Billing\SubscriptionEntitlementService;
 use App\Services\Documents\DefaultDocumentFactory;
 use App\Services\Documents\WebsiteDocumentService;
 use Illuminate\Http\JsonResponse;
@@ -25,7 +26,8 @@ use Illuminate\Support\Str;
 class WebsiteController extends Controller
 {
     public function __construct(
-        protected WebsiteDocumentService $documentService
+        protected WebsiteDocumentService $documentService,
+        protected SubscriptionEntitlementService $entitlementService
     ) {}
 
     /**
@@ -52,6 +54,8 @@ class WebsiteController extends Controller
      */
     public function store(StoreWebsiteRequest $request): JsonResponse
     {
+        $this->entitlementService->assertCan($request->user(), 'create_website');
+
         $project = Project::findOrFail($request->validated('project_id'));
         Gate::authorize('update', $project);
 

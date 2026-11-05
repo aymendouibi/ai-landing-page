@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\WebsiteStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Deployment;
 use App\Models\Website;
+use App\Services\Billing\SubscriptionEntitlementService;
 use App\Services\Hosting\CloudflareHostingService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +16,8 @@ use Illuminate\Support\Facades\Gate;
 class PublishingController extends Controller
 {
     public function __construct(
-        protected CloudflareHostingService $hostingService
+        protected CloudflareHostingService $hostingService,
+        protected SubscriptionEntitlementService $entitlementService
     ) {}
 
     /**
@@ -23,6 +26,10 @@ class PublishingController extends Controller
     public function publish(Website $website, Request $request): JsonResponse
     {
         Gate::authorize('update', $website);
+
+        if ($website->status !== WebsiteStatus::Published) {
+            $this->entitlementService->assertCan($request->user(), 'publish_website');
+        }
 
         try {
             $deployment = $this->hostingService->publish($website);
