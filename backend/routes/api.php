@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\FormController;
 use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\TemplateController;
+use App\Http\Controllers\Api\V1\TemplateIngestionController;
 use App\Http\Controllers\Api\V1\WebsiteController;
 use Illuminate\Support\Facades\Route;
 
@@ -51,8 +52,13 @@ Route::prefix('v1')->group(function () {
             Route::get('/forms/{form}/submissions', [FormController::class, 'submissions']);
         });
 
-        // Template usage
-        Route::post('/templates/{template}/use', [TemplateController::class, 'use']);
+        // Template usage and ingestion
+        Route::prefix('templates')->group(function () {
+            Route::post('/{template}/use', [TemplateController::class, 'use']);
+            Route::post('/ingest/zip', [TemplateIngestionController::class, 'ingestZip']);
+            Route::post('/ingest/url', [TemplateIngestionController::class, 'ingestUrl']);
+            Route::post('/{template}/approve', [TemplateIngestionController::class, 'approve']);
+        });
 
         // AI System
         Route::prefix('ai')->group(function () {
