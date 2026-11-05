@@ -101,3 +101,4 @@ class AiJob extends Model
         ]);
     }
 }
+

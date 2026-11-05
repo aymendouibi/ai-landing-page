@@ -37,3 +37,4 @@ class WebsiteForm extends Model
         return $this->hasMany(FormSubmission::class, 'form_id');
     }
 }
+

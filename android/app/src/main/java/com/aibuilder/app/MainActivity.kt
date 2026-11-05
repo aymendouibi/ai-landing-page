@@ -16,6 +16,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.aibuilder.app.core.designsystem.AiBuilderTheme
 import com.aibuilder.app.core.navigation.Screen
+import com.aibuilder.app.feature.ai_creation.AiCreationScreen
+import com.aibuilder.app.feature.ai_creation.AiCreationViewModel
 import com.aibuilder.app.feature.auth.AuthScreen
 import com.aibuilder.app.feature.auth.AuthViewModel
 import com.aibuilder.app.feature.dashboard.DashboardScreen
@@ -71,6 +73,9 @@ fun AiBuilderAppNavigation() {
                 onNavigateToTemplates = {
                     navController.navigate(Screen.Templates.route)
                 },
+                onNavigateToAiCreation = {
+                    navController.navigate(Screen.AiCreation.route)
+                },
                 onLogout = {
                     navController.navigate(Screen.Auth.route) {
                         popUpTo(Screen.Dashboard.route) { inclusive = true }
@@ -90,6 +95,19 @@ fun AiBuilderAppNavigation() {
             )
         }
 
+        composable(Screen.AiCreation.route) {
+            val viewModel: AiCreationViewModel = hiltViewModel()
+            AiCreationScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onGenerationComplete = { websiteId ->
+                    navController.navigate(Screen.Editor.createRoute(websiteId)) {
+                        popUpTo(Screen.Dashboard.route)
+                    }
+                }
+            )
+        }
+
         composable(
             route = Screen.Editor.route,
             arguments = listOf(navArgument("websiteId") { type = NavType.StringType })
@@ -104,3 +122,4 @@ fun AiBuilderAppNavigation() {
         }
     }
 }
+

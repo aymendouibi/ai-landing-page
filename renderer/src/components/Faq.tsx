@@ -80,3 +80,4 @@ export const Faq: React.FC<FaqProps> = ({ props, styles = {} }) => {
     </div>
   );
 };
+

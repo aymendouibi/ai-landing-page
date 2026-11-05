@@ -11,3 +11,4 @@ enum AiJobType: string
     case Plan = 'plan';
     case VisionQa = 'vision_qa';
 }
+

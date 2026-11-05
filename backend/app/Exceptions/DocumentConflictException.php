@@ -11,3 +11,4 @@ class DocumentConflictException extends Exception
         parent::__construct($message, $code);
     }
 }
+

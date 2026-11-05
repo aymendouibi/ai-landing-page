@@ -64,3 +64,4 @@ class Template extends Model
         $this->increment('use_count');
     }
 }
+

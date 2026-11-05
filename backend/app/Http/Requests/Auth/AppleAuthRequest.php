@@ -23,3 +23,4 @@ class AppleAuthRequest extends FormRequest
         ];
     }
 }
+

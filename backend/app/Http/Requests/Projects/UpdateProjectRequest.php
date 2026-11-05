@@ -22,3 +22,4 @@ class UpdateProjectRequest extends FormRequest
         ];
     }
 }
+

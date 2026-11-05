@@ -42,3 +42,4 @@ class MediaAsset extends Model
         return $this->belongsTo(Website::class);
     }
 }
+

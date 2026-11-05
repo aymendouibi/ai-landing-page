@@ -109,3 +109,4 @@ class TemplateTest extends TestCase
         $this->assertEquals(11, $this->template->fresh()->use_count);
     }
 }
+

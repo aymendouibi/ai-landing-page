@@ -174,3 +174,4 @@ export interface BridgeMessage<T = any> {
   action: BridgeAction;
   payload: T;
 }
+

@@ -52,3 +52,4 @@ class UsageRecord extends Model
             ->value('quantity') ?? 0);
     }
 }
+

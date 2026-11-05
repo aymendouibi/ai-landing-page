@@ -9,3 +9,4 @@ enum AiJobStatus: string
     case Completed = 'completed';
     case Failed = 'failed';
 }
+

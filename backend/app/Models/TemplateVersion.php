@@ -35,3 +35,4 @@ class TemplateVersion extends Model
         return $this->belongsTo(Template::class);
     }
 }
+

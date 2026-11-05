@@ -32,3 +32,4 @@ class EditorJsBridgeTest {
         assertTrue(ready)
     }
 }
+

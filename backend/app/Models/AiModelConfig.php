@@ -42,3 +42,4 @@ class AiModelConfig extends Model
             ->first();
     }
 }
+

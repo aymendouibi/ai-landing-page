@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ai-builder-android"
 include(":app")
+

@@ -30,3 +30,4 @@ class TemplateCategory extends Model
         return $this->hasMany(Template::class, 'category_id');
     }
 }
+

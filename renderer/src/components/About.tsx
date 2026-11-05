@@ -66,3 +66,4 @@ export const About: React.FC<AboutProps> = ({ props, styles = {} }) => {
     </div>
   );
 };
+

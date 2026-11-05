@@ -51,3 +51,4 @@ export const Statistics: React.FC<StatisticsProps> = ({ props, styles = {} }) =>
     </div>
   );
 };
+

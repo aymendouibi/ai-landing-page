@@ -77,3 +77,4 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({
     </section>
   );
 };
+

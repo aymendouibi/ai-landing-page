@@ -84,3 +84,4 @@ class DocumentValidatorTest extends TestCase
         $this->validator->validate($doc);
     }
 }
+

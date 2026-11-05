@@ -27,3 +27,4 @@ class BillingCustomer extends Model
         return $this->hasMany(BillingEvent::class);
     }
 }
+

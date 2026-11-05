@@ -282,3 +282,4 @@ class WebsiteController extends Controller
         ]);
     }
 }
+

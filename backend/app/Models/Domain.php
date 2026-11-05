@@ -46,3 +46,4 @@ class Domain extends Model
         return $this->status === DomainStatus::Pending;
     }
 }
+

@@ -107,3 +107,4 @@ export const Hero: React.FC<HeroProps> = ({ variant = 'centered', props, styles 
     </div>
   );
 };
+

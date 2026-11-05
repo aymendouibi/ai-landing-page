@@ -183,3 +183,4 @@ export const Contact: React.FC<ContactProps> = ({ props, styles = {} }) => {
     </div>
   );
 };
+

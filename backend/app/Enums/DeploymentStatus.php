@@ -11,3 +11,4 @@ enum DeploymentStatus: string
     case Failed = 'failed';
     case RolledBack = 'rolled_back';
 }
+

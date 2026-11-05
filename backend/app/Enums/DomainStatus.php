@@ -10,3 +10,4 @@ enum DomainStatus: string
     case Failed = 'failed';
     case Removed = 'removed';
 }
+

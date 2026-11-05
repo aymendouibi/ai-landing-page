@@ -39,3 +39,4 @@ class DesignRecipe extends Model
             ->first();
     }
 }
+

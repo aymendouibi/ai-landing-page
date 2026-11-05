@@ -8,3 +8,4 @@ enum WebsiteStatus: string
     case Published = 'published';
     case Archived = 'archived';
 }
+

@@ -118,3 +118,4 @@ class Website extends Model
         return $this->status === WebsiteStatus::Published;
     }
 }
+

@@ -111,3 +111,4 @@ class ProjectTest extends TestCase
         $this->assertSoftDeleted('projects', ['id' => $project->id]);
     }
 }
+

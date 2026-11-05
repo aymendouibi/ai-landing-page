@@ -70,3 +70,4 @@ export const Testimonials: React.FC<TestimonialsProps> = ({ props, styles = {} }
     </div>
   );
 };
+

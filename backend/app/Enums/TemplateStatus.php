@@ -9,3 +9,4 @@ enum TemplateStatus: string
     case Published = 'published';
     case Archived = 'archived';
 }
+

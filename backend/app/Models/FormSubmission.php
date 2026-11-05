@@ -31,3 +31,4 @@ class FormSubmission extends Model
         return $this->belongsTo(WebsiteForm::class, 'form_id');
     }
 }
+

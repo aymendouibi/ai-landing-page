@@ -50,3 +50,4 @@ class Subscription extends Model
             && ($this->current_period_end === null || $this->current_period_end->isFuture());
     }
 }
+

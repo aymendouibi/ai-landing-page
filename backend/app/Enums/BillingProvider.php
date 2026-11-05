@@ -8,3 +8,4 @@ enum BillingProvider: string
     case GooglePlay = 'google_play';
     case Manual = 'manual';
 }
+

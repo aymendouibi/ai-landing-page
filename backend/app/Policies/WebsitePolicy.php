@@ -22,3 +22,4 @@ class WebsitePolicy
         return $user->id === $website->project->user_id || $user->isAdmin();
     }
 }
+

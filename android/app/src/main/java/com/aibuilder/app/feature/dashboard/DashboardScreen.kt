@@ -22,6 +22,7 @@ fun DashboardScreen(
     viewModel: DashboardViewModel,
     onNavigateToEditor: (String) -> Unit,
     onNavigateToTemplates: () -> Unit,
+    onNavigateToAiCreation: () -> Unit,
     onLogout: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -86,8 +87,13 @@ fun DashboardScreen(
                         color = MaterialTheme.colorScheme.outline
                     )
                     Spacer(modifier = Modifier.height(24.dp))
-                    Button(onClick = onNavigateToTemplates) {
-                        Text("Browse Templates")
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Button(onClick = onNavigateToAiCreation) {
+                            Text("Create with AI")
+                        }
+                        OutlinedButton(onClick = onNavigateToTemplates) {
+                            Text("Templates")
+                        }
                     }
                 }
             } else {
@@ -107,8 +113,13 @@ fun DashboardScreen(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            TextButton(onClick = onNavigateToTemplates) {
-                                Text("Templates")
+                            Row {
+                                TextButton(onClick = onNavigateToAiCreation) {
+                                    Text("AI Creator")
+                                }
+                                TextButton(onClick = onNavigateToTemplates) {
+                                    Text("Templates")
+                                }
                             }
                         }
                     }

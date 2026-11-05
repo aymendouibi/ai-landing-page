@@ -46,3 +46,4 @@ class Deployment extends Model
         return $this->status === DeploymentStatus::Deployed;
     }
 }
+

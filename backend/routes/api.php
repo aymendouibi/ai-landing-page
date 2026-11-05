@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AiController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\FormController;
 use App\Http\Controllers\Api\V1\ProjectController;
@@ -52,5 +53,14 @@ Route::prefix('v1')->group(function () {
 
         // Template usage
         Route::post('/templates/{template}/use', [TemplateController::class, 'use']);
+
+        // AI System
+        Route::prefix('ai')->group(function () {
+            Route::post('/plan', [AiController::class, 'plan']);
+            Route::post('/generate', [AiController::class, 'generate']);
+            Route::post('/remix', [AiController::class, 'remix']);
+            Route::post('/edit', [AiController::class, 'edit']);
+            Route::get('/jobs/{job}', [AiController::class, 'getJob']);
+        });
     });
 });

@@ -39,3 +39,4 @@ class SubscriptionPlan extends Model
         return $this->limits[$key] ?? $default;
     }
 }
+

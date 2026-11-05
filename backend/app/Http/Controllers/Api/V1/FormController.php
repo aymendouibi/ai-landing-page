@@ -52,3 +52,4 @@ class FormController extends Controller
         return response()->json($submissions);
     }
 }
+

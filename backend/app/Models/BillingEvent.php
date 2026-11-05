@@ -32,3 +32,4 @@ class BillingEvent extends Model
         return $this->belongsTo(BillingCustomer::class);
     }
 }
+

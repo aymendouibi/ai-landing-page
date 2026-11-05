@@ -85,3 +85,4 @@ data class PaginatedResponse<T>(
     @SerializedName("last_page") val lastPage: Int,
     val total: Int
 )
+

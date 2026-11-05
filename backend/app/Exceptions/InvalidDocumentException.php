@@ -26,3 +26,4 @@ class InvalidDocumentException extends Exception
         return $this->errors;
     }
 }
+
