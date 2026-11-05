@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Tablet
 import androidx.compose.material.icons.filled.Tv
@@ -30,7 +31,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 fun EditorScreen(
     websiteId: String,
     viewModel: EditorViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToPublishing: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
@@ -90,6 +92,13 @@ fun EditorScreen(
                             Icons.Default.Tv,
                             contentDescription = "Desktop",
                             tint = if (uiState.viewport == ViewportMode.Desktop) MaterialTheme.colorScheme.primary else Color.Gray
+                        )
+                    }
+                    IconButton(onClick = onNavigateToPublishing) {
+                        Icon(
+                            Icons.Filled.CloudUpload,
+                            contentDescription = "Publish & Hosting",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

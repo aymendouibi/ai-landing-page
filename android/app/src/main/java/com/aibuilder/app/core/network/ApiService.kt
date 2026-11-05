@@ -88,5 +88,49 @@ interface ApiService {
         @Path("id") id: String,
         @Body body: Map<String, String>
     ): Response<Map<String, Any>>
+
+    // Publishing & Domains
+    @POST("api/v1/websites/{id}/publish")
+    suspend fun publishWebsite(@Path("id") id: String): Response<Map<String, Any>>
+
+    @POST("api/v1/websites/{id}/unpublish")
+    suspend fun unpublishWebsite(@Path("id") id: String): Response<Map<String, Any>>
+
+    @GET("api/v1/websites/{id}/deployments")
+    suspend fun getDeployments(@Path("id") id: String): Response<PaginatedResponse<Map<String, Any>>>
+
+    @POST("api/v1/websites/{id}/deployments/{deploymentId}/rollback")
+    suspend fun rollbackDeployment(
+        @Path("id") id: String,
+        @Path("deploymentId") deploymentId: String
+    ): Response<Map<String, Any>>
+
+    @GET("api/v1/websites/{id}/domains")
+    suspend fun getDomains(@Path("id") id: String): Response<Map<String, Any>>
+
+    @POST("api/v1/websites/{id}/domains")
+    suspend fun addCustomDomain(
+        @Path("id") id: String,
+        @Body body: Map<String, String>
+    ): Response<Map<String, Any>>
+
+    @POST("api/v1/websites/{id}/domains/{domainId}/verify")
+    suspend fun verifyDomain(
+        @Path("id") id: String,
+        @Path("domainId") domainId: String
+    ): Response<Map<String, Any>>
+
+    @DELETE("api/v1/websites/{id}/domains/{domainId}")
+    suspend fun removeDomain(
+        @Path("id") id: String,
+        @Path("domainId") domainId: String
+    ): Response<Map<String, Any>>
+
+    // Visual QA
+    @POST("api/v1/websites/{id}/qa")
+    suspend fun runVisualQa(
+        @Path("id") id: String,
+        @Body body: Map<String, Boolean>
+    ): Response<Map<String, Any>>
 }
 

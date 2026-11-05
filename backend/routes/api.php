@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Api\V1\AiController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\DomainController;
 use App\Http\Controllers\Api\V1\FormController;
 use App\Http\Controllers\Api\V1\ProjectController;
+use App\Http\Controllers\Api\V1\PublishingController;
 use App\Http\Controllers\Api\V1\TemplateController;
 use App\Http\Controllers\Api\V1\TemplateIngestionController;
 use App\Http\Controllers\Api\V1\VisualQaController;
@@ -52,6 +54,18 @@ Route::prefix('v1')->group(function () {
             Route::post('/lock', [WebsiteController::class, 'acquireLock']);
             Route::post('/unlock', [WebsiteController::class, 'releaseLock']);
             Route::get('/forms/{form}/submissions', [FormController::class, 'submissions']);
+
+            // Publishing & Hosting
+            Route::post('/publish', [PublishingController::class, 'publish']);
+            Route::post('/unpublish', [PublishingController::class, 'unpublish']);
+            Route::get('/deployments', [PublishingController::class, 'deployments']);
+            Route::post('/deployments/{deployment}/rollback', [PublishingController::class, 'rollback']);
+
+            // Custom Domains
+            Route::get('/domains', [DomainController::class, 'index']);
+            Route::post('/domains', [DomainController::class, 'store']);
+            Route::post('/domains/{domain}/verify', [DomainController::class, 'verify']);
+            Route::delete('/domains/{domain}', [DomainController::class, 'destroy']);
         });
 
         // Template usage and ingestion

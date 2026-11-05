@@ -25,6 +25,7 @@ class Website extends Model
         'lock_token',
         'locked_at',
         'subdomain',
+        'published_at',
     ];
 
     protected function casts(): array
@@ -33,6 +34,7 @@ class Website extends Model
             'status' => WebsiteStatus::class,
             'document' => 'array',
             'locked_at' => 'datetime',
+            'published_at' => 'datetime',
             'revision_number' => 'integer',
         ];
     }

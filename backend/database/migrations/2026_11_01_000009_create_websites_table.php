@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('lock_token')->nullable();
             $table->timestamp('locked_at')->nullable();
             $table->string('subdomain')->unique()->nullable();
+            $table->timestamp('published_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

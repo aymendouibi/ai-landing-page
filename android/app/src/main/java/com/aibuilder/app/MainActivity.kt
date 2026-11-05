@@ -24,6 +24,7 @@ import com.aibuilder.app.feature.dashboard.DashboardScreen
 import com.aibuilder.app.feature.dashboard.DashboardViewModel
 import com.aibuilder.app.feature.editor.EditorScreen
 import com.aibuilder.app.feature.editor.EditorViewModel
+import com.aibuilder.app.feature.publishing.PublishingScreen
 import com.aibuilder.app.feature.templates.TemplatesScreen
 import com.aibuilder.app.feature.templates.TemplatesViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -117,6 +118,16 @@ fun AiBuilderAppNavigation() {
             EditorScreen(
                 websiteId = websiteId,
                 viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToPublishing = { navController.navigate(Screen.Publishing.createRoute(websiteId)) }
+            )
+        }
+
+        composable(
+            route = Screen.Publishing.route,
+            arguments = listOf(navArgument("websiteId") { type = NavType.StringType })
+        ) {
+            PublishingScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
