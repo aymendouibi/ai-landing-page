@@ -1,22 +1,25 @@
 package com.aibuilder.app.feature.editor
 
 import android.webkit.JavascriptInterface
-import org.json.JSONObject
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 
 class EditorJsBridge(
     private val onSectionSelected: (String) -> Unit,
     private val onEditorReady: () -> Unit
 ) {
+    private val gson = Gson()
+
     @JavascriptInterface
     fun postMessage(message: String) {
         try {
-            val json = JSONObject(message)
-            val action = json.optString("action")
-            val payload = json.optJSONObject("payload")
+            val json = gson.fromJson(message, JsonObject::class.java)
+            val action = json.get("action")?.asString
 
             when (action) {
                 "SELECT_SECTION" -> {
-                    val sectionId = payload?.optString("sectionId")
+                    val payload = json.getAsJsonObject("payload")
+                    val sectionId = payload?.get("sectionId")?.asString
                     if (!sectionId.isNullOrEmpty()) {
                         onSectionSelected(sectionId)
                     }
