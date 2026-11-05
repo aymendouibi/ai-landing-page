@@ -28,6 +28,14 @@ class SessionManager @Inject constructor(
         preferences[TOKEN_KEY]
     }
 
+    val userName: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[USER_NAME_KEY]
+    }
+
+    val userEmail: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[USER_EMAIL_KEY]
+    }
+
     suspend fun getAuthToken(): String? {
         return context.dataStore.data.map { it[TOKEN_KEY] }.first()
     }

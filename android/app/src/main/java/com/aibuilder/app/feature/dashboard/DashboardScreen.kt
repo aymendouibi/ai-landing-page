@@ -1,22 +1,34 @@
 package com.aibuilder.app.feature.dashboard
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Web
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.aibuilder.app.core.designsystem.AppColors
+import com.aibuilder.app.core.designsystem.AppGradients
+import com.aibuilder.app.core.designsystem.AppTypography
+import com.aibuilder.app.feature.dashboard.components.ContinueEditingHeroCard
+import com.aibuilder.app.feature.dashboard.components.FloatingBottomBar
+import com.aibuilder.app.feature.dashboard.components.NewWebsiteBottomSheet
+import com.aibuilder.app.feature.dashboard.components.RecentProjectCard
+import com.aibuilder.app.feature.dashboard.components.ShowcaseRecentItem
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
@@ -26,180 +38,270 @@ fun DashboardScreen(
     onLogout: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var showCreateDialog by remember { mutableStateOf(false) }
-    var newSiteName by remember { mutableStateOf("") }
+    var showProfileDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("My Websites", fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = { viewModel.logout(onLogout) }) {
-                        Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Log Out")
+    // Curated high-fidelity showcase recent designs
+    val showcaseItems = remember(uiState.websites) {
+        val list = mutableListOf<ShowcaseRecentItem>()
+
+        // Map real websites if available
+        uiState.websites.drop(1).forEach { site ->
+            list.add(
+                ShowcaseRecentItem(
+                    id = site.id,
+                    title = site.name,
+                    category = "Digital Studio",
+                    headline = "Crafted for Modern Growth",
+                    body = "Clean architecture, custom layout, and optimized speed for high conversion.",
+                    ctaText = "Open Editor",
+                    ctaColor = AppColors.Ink,
+                    imageUrl = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80"
+                )
+            )
+        }
+
+        // Add standard sample cards matching designs
+        list.add(
+            ShowcaseRecentItem(
+                id = "showcase_studio_marlow",
+                title = "Studio Marlow",
+                category = "Architecture, Copenhagen",
+                headline = "Quiet buildings for busy lives",
+                body = "Homes, libraries and small civic spaces, designed with the people who use them.",
+                ctaText = "See our work",
+                ctaColor = Color(0xFF0C0C14),
+                imageUrl = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80"
+            )
+        )
+        list.add(
+            ShowcaseRecentItem(
+                id = "showcase_kite_yoga",
+                title = "Kite Yoga",
+                category = "East 6th St, Austin",
+                headline = "Slow mornings start here",
+                body = "Small classes in a sunlit studio, timers to daily practice.",
+                ctaText = "See the schedule",
+                ctaColor = Color(0xFF5D6B50),
+                imageUrl = "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=400&q=80"
+            )
+        )
+        list
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.Background)
+    ) {
+        // Soft ambient atmospheric gradient wash at the top
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp)
+                .background(AppGradients.BackdropAura)
+        )
+
+        // Main Scrollable Content
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 20.dp,
+                end = 20.dp,
+                top = 56.dp,
+                bottom = 120.dp
+            )
+        ) {
+            // Header Row: "Projects" + User Avatar "MR"
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Projects",
+                        style = AppTypography.LargePageTitle
+                    )
+
+                    // Circular Avatar with User Initials
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(AppColors.Ink)
+                            .clickable { showProfileDialog = true },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = uiState.userInitials,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+
+            // Continue Editing Hero Card
+            item {
+                val primaryWebsite = uiState.websites.firstOrNull()
+                ContinueEditingHeroCard(
+                    website = primaryWebsite,
+                    onOpenClick = {
+                        if (primaryWebsite != null) {
+                            onNavigateToEditor(primaryWebsite.id)
+                        } else {
+                            viewModel.openNewWebsiteSheet()
+                        }
+                    }
+                )
+            }
+
+            // "Recent" Section Title
+            item {
+                Spacer(modifier = Modifier.height(28.dp))
+                Text(
+                    text = "Recent",
+                    style = AppTypography.SectionHeading,
+                    modifier = Modifier.padding(bottom = 14.dp)
+                )
+            }
+
+            // Horizontal Carousel of Recent Websites
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    contentPadding = PaddingValues(end = 12.dp)
+                ) {
+                    items(showcaseItems) { item ->
+                        RecentProjectCard(
+                            item = item,
+                            onClick = {
+                                if (item.id.startsWith("showcase_")) {
+                                    val targetId = uiState.websites.firstOrNull()?.id
+                                    if (targetId != null) {
+                                        onNavigateToEditor(targetId)
+                                    } else {
+                                        viewModel.openNewWebsiteSheet()
+                                    }
+                                } else {
+                                    onNavigateToEditor(item.id)
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        // Floating Translucent Bottom Bar
+        FloatingBottomBar(
+            activeTab = uiState.activeTab,
+            onTabSelected = { tab ->
+                viewModel.setTab(tab)
+                when (tab) {
+                    "Templates" -> onNavigateToTemplates()
+                    "Profile" -> showProfileDialog = true
+                    "Assets" -> {}
+                    "Projects" -> {}
+                }
+            },
+            onAddClick = { viewModel.openNewWebsiteSheet() },
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+
+        // New Website Bottom Sheet
+        if (uiState.showNewWebsiteSheet) {
+            NewWebsiteBottomSheet(
+                onDismiss = { viewModel.closeNewWebsiteSheet() },
+                onDescribeToAi = {
+                    viewModel.closeNewWebsiteSheet()
+                    onNavigateToAiCreation()
+                },
+                onStartFromTemplate = {
+                    viewModel.closeNewWebsiteSheet()
+                    onNavigateToTemplates()
+                },
+                onBlankWebsite = {
+                    viewModel.createBlankWebsite { newId ->
+                        onNavigateToEditor(newId)
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    if (uiState.projects.isNotEmpty()) {
-                        showCreateDialog = true
-                    } else {
-                        onNavigateToTemplates()
-                    }
-                }
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "New Website")
-            }
         }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (uiState.websites.isEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        Icons.Default.Web,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        "No websites created yet",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        "Choose a professional template or build from scratch.",
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Button(onClick = onNavigateToAiCreation) {
-                            Text("Create with AI")
-                        }
-                        OutlinedButton(onClick = onNavigateToTemplates) {
-                            Text("Templates")
-                        }
-                    }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+
+        // User Profile / Logout Dialog
+        if (showProfileDialog) {
+            AlertDialog(
+                onDismissRequest = { showProfileDialog = false },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(AppColors.Ink),
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                "Active Sites",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
+                                text = uiState.userInitials,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
                             )
-                            Row {
-                                TextButton(onClick = onNavigateToAiCreation) {
-                                    Text("AI Creator")
-                                }
-                                TextButton(onClick = onNavigateToTemplates) {
-                                    Text("Templates")
-                                }
-                            }
+                        }
+                        Column {
+                            Text(
+                                text = uiState.userName ?: "Creator Account",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 17.sp
+                            )
+                            Text(
+                                text = "user@aibuilder.local",
+                                color = AppColors.InkMuted,
+                                fontSize = 13.sp
+                            )
                         }
                     }
-
-                    items(uiState.websites) { site ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onNavigateToEditor(site.id) },
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = site.name,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = site.subdomain?.let { "$it.yourplatform.com" } ?: "Draft",
-                                    fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.outline
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(
-                                        text = "Revision #${site.revisionNumber}",
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        text = site.status.uppercase(),
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (site.status == "published") MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
-                                    )
-                                }
-                            }
-                        }
+                },
+                text = {
+                    Text(
+                        "Manage your active projects or sign out to switch accounts.",
+                        color = AppColors.InkSecondary,
+                        fontSize = 14.sp
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showProfileDialog = false
+                            viewModel.logout(onLogout)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = AppColors.Ink),
+                        shape = RoundedCornerShape(999.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Sign Out")
                     }
-                }
-            }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showProfileDialog = false }) {
+                        Text("Close", color = AppColors.InkMuted)
+                    }
+                },
+                containerColor = AppColors.Surface,
+                shape = RoundedCornerShape(22.dp)
+            )
         }
-    }
-
-    if (showCreateDialog) {
-        AlertDialog(
-            onDismissRequest = { showCreateDialog = false },
-            title = { Text("Create New Website") },
-            text = {
-                OutlinedTextField(
-                    value = newSiteName,
-                    onValueChange = { newSiteName = it },
-                    label = { Text("Website Name") },
-                    singleLine = true
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val firstProject = uiState.projects.firstOrNull()
-                        if (firstProject != null && newSiteName.isNotBlank()) {
-                            viewModel.createWebsite(newSiteName, firstProject.id) { newId ->
-                                showCreateDialog = false
-                                onNavigateToEditor(newId)
-                            }
-                        }
-                    }
-                ) {
-                    Text("Create")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCreateDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
 }
