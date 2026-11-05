@@ -203,3 +203,4 @@ class StructuredAiEditor
         return $doc;
     }
 }
+

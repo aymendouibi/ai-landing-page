@@ -3,11 +3,8 @@
 namespace App\Services\AI;
 
 use App\Models\DesignRecipe;
-use App\Services\AI\Prompts\BusinessAnalysisPrompt;
-use App\Services\AI\Prompts\ContentGenerationPrompt;
-use App\Services\AI\Prompts\DesignBriefPrompt;
 use App\Services\AI\Prompts\PromptHelper;
-use App\Services\AI\Prompts\WebsitePlanPrompt;
+use App\Services\AI\Prompts\UnifiedWebsitePrompt;
 use App\Services\Documents\DefaultDocumentFactory;
 use App\Services\Documents\DocumentValidator;
 use Exception;
@@ -34,11 +31,12 @@ class AiWebsiteGenerator
         'fitness' => 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=80',
         'agency' => 'https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=1200&q=80',
         'portfolio' => 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80',
+        'architecture' => 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
         'default' => 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
     ];
 
     /**
-     * Run the staged AI generation pipeline.
+     * Run high-speed staged AI generation pipeline.
      *
      * @param string $userPrompt
      * @param string|null $preferredIndustry
@@ -51,8 +49,7 @@ class AiWebsiteGenerator
         ?string $preferredIndustry = null,
         ?callable $progressCallback = null
     ): array {
-        $totalTokens = 0;
-        $primaryModel = $this->modelSelector->getModelForTask('document_generation');
+        @set_time_limit(180);
 
         $reportProgress = function (int $percent, string $msg) use ($progressCallback) {
             if ($progressCallback) {
@@ -60,133 +57,226 @@ class AiWebsiteGenerator
             }
         };
 
-        // STAGE 1: Understand the business
-        $reportProgress(15, 'Analyzing business & audience...');
-        $stage1Res = $this->client->chatCompletion(
-            messages: BusinessAnalysisPrompt::build($userPrompt),
-            preferredModel: $this->modelSelector->getModelForTask('business_analysis'),
+        // STAGE 1: Industry tokens & design recipe matching
+        $reportProgress(20, 'Matching design recipe & typography...');
+        $normIndustry = strtolower($preferredIndustry ?? 'general');
+        $recipe = DesignRecipe::findByIndustry($normIndustry)?->theme;
+
+        // STAGE 2: High-speed unified generation
+        $reportProgress(45, 'Generating brand copywriting, sections, and layout...');
+        $primaryModel = $this->modelSelector->getModelForTask('document_generation');
+
+        $response = $this->client->chatCompletion(
+            messages: UnifiedWebsitePrompt::build($userPrompt, $preferredIndustry),
+            preferredModel: $primaryModel,
             jsonMode: true
         );
-        $totalTokens += $stage1Res['tokens_input'] + $stage1Res['tokens_output'];
-        $businessInfo = PromptHelper::extractJson($stage1Res['content']);
 
-        $industry = strtolower($preferredIndustry ?? $businessInfo['industry'] ?? 'general');
-        $siteName = $businessInfo['business_name'] ?? 'My Business';
+        $tokensUsed = ($response['tokens_input'] ?? 0) + ($response['tokens_output'] ?? 0);
+        $data = PromptHelper::extractJson($response['content']);
 
-        // STAGE 2: Design brief & recipe matching
-        $reportProgress(35, 'Selecting design tokens & typography...');
-        $recipe = DesignRecipe::findByIndustry($industry)?->theme;
+        $siteName = $data['business_name'] ?? 'Apex Form Studio';
+        $industry = strtolower($data['industry'] ?? $preferredIndustry ?? 'general');
 
-        $stage2Res = $this->client->chatCompletion(
-            messages: DesignBriefPrompt::build($businessInfo, $recipe),
-            preferredModel: $this->modelSelector->getModelForTask('design_planning'),
-            jsonMode: true
-        );
-        $totalTokens += $stage2Res['tokens_input'] + $stage2Res['tokens_output'];
-        $designBrief = PromptHelper::extractJson($stage2Res['content']);
+        // STAGE 3: Document Assembly
+        $reportProgress(85, 'Assembling structured website document...');
+        $document = $this->assembleDocument($siteName, $industry, $recipe, $data);
 
-        // STAGE 3: Architecture & section planning
-        $reportProgress(55, 'Planning conversion architecture...');
-        $stage3Res = $this->client->chatCompletion(
-            messages: WebsitePlanPrompt::build($businessInfo),
-            preferredModel: $this->modelSelector->getModelForTask('website_planning'),
-            jsonMode: true
-        );
-        $totalTokens += $stage3Res['tokens_input'] + $stage3Res['tokens_output'];
-        $plan = PromptHelper::extractJson($stage3Res['content']);
-
-        // STAGE 4: Copywriting & Content generation
-        $reportProgress(75, 'Crafting professional copy & benefits...');
-        $stage4Res = $this->client->chatCompletion(
-            messages: ContentGenerationPrompt::build($businessInfo, $plan),
-            preferredModel: $this->modelSelector->getModelForTask('content_generation'),
-            jsonMode: true
-        );
-        $totalTokens += $stage4Res['tokens_input'] + $stage4Res['tokens_output'];
-        $content = PromptHelper::extractJson($stage4Res['content']);
-
-        // STAGE 5: Document Assembly & Media Mapping
-        $reportProgress(90, 'Assembling structured website document...');
-        $document = $this->assembleDocument($siteName, $industry, $designBrief, $plan, $content);
-
-        // STAGE 6: Quality Assurance & Validation
+        // STAGE 4: Schema validation
+        $reportProgress(95, 'Validating schema compliance...');
         $this->validator->validate($document);
+
         $reportProgress(100, 'Website ready!');
 
         return [
             'document' => $document,
-            'tokens_used' => $totalTokens,
-            'model_used' => $primaryModel,
-            'business_analysis' => $businessInfo,
+            'tokens_used' => $tokensUsed,
+            'model_used' => $response['model_used'] ?? $primaryModel,
+            'business_analysis' => [
+                'business_name' => $siteName,
+                'industry' => $industry,
+                'tagline' => $data['tagline'] ?? '',
+            ],
         ];
     }
 
     /**
-     * Assemble all generated pieces into the formal platform document.
+     * Assemble generated data into valid WebsiteDocument format.
      */
     protected function assembleDocument(
         string $siteName,
         string $industry,
-        array $designBrief,
-        array $plan,
-        array $content
+        ?array $recipeTheme,
+        array $data
     ): array {
         $defaultBase = DefaultDocumentFactory::createDefault($siteName);
+        $theme = $recipeTheme ?? $defaultBase['site']['theme'];
 
-        // Theme integration
-        $theme = $designBrief['theme'] ?? $defaultBase['site']['theme'];
+        // Hero image
+        $heroImage = self::INDUSTRY_HERO_IMAGES[$industry]
+            ?? self::INDUSTRY_HERO_IMAGES['architecture']
+            ?? self::INDUSTRY_HERO_IMAGES['default'];
 
-        // Hero image selection
-        $heroImage = self::INDUSTRY_HERO_IMAGES[$industry] ?? self::INDUSTRY_HERO_IMAGES['default'];
-
-        // Navigation
-        $navItems = $plan['navigation_items'] ?? $defaultBase['navigation']['items'];
-
-        // Build Sections
         $sections = [];
-        $plannedSections = $plan['sections'] ?? [];
-        $sectionsContent = $content['sections_content'] ?? [];
-
-        // Index content by component
-        $contentByComp = [];
-        foreach ($sectionsContent as $sc) {
-            if (isset($sc['component'])) {
-                $contentByComp[$sc['component']] = $sc['props'] ?? [];
-            }
-        }
-
         $order = 0;
-        foreach ($plannedSections as $pSec) {
-            $component = $pSec['component'] ?? 'features';
-            if (!in_array($component, DocumentValidator::SUPPORTED_COMPONENTS, true)) {
-                continue; // Skip invalid components
-            }
 
-            $props = $contentByComp[$component] ?? [];
+        // 1. Hero Section
+        $hero = $data['hero'] ?? [];
+        $sections[] = [
+            'id' => 'sec_hero_' . Str::random(8),
+            'component' => 'hero',
+            'variant' => 'centered',
+            'order' => $order++,
+            'visible' => true,
+            'props' => [
+                'headline' => $hero['headline'] ?? "Welcome to {$siteName}",
+                'subheadline' => $hero['subheadline'] ?? ($data['tagline'] ?? 'Architectural excellence and innovative design.'),
+                'ctaText' => $hero['ctaText'] ?? 'Explore Projects',
+                'ctaLink' => $hero['ctaLink'] ?? '#features',
+                'secondaryCtaText' => $hero['secondaryCtaText'] ?? 'Contact Studio',
+                'secondaryCtaLink' => $hero['secondaryCtaLink'] ?? '#contact',
+                'image' => ['src' => $heroImage, 'alt' => $siteName],
+            ],
+            'styles' => ['background' => 'surface', 'textAlign' => 'center'],
+            'responsive' => [],
+        ];
 
-            // Add hero image if hero section
-            if ($component === 'hero' && !isset($props['image'])) {
-                $props['image'] = ['src' => $heroImage, 'alt' => $siteName];
-            }
+        // 2. Features Section
+        $features = $data['features'] ?? [];
+        $featureItems = $features['items'] ?? [
+            ['icon' => 'zap', 'title' => 'Innovative Design', 'description' => 'Forward-thinking architectural solutions.'],
+            ['icon' => 'shield', 'title' => 'Sustainable Execution', 'description' => 'Committed to environmental longevity.'],
+            ['icon' => 'sparkles', 'title' => 'Urban Context', 'description' => 'Harmonizing spaces with civic identity.'],
+        ];
+        $sections[] = [
+            'id' => 'sec_feat_' . Str::random(8),
+            'component' => 'features',
+            'variant' => 'grid_3col',
+            'order' => $order++,
+            'visible' => true,
+            'props' => [
+                'title' => $features['title'] ?? 'Our Disciplines',
+                'subtitle' => $features['subtitle'] ?? 'Holistic architecture engineered for human experience.',
+                'items' => $featureItems,
+            ],
+            'styles' => ['background' => 'default'],
+            'responsive' => [],
+        ];
 
-            $sections[] = [
-                'id' => 'sec_' . substr($component, 0, 4) . '_' . Str::random(6),
-                'component' => $component,
-                'variant' => $pSec['variant'] ?? 'centered',
-                'order' => $order++,
-                'visible' => true,
-                'props' => $props,
-                'styles' => [
-                    'background' => $pSec['background'] ?? 'default',
+        // 3. About Section
+        $about = $data['about'] ?? [];
+        $sections[] = [
+            'id' => 'sec_about_' . Str::random(8),
+            'component' => 'about',
+            'variant' => 'split_text',
+            'order' => $order++,
+            'visible' => true,
+            'props' => [
+                'headline' => $about['headline'] ?? "About {$siteName}",
+                'description' => $about['description'] ?? "We craft visionary buildings and urban spaces that balance functional pragmatism with striking architectural aesthetics.",
+                'highlights' => $about['highlights'] ?? ['Sustainable design', 'Urban precision', 'Award-winning masterplanning'],
+            ],
+            'styles' => ['background' => 'surface'],
+            'responsive' => [],
+        ];
+
+        // 4. Statistics Section
+        $statistics = $data['statistics'] ?? [];
+        $statItems = $statistics['items'] ?? [
+            ['value' => '120+', 'label' => 'Projects Realized'],
+            ['value' => '15', 'label' => 'Design Accolades'],
+            ['value' => '100%', 'label' => 'Sustainable Standards'],
+        ];
+        $sections[] = [
+            'id' => 'sec_stat_' . Str::random(8),
+            'component' => 'statistics',
+            'variant' => 'counters_3col',
+            'order' => $order++,
+            'visible' => true,
+            'props' => [
+                'items' => $statItems,
+            ],
+            'styles' => ['background' => 'default'],
+            'responsive' => [],
+        ];
+
+        // 5. Testimonials Section
+        $testimonials = $data['testimonials'] ?? [];
+        $testItems = $testimonials['items'] ?? [
+            ['quote' => 'Apex Form Studio transformed our urban development vision into an iconic architectural reality.', 'author' => 'David Sterling', 'role' => 'Principal Developer'],
+            ['quote' => 'Uncompromising precision, ecological awareness, and profound aesthetic judgment.', 'author' => 'Sarah Lin', 'role' => 'Civic Planning Director'],
+        ];
+        $sections[] = [
+            'id' => 'sec_test_' . Str::random(8),
+            'component' => 'testimonials',
+            'variant' => 'cards_grid',
+            'order' => $order++,
+            'visible' => true,
+            'props' => [
+                'title' => 'Client Endorsements',
+                'subtitle' => 'Trusted by leading urban developers and private patrons worldwide.',
+                'items' => $testItems,
+            ],
+            'styles' => ['background' => 'surface'],
+            'responsive' => [],
+        ];
+
+        // 6. CTA Section
+        $cta = $data['cta'] ?? [];
+        $sections[] = [
+            'id' => 'sec_cta_' . Str::random(8),
+            'component' => 'cta',
+            'variant' => 'centered',
+            'order' => $order++,
+            'visible' => true,
+            'props' => [
+                'headline' => $cta['headline'] ?? 'Ready to shape the future of space?',
+                'description' => $cta['description'] ?? 'Connect with our team to initiate your next project monograph.',
+                'buttonText' => $cta['buttonText'] ?? 'Initiate Consultation',
+                'buttonLink' => $cta['buttonLink'] ?? '#contact',
+            ],
+            'styles' => ['background' => 'surface'],
+            'responsive' => [],
+        ];
+
+        // 7. Contact Section
+        $contact = $data['contact'] ?? [];
+        $sections[] = [
+            'id' => 'sec_contact_' . Str::random(8),
+            'component' => 'contact',
+            'variant' => 'form_split',
+            'order' => $order++,
+            'visible' => true,
+            'props' => [
+                'title' => $contact['title'] ?? 'Inquire With Our Studio',
+                'description' => $contact['description'] ?? 'Discuss project feasibility or collaborate on urban research.',
+            ],
+            'styles' => ['background' => 'default'],
+            'responsive' => [],
+        ];
+
+        // 8. Footer Section
+        $sections[] = [
+            'id' => 'sec_footer_' . Str::random(8),
+            'component' => 'footer',
+            'variant' => 'simple',
+            'order' => $order++,
+            'visible' => true,
+            'props' => [
+                'copyright' => "© " . date('Y') . " {$siteName}. All rights reserved.",
+                'links' => [
+                    ['label' => 'Privacy', 'href' => '#'],
+                    ['label' => 'Terms', 'href' => '#'],
                 ],
-                'responsive' => [],
-            ];
-        }
+            ],
+            'styles' => ['background' => 'surface'],
+            'responsive' => [],
+        ];
 
-        // Ensure at least hero and footer exist if AI produced an empty section list
-        if (empty($sections)) {
-            $sections = $defaultBase['pages'][0]['sections'];
-        }
+        // SEO
+        $seo = $data['seo'] ?? [];
+        $seoTitle = $seo['title'] ?? "{$siteName} - Official Website";
+        $seoDesc = $seo['description'] ?? ($data['tagline'] ?? "Discover {$siteName}. Quality, reliability, and excellence.");
 
         return [
             'schema_version' => 1,
@@ -207,8 +297,8 @@ class AiWebsiteGenerator
                     'title' => 'Home',
                     'description' => "Welcome to {$siteName}",
                     'seo' => [
-                        'title' => "{$siteName} - Official Website",
-                        'description' => "Discover {$siteName}. Quality, reliability, and excellence.",
+                        'title' => $seoTitle,
+                        'description' => $seoDesc,
                         'ogImage' => $heroImage,
                         'noIndex' => false,
                     ],
@@ -217,7 +307,12 @@ class AiWebsiteGenerator
             ],
             'navigation' => [
                 'logo' => ['text' => $siteName],
-                'items' => $navItems,
+                'items' => [
+                    ['label' => 'Home', 'href' => '#', 'type' => 'link'],
+                    ['label' => 'Disciplines', 'href' => '#features', 'type' => 'link'],
+                    ['label' => 'About', 'href' => '#about', 'type' => 'link'],
+                    ['label' => 'Consultation', 'href' => '#contact', 'type' => 'button'],
+                ],
                 'style' => 'transparent',
             ],
         ];

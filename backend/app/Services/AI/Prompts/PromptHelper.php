@@ -40,3 +40,4 @@ class PromptHelper
         return $decoded;
     }
 }
+

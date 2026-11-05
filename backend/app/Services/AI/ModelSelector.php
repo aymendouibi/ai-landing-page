@@ -12,13 +12,13 @@ class ModelSelector
      * @var array<string, string>
      */
     protected const DEFAULT_MODELS_BY_TASK = [
-        'business_analysis' => 'google/gemma-4-31b-it:free',
-        'design_planning' => 'google/gemma-4-31b-it:free',
-        'website_planning' => 'google/gemma-4-31b-it:free',
-        'content_generation' => 'google/gemma-4-31b-it:free',
-        'document_generation' => 'google/gemma-4-31b-it:free',
-        'editing' => 'google/gemma-4-31b-it:free',
-        'remix' => 'google/gemma-4-31b-it:free',
+        'business_analysis' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'design_planning' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'website_planning' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'content_generation' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'document_generation' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'editing' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'remix' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
         'vision_qa' => 'nvidia/nemotron-3.5-super-vl:free',
     ];
 
@@ -37,6 +37,7 @@ class ModelSelector
         }
 
         // 2. Return sensible default
-        return self::DEFAULT_MODELS_BY_TASK[$task] ?? 'google/gemma-4-31b-it:free';
+        return self::DEFAULT_MODELS_BY_TASK[$task] ?? 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free';
     }
 }
+

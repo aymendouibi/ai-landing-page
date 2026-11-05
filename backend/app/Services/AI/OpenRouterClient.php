@@ -17,9 +17,9 @@ class OpenRouterClient
      * @var array<string>
      */
     public const DEFAULT_FALLBACK_MODELS = [
-        'google/gemma-4-31b-it:free',
-        'google/gemma-4-26b-a4b-it:free',
         'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'google/gemma-4-26b-a4b-it:free',
+        'meta-llama/llama-3.3-70b-instruct:free',
         'nvidia/nemotron-3.5-lightning:free',
     ];
 
@@ -95,7 +95,7 @@ class OpenRouterClient
             'model' => $model,
             'messages' => $messages,
             'temperature' => 0.7,
-            'max_tokens' => 4000,
+            'max_tokens' => 8000,
         ], $parameters);
 
         if ($jsonMode) {
@@ -151,3 +151,4 @@ class OpenRouterClient
         ];
     }
 }
+
