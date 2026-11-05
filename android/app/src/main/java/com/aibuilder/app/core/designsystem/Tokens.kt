@@ -144,3 +144,4 @@ object AppTypography {
         color = AppColors.Ink
     )
 }
+

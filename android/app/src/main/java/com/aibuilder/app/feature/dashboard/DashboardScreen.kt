@@ -1,7 +1,6 @@
 package com.aibuilder.app.feature.dashboard
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,7 +26,7 @@ import com.aibuilder.app.feature.dashboard.components.ContinueEditingHeroCard
 import com.aibuilder.app.feature.dashboard.components.FloatingBottomBar
 import com.aibuilder.app.feature.dashboard.components.NewWebsiteBottomSheet
 import com.aibuilder.app.feature.dashboard.components.RecentProjectCard
-import com.aibuilder.app.feature.dashboard.components.ShowcaseRecentItem
+import com.aibuilder.app.feature.dashboard.components.WebsitePreviewItem
 
 @Composable
 fun DashboardScreen(
@@ -40,51 +39,95 @@ fun DashboardScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showProfileDialog by remember { mutableStateOf(false) }
 
-    // Curated high-fidelity showcase recent designs
-    val showcaseItems = remember(uiState.websites) {
-        val list = mutableListOf<ShowcaseRecentItem>()
+    // Website previews for the "Recent" horizontal carousel
+    val previewItems = remember(uiState.websites) {
+        val list = mutableListOf<WebsitePreviewItem>()
+        val recentSites = uiState.websites.drop(1)
 
-        // Map real websites if available
-        uiState.websites.drop(1).forEach { site ->
+        recentSites.forEach { site ->
+            when (site.slug) {
+                "studio-marlow" -> list.add(
+                    WebsitePreviewItem(
+                        id = site.id,
+                        title = "Studio Marlow",
+                        category = "Architecture, Copenhagen",
+                        headline = "Quiet buildings for busy lives",
+                        body = "Homes, libraries and small civic spaces, designed with the people who use them.",
+                        ctaText = "See our work",
+                        ctaColor = Color(0xFF0C0C14),
+                        imageUrl = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80",
+                        isSerif = true,
+                        bgCanvasColor = Color(0xFFFAF8F5)
+                    )
+                )
+                "kite-yoga" -> list.add(
+                    WebsitePreviewItem(
+                        id = site.id,
+                        title = "Kite Yoga",
+                        category = "East 6th St, Austin",
+                        headline = "Slow mornings start here",
+                        body = "Small classes in a sunlit studio, timers to daily practice.",
+                        ctaText = "See the schedule",
+                        ctaColor = Color(0xFF5D6B50),
+                        imageUrl = "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=400&q=80",
+                        isSerif = false,
+                        bgCanvasColor = Color(0xFFFAF8F4)
+                    )
+                )
+                else -> {
+                    val isBakery = site.name.contains("Boulangerie", ignoreCase = true)
+                    val isApex = site.name.contains("Apex", ignoreCase = true)
+                    list.add(
+                        WebsitePreviewItem(
+                            id = site.id,
+                            title = site.name,
+                            category = if (isBakery) "Artisanal Bakery, Paris" else if (isApex) "Architecture & Design" else "Digital Studio",
+                            headline = if (isBakery) "Fresh Croissants, Crafted with Tech-Precision" else if (isApex) "Designing Tomorrow's Landmarks" else "Crafted for Modern Growth",
+                            body = if (isBakery) "Experience the perfect blend of traditional French baking and modern digital quality." else if (isApex) "We blend cutting-edge design, sustainable practices, and flawless execution." else "Clean architecture, custom layout, and optimized speed for high conversion.",
+                            ctaText = if (isBakery) "Explore Menu" else if (isApex) "Explore Projects" else "Open Editor",
+                            ctaColor = if (isBakery) Color(0xFF2563EB) else if (isApex) Color(0xFF2563EB) else Color(0xFF0C0C14),
+                            imageUrl = if (isBakery) "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=400&q=80" else if (isApex) "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80" else "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80",
+                            isSerif = isApex,
+                            bgCanvasColor = Color(0xFFFAF8F5)
+                        )
+                    )
+                }
+            }
+        }
+
+        // Guarantee Studio Marlow and Kite Yoga exist in the carousel
+        if (list.none { it.title == "Studio Marlow" }) {
             list.add(
-                ShowcaseRecentItem(
-                    id = site.id,
-                    title = site.name,
-                    category = "Digital Studio",
-                    headline = "Crafted for Modern Growth",
-                    body = "Clean architecture, custom layout, and optimized speed for high conversion.",
-                    ctaText = "Open Editor",
-                    ctaColor = AppColors.Ink,
-                    imageUrl = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80"
+                WebsitePreviewItem(
+                    id = "showcase_studio_marlow",
+                    title = "Studio Marlow",
+                    category = "Architecture, Copenhagen",
+                    headline = "Quiet buildings for busy lives",
+                    body = "Homes, libraries and small civic spaces, designed with the people who use them.",
+                    ctaText = "See our work",
+                    ctaColor = Color(0xFF0C0C14),
+                    imageUrl = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80",
+                    isSerif = true,
+                    bgCanvasColor = Color(0xFFFAF8F5)
                 )
             )
         }
-
-        // Add standard sample cards matching designs
-        list.add(
-            ShowcaseRecentItem(
-                id = "showcase_studio_marlow",
-                title = "Studio Marlow",
-                category = "Architecture, Copenhagen",
-                headline = "Quiet buildings for busy lives",
-                body = "Homes, libraries and small civic spaces, designed with the people who use them.",
-                ctaText = "See our work",
-                ctaColor = Color(0xFF0C0C14),
-                imageUrl = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80"
+        if (list.none { it.title == "Kite Yoga" }) {
+            list.add(
+                WebsitePreviewItem(
+                    id = "showcase_kite_yoga",
+                    title = "Kite Yoga",
+                    category = "East 6th St, Austin",
+                    headline = "Slow mornings start here",
+                    body = "Small classes in a sunlit studio, timers to daily practice.",
+                    ctaText = "See the schedule",
+                    ctaColor = Color(0xFF5D6B50),
+                    imageUrl = "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=400&q=80",
+                    isSerif = false,
+                    bgCanvasColor = Color(0xFFFAF8F4)
+                )
             )
-        )
-        list.add(
-            ShowcaseRecentItem(
-                id = "showcase_kite_yoga",
-                title = "Kite Yoga",
-                category = "East 6th St, Austin",
-                headline = "Slow mornings start here",
-                body = "Small classes in a sunlit studio, timers to daily practice.",
-                ctaText = "See the schedule",
-                ctaColor = Color(0xFF5D6B50),
-                imageUrl = "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=400&q=80"
-            )
-        )
+        }
         list
     }
 
@@ -93,7 +136,7 @@ fun DashboardScreen(
             .fillMaxSize()
             .background(AppColors.Background)
     ) {
-        // Soft ambient atmospheric gradient wash at the top
+        // Soft atmospheric wash at the top
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -169,13 +212,13 @@ fun DashboardScreen(
                 )
             }
 
-            // Horizontal Carousel of Recent Websites
+            // Horizontal Carousel of Website Previews
             item {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     contentPadding = PaddingValues(end = 12.dp)
                 ) {
-                    items(showcaseItems) { item ->
+                    items(previewItems) { item ->
                         RecentProjectCard(
                             item = item,
                             onClick = {
@@ -196,7 +239,7 @@ fun DashboardScreen(
             }
         }
 
-        // Floating Translucent Bottom Bar
+        // iOS Frosted Glass Floating Bottom Bar with Clipping Plus Button
         FloatingBottomBar(
             activeTab = uiState.activeTab,
             onTabSelected = { tab ->
