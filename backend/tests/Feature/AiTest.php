@@ -241,3 +241,4 @@ class AiTest extends TestCase
             ->assertJsonPath('website.document.pages.0.sections.0.props.headline', 'AI Generated Brand New Headline');
     }
 }
+

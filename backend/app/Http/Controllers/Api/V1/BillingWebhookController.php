@@ -32,3 +32,4 @@ class BillingWebhookController extends Controller
         }
     }
 }
+

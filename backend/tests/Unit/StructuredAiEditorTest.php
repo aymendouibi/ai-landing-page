@@ -125,3 +125,4 @@ class StructuredAiEditorTest extends TestCase
         $this->assertEquals('#10B981', $updatedSite->document['site']['theme']['colors']['primary']);
     }
 }
+

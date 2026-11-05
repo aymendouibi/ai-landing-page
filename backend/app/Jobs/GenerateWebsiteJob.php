@@ -98,3 +98,4 @@ class GenerateWebsiteJob implements ShouldQueue
         }
     }
 }
+

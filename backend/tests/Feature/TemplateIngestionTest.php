@@ -172,3 +172,4 @@ class TemplateIngestionTest extends TestCase
         $this->assertEquals(TemplateStatus::Published, $template->fresh()->status);
     }
 }
+

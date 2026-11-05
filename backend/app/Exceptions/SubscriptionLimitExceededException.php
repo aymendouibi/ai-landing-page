@@ -32,3 +32,4 @@ class SubscriptionLimitExceededException extends Exception
         ], 403);
     }
 }
+

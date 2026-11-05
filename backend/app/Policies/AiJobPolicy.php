@@ -12,3 +12,4 @@ class AiJobPolicy
         return $user->id === $job->user_id || $user->isAdmin();
     }
 }
+

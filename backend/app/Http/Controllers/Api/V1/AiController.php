@@ -71,6 +71,8 @@ class AiController extends Controller
      */
     public function generate(Request $request): JsonResponse
     {
+        @set_time_limit(180);
+
         $validated = $request->validate([
             'project_id' => ['required', 'uuid', 'exists:projects,id'],
             'prompt' => ['required', 'string', 'min:5', 'max:2000'],
@@ -230,3 +232,4 @@ class AiController extends Controller
         ]);
     }
 }
+
