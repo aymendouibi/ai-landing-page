@@ -105,10 +105,18 @@ class AiController extends Controller
             );
             $aiJob->refresh();
 
+            if ($aiJob->status === AiJobStatus::Failed) {
+                return response()->json([
+                    'message' => 'AI Generation failed: ' . ($aiJob->error_message ?? 'Unknown error'),
+                    'job' => $aiJob,
+                ], 500);
+            }
+
             return response()->json([
                 'message' => 'Website generated successfully.',
                 'job' => $aiJob,
                 'website_id' => $aiJob->website_id,
+                'website' => $aiJob->website,
             ], 201);
         }
 

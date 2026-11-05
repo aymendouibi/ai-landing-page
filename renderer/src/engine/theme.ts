@@ -1,27 +1,31 @@
 import { ThemeConfig } from '../types/schema';
 
-export function generateCssVariables(theme: ThemeConfig): Record<string, string> {
+export function generateCssVariables(theme?: ThemeConfig): Record<string, string> {
+  const t = theme || ({} as any);
+  const colors = t.colors || {};
+  const text = colors.text || {};
+
   const vars: Record<string, string> = {
-    '--color-primary': theme.colors.primary,
-    '--color-secondary': theme.colors.secondary,
-    '--color-accent': theme.colors.accent,
-    '--color-bg': theme.colors.background,
-    '--color-surface': theme.colors.surface,
-    '--color-text-primary': theme.colors.text.primary,
-    '--color-text-secondary': theme.colors.text.secondary,
-    '--color-text-inverse': theme.colors.text.inverse,
+    '--color-primary': colors.primary || '#0C0C14',
+    '--color-secondary': colors.secondary || '#64748B',
+    '--color-accent': colors.accent || '#7C5CFF',
+    '--color-bg': colors.background || '#FFFFFF',
+    '--color-surface': colors.surface || '#FFFFFF',
+    '--color-text-primary': text.primary || '#0F172A',
+    '--color-text-secondary': text.secondary || '#475569',
+    '--color-text-inverse': text.inverse || '#FFFFFF',
 
-    '--font-heading': `"${theme.typography.headingFamily}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
-    '--font-body': `"${theme.typography.bodyFamily}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
+    '--font-heading': `"${t.typography?.headingFamily || 'Inter'}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
+    '--font-body': `"${t.typography?.bodyFamily || 'Inter'}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
 
-    '--container-max-w': theme.spacing?.containerMaxWidth || '1200px',
-    '--section-padding-x': theme.spacing?.sectionPadding?.x || '1.5rem',
-    '--section-padding-y': theme.spacing?.sectionPadding?.y || '5rem',
+    '--container-max-w': t.spacing?.containerMaxWidth || '1200px',
+    '--section-padding-x': t.spacing?.sectionPadding?.x || '1.5rem',
+    '--section-padding-y': t.spacing?.sectionPadding?.y || '5rem',
 
-    '--radius-sm': theme.spacing?.borderRadius?.small || '0.375rem',
-    '--radius-md': theme.spacing?.borderRadius?.medium || '0.75rem',
-    '--radius-lg': theme.spacing?.borderRadius?.large || '1rem',
-    '--radius-full': theme.spacing?.borderRadius?.full || '9999px',
+    '--radius-sm': t.spacing?.borderRadius?.small || '0.375rem',
+    '--radius-md': t.spacing?.borderRadius?.medium || '0.75rem',
+    '--radius-lg': t.spacing?.borderRadius?.large || '1rem',
+    '--radius-full': t.spacing?.borderRadius?.full || '9999px',
   };
 
   return vars;

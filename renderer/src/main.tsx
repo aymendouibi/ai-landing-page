@@ -183,9 +183,48 @@ const sampleDocument: WebsiteDocument = {
   ],
 };
 
+declare global {
+  interface Window {
+    AndroidBridge?: {
+      postMessage: (message: string) => void;
+    };
+    updateDocument?: (jsonString: string) => void;
+  }
+}
+
 function App() {
   const [viewport, setViewport] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [currentDoc, setCurrentDoc] = useState<WebsiteDocument>(sampleDocument);
   const isAndroidWebView = typeof window.AndroidBridge !== 'undefined';
+
+  React.useEffect(() => {
+    window.updateDocument = (data: any) => {
+      try {
+        const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+        if (parsed && typeof parsed === 'object') {
+          setCurrentDoc(parsed);
+        }
+      } catch (e) {
+        console.error('Failed to parse updated document', e);
+      }
+    };
+
+    // Notify mobile container that webview renderer is ready
+    if (window.AndroidBridge?.postMessage) {
+      window.AndroidBridge.postMessage(JSON.stringify({ type: 'RENDERER_READY' }));
+    }
+  }, []);
+
+  const handleSectionSelect = (sectionId: string) => {
+    if (window.AndroidBridge?.postMessage) {
+      window.AndroidBridge.postMessage(
+        JSON.stringify({
+          type: 'SECTION_SELECTED',
+          sectionId,
+        })
+      );
+    }
+  };
 
   const viewportWidths = {
     mobile: '375px',
@@ -195,7 +234,13 @@ function App() {
 
   // In Android WebView, render directly full width without the preview toolbar
   if (isAndroidWebView) {
-    return <WebsiteRenderer initialDocument={sampleDocument} isEditorMode={true} />;
+    return (
+      <WebsiteRenderer
+        initialDocument={currentDoc}
+        isEditorMode={true}
+        onSectionSelect={handleSectionSelect}
+      />
+    );
   }
 
   return (

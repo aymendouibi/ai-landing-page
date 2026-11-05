@@ -18,8 +18,6 @@ class OpenRouterClient
      */
     public const DEFAULT_FALLBACK_MODELS = [
         'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-        'google/gemma-4-26b-a4b-it:free',
-        'meta-llama/llama-3.3-70b-instruct:free',
         'nvidia/nemotron-3.5-lightning:free',
     ];
 

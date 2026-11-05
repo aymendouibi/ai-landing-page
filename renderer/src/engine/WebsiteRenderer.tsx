@@ -36,6 +36,12 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
   const [currentSlug] = useState<string>(initialPageSlug);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (initialDocument) {
+      setDoc(initialDocument);
+    }
+  }, [initialDocument]);
+
   // Setup communication bridge with Android WebView and Parent Window
   useEffect(() => {
     // 1. Listen for window messages (Web iframe or WebView postMessage)
@@ -71,10 +77,12 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     window.addEventListener('message', handleMessage);
 
     // 2. Expose global functions callable directly by Android WebView: webView.evaluateJavascript("...")
-    window.updateDocument = (jsonString: string) => {
+    window.updateDocument = (data: any) => {
       try {
-        const updated = JSON.parse(jsonString);
-        setDoc(updated);
+        const updated = typeof data === 'string' ? JSON.parse(data) : data;
+        if (updated && typeof updated === 'object') {
+          setDoc(updated);
+        }
       } catch (err) {
         console.error('Failed to parse updated document', err);
       }
