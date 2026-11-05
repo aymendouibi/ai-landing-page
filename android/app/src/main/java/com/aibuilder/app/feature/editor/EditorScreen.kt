@@ -168,13 +168,19 @@ fun EditorScreen(
                             loadUrl("http://10.0.2.2:3000/")
                             webViewInstance = this
                         }
+                    },
+                    update = { webView ->
+                        uiState.document?.let { doc ->
+                            val jsonEscaped = doc.toString().replace("'", "\\'")
+                            webView.evaluateJavascript("if (window.updateDocument) { window.updateDocument('$jsonEscaped'); }", null)
+                        }
                     }
                 )
             }
 
             // Bottom Section Editor Sheet
             AnimatedVisibility(
-                visible = uiState.selectedSectionId != null,
+                visible = !uiState.selectedSectionId.isNullOrBlank(),
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 Card(
@@ -224,7 +230,7 @@ fun EditorScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
-                            TextButton(onClick = { viewModel.selectSection("") }) {
+                            TextButton(onClick = { viewModel.selectSection(null) }) {
                                 Text("Close")
                             }
                             Spacer(modifier = Modifier.width(8.dp))
@@ -235,6 +241,7 @@ fun EditorScreen(
                                     if (headlineText.isNotBlank()) updates["headline"] = headlineText
                                     if (subheadlineText.isNotBlank()) updates["subheadline"] = subheadlineText
                                     viewModel.updateSectionProps(secId, updates)
+                                    viewModel.selectSection(null)
                                 }
                             ) {
                                 Icon(Icons.Default.Check, contentDescription = null)

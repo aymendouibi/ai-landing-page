@@ -64,7 +64,14 @@ class AiCreationViewModel @Inject constructor(
                         _status.value = AiGenerationStatus.Error("Could not retrieve created website.")
                     }
                 } else {
-                    _status.value = AiGenerationStatus.Error("Generation request failed [${genRes.code()}].")
+                    val rawErr = genRes.errorBody()?.string() ?: ""
+                    val parsedMsg = try {
+                        val obj = com.google.gson.JsonParser.parseString(rawErr).asJsonObject
+                        obj.get("message")?.asString ?: "Generation failed [${genRes.code()}]."
+                    } catch (e: Exception) {
+                        "Generation request failed [${genRes.code()}]."
+                    }
+                    _status.value = AiGenerationStatus.Error(parsedMsg)
                 }
             } catch (e: Exception) {
                 _status.value = AiGenerationStatus.Error(e.message ?: "Failed to generate website.")

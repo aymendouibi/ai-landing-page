@@ -75,7 +75,7 @@ class AiController extends Controller
 
         $validated = $request->validate([
             'project_id' => ['required', 'uuid', 'exists:projects,id'],
-            'prompt' => ['required', 'string', 'min:5', 'max:2000'],
+            'prompt' => ['required', 'string', 'min:2', 'max:2000'],
             'industry' => ['nullable', 'string', 'max:100'],
             'sync' => ['nullable', 'boolean'],
         ]);

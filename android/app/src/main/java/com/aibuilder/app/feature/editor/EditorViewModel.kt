@@ -68,8 +68,10 @@ class EditorViewModel @Inject constructor(
         }
     }
 
-    fun selectSection(sectionId: String) {
-        _uiState.value = _uiState.value.copy(selectedSectionId = sectionId)
+    fun selectSection(sectionId: String?) {
+        _uiState.value = _uiState.value.copy(
+            selectedSectionId = if (sectionId.isNullOrBlank()) null else sectionId
+        )
     }
 
     fun setViewport(mode: ViewportMode) {
