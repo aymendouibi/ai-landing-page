@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\FormController;
 use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\TemplateController;
 use App\Http\Controllers\Api\V1\TemplateIngestionController;
+use App\Http\Controllers\Api\V1\VisualQaController;
 use App\Http\Controllers\Api\V1\WebsiteController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +46,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('websites', WebsiteController::class);
         Route::prefix('websites/{website}')->group(function () {
             Route::put('/document', [WebsiteController::class, 'updateDocument']);
+            Route::post('/qa', [VisualQaController::class, 'inspect']);
             Route::get('/revisions', [WebsiteController::class, 'revisions']);
             Route::post('/revisions/{revision}/restore', [WebsiteController::class, 'restoreRevision']);
             Route::post('/lock', [WebsiteController::class, 'acquireLock']);
