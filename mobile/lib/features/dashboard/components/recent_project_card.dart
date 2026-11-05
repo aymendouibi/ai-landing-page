@@ -44,7 +44,7 @@ class RecentProjectCard extends StatelessWidget {
       onTap: onClick,
       child: Container(
         width: 225,
-        height: 340,
+        height: 460,
         decoration: BoxDecoration(
           color: item.bgCanvasColor,
           borderRadius: BorderRadius.circular(22),
@@ -147,13 +147,14 @@ class RecentProjectCard extends StatelessWidget {
             const Spacer(),
 
             // Bottom Image Slice clipped to bottom rounded corners
-            SizedBox(
-              width: double.infinity,
-              height: 115,
-              child: CachedNetworkImage(
-                imageUrl: item.imageUrl,
-                fit: BoxFit.cover,
-                errorWidget: (context, url, error) => Container(color: const Color(0xFFE4E4E7)),
+            Expanded(
+              child: SizedBox(
+                width: double.infinity,
+                child: CachedNetworkImage(
+                  imageUrl: item.imageUrl,
+                  fit: BoxFit.cover,
+                  errorWidget: (context, url, error) => Container(color: const Color(0xFFE4E4E7)),
+                ),
               ),
             ),
           ],

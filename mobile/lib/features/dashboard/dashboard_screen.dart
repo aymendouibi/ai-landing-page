@@ -107,11 +107,12 @@ class DashboardScreen extends StatelessWidget {
           RefreshIndicator(
             onRefresh: controller.loadData,
             child: ListView(
+              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
               padding: const EdgeInsets.only(
                 top: 56,
                 left: 20,
                 right: 20,
-                bottom: 120,
+                bottom: 110,
               ),
               children: [
                 // Header: "Projects" + Circular User Initials Avatar
@@ -196,7 +197,7 @@ class DashboardScreen extends StatelessWidget {
 
                 // Horizontal Carousel of Website Previews
                 SizedBox(
-                  height: 345,
+                  height: 480,
                   child: Obx(() {
                     final items = controller.previewItems;
                     return ListView.separated(

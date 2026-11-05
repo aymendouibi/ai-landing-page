@@ -27,28 +27,46 @@ class FloatingBottomBar extends StatelessWidget {
           // 1. iOS Frosted Glass Pill Dock Bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(33),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: Container(
-                  height: 66,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.86),
-                    borderRadius: BorderRadius.circular(33),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.75),
-                      width: 1.0,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0x24141432),
-                        blurRadius: 24,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
+            child: Container(
+              height: 66,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(33),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0F172A).withValues(alpha: 0.12),
+                    blurRadius: 28,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 10),
                   ),
-                  child: Row(
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(33),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                  child: Container(
+                    height: 66,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withValues(alpha: 0.55),
+                          Colors.white.withValues(alpha: 0.30),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(33),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Row(
                     children: [
                       // Left 2 items (Projects & Templates)
                       Expanded(
@@ -100,6 +118,7 @@ class FloatingBottomBar extends StatelessWidget {
               ),
             ),
           ),
+        ),
 
           // 2. The Plus Button clipping / protruding from the top
           Positioned(
