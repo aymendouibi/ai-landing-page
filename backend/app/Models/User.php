@@ -66,7 +66,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function subscription(): HasOne
     {
-        return $this->hasOne(Subscription::class)->latestOfMany();
+        return $this->hasOne(Subscription::class)->latest('created_at');
     }
 
     public function billingCustomer(): HasOne

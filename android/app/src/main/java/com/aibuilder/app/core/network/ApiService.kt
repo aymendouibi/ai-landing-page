@@ -5,6 +5,7 @@ import com.google.gson.JsonObject
 import retrofit2.Response
 import retrofit2.http.*
 
+@JvmSuppressWildcards
 interface ApiService {
 
     // Auth
@@ -87,6 +88,12 @@ interface ApiService {
     suspend fun useTemplate(
         @Path("id") id: String,
         @Body body: Map<String, String>
+    ): Response<Map<String, Any>>
+
+    // AI Generation
+    @POST("api/v1/ai/generate")
+    suspend fun generateWebsite(
+        @Body body: Map<String, Any>
     ): Response<Map<String, Any>>
 
     // Publishing & Domains

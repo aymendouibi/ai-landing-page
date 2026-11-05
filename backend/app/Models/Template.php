@@ -51,7 +51,7 @@ class Template extends Model
 
     public function activeVersion(): HasOne
     {
-        return $this->hasOne(TemplateVersion::class)->where('is_active', true)->latestOfMany('version');
+        return $this->hasOne(TemplateVersion::class)->where('is_active', true);
     }
 
     public function isPublished(): bool

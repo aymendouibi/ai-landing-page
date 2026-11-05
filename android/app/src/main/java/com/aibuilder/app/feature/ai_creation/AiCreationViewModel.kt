@@ -41,30 +41,30 @@ class AiCreationViewModel @Inject constructor(
 
                 _status.value = AiGenerationStatus.Generating("Planning conversion architecture...", 35)
 
-                // Dispatch generation
-                val genRes = apiService.createWebsite(
+                // Dispatch generation to AI pipeline
+                val genRes = apiService.generateWebsite(
                     mapOf(
                         "project_id" to projectId,
-                        "name" to "AI: " + prompt.take(20),
                         "prompt" to prompt,
-                        "industry" to industry
+                        "industry" to industry,
+                        "sync" to true
                     )
                 )
 
                 if (genRes.isSuccessful && genRes.body() != null) {
-                    _status.value = AiGenerationStatus.Generating("Assembling structured document...", 85)
+                    _status.value = AiGenerationStatus.Generating("Assembling structured document...", 90)
                     delay(500)
 
-                    val webMap = genRes.body()!!["website"] as? Map<*, *>
-                    val websiteId = webMap?.get("id") as? String
+                    val body = genRes.body()!!
+                    val websiteId = body["website_id"]?.toString()
 
-                    if (websiteId != null) {
+                    if (!websiteId.isNullOrBlank()) {
                         _status.value = AiGenerationStatus.Success(websiteId)
                     } else {
                         _status.value = AiGenerationStatus.Error("Could not retrieve created website.")
                     }
                 } else {
-                    _status.value = AiGenerationStatus.Error("Generation request failed.")
+                    _status.value = AiGenerationStatus.Error("Generation request failed [${genRes.code()}].")
                 }
             } catch (e: Exception) {
                 _status.value = AiGenerationStatus.Error(e.message ?: "Failed to generate website.")
@@ -72,3 +72,4 @@ class AiCreationViewModel @Inject constructor(
         }
     }
 }
+
