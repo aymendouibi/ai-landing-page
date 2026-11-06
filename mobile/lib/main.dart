@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'core/designsystem/colors.dart';
 import 'core/routes/app_pages.dart';
@@ -7,6 +8,9 @@ import 'core/storage/session_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   final isLoggedIn = await SessionManager.isLoggedIn();
 
   runApp(AiBuilderApp(isLoggedIn: isLoggedIn));

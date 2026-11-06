@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -41,7 +42,7 @@ class FontPreset {
 }
 
 class EditorController extends GetxController {
-  late final String websiteId;
+  String websiteId = '';
   WebViewController? webViewController;
 
   final websiteName = 'Untitled site'.obs;
@@ -50,10 +51,43 @@ class EditorController extends GetxController {
   final isPublishing = false.obs;
   final isLoading = true.obs;
   final viewport = ViewportMode.mobile.obs;
+  final isLandscape = false.obs;
+
+  void toggleLandscape() {
+    if (isLandscape.value) {
+      setPortrait();
+    } else {
+      setLandscape();
+    }
+  }
+
+  void setLandscape() {
+    isLandscape.value = true;
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+  void setPortrait() {
+    isLandscape.value = false;
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+  }
 
   // Bottom panel state: 0 = Add, 1 = Edit, 2 = Layers, 3 = Design
   final selectedTab = 0.obs;
   final isPanelOpen = false.obs;
+
+  void openTab(int index) {
+    selectedTab.value = index;
+    isPanelOpen.value = true;
+  }
+
+  void closePanel() {
+    isPanelOpen.value = false;
+  }
 
   // Selected Presets in Design Tab
   final selectedColorPreset = 'Crema'.obs;
@@ -276,6 +310,12 @@ class EditorController extends GetxController {
     super.onInit();
     final args = Get.arguments as Map<String, dynamic>?;
     websiteId = args?['websiteId'] ?? '';
+    // Enable both portrait and landscape on editor screen
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     _initWebView();
     if (websiteId.isNotEmpty) {
       loadWebsite();
@@ -1140,6 +1180,10 @@ class EditorController extends GetxController {
 
   @override
   void onClose() {
+    // Restore portrait lock when leaving editor screen
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     _saveDebounceTimer?.cancel();
     aiPromptController.dispose();
     textController.dispose();

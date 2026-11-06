@@ -13,153 +13,258 @@ class EditorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(EditorController());
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    if (controller.isLandscape.value != isLandscape) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.isLandscape.value = isLandscape;
+      });
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFEDF2F7),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Top Bar: Two rows
-            _buildTopBar(context, controller),
-
-            // Canvas & Bottom Floating / Docked UI
-            Expanded(
-              child: Stack(
+        child: isLandscape
+            ? Column(
                 children: [
-                  // Canvas (WebView) Area
-                  Positioned.fill(
-                    child: Obx(
-                      () => Padding(
-                        padding: EdgeInsets.only(
-                          bottom: controller.isPanelOpen.value ? 420 : 130,
-                        ),
-                        child: Center(
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeInOut,
-                            width: _calculateCanvasWidth(context, controller),
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(
-                                controller.viewport.value == ViewportMode.desktop
-                                    ? 14
-                                    : 24,
-                              ),
-                              border: Border.all(
-                                color: const Color(0xFFE2E8F0),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.06),
-                                  blurRadius: 18,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                controller.viewport.value == ViewportMode.desktop
-                                    ? 14
-                                    : 24,
-                              ),
-                              child: Column(
-                                children: [
-                                  // Desktop browser title bar (Screenshots 4 & 5)
-                                  if (controller.viewport.value == ViewportMode.desktop)
-                                    _buildDesktopBrowserBar(controller),
-
-                                  // WebView
-                                  Expanded(
-                                    child: controller.isLoading.value ||
-                                            controller.webViewController == null
-                                        ? const Center(
-                                            child: CircularProgressIndicator(
-                                              color: Color(0xFF0F172A),
-                                            ),
-                                          )
-                                        : WebViewWidget(
-                                            controller: controller.webViewController!,
-                                            gestureRecognizers: {
-                                              Factory<OneSequenceGestureRecognizer>(
-                                                () => EagerGestureRecognizer(),
-                                              ),
-                                            },
-                                          ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                  _buildLandscapeTopBar(context, controller),
+                  Expanded(
+                    child: _buildLandscapeBody(context, controller),
                   ),
-
-                  // Slim vertical scrollbar on right edge (Screenshots 1 & 2)
-                  Positioned(
-                    right: 4,
-                    top: 40,
-                    bottom: 140,
-                    child: Container(
-                      width: 4,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF94A3B8).withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-
-                  // Bottom Dock & Floating AI Pill (Preview Mode - Screenshots 1, 2, 4, 5)
-                  Obx(
-                    () => AnimatedPositioned(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                      left: 0,
-                      right: 0,
-                      bottom: controller.isPanelOpen.value ? -400 : 0,
-                      child: IgnorePointer(
-                        ignoring: controller.isPanelOpen.value,
-                        child: _buildFloatingBottomDock(context, controller),
-                      ),
-                    ),
-                  ),
-
-                  // Bottom Docked Panel (Edit/Layers/Add/Design - Screenshot 3)
-                  Obx(
-                    () => AnimatedPositioned(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                      left: 0,
-                      right: 0,
-                      bottom: controller.isPanelOpen.value ? 0 : -450,
-                      child: IgnorePointer(
-                        ignoring: !controller.isPanelOpen.value,
-                        child: _buildBottomPanel(context, controller),
-                      ),
-                    ),
+                ],
+              )
+            : Column(
+                children: [
+                  _buildTopBar(context, controller),
+                  Expanded(
+                    child: _buildPortraitBody(context, controller),
                   ),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildPortraitBody(BuildContext context, EditorController controller) {
+    return Stack(
+      children: [
+        // Canvas (WebView) Area
+        Positioned.fill(
+          child: Obx(
+            () => Padding(
+              padding: EdgeInsets.only(
+                bottom: controller.isPanelOpen.value ? 420 : 130,
+              ),
+              child: Center(
+                child: _buildCanvasContainer(context, controller, isLandscape: false),
+              ),
+            ),
+          ),
+        ),
+
+        // Slim vertical scrollbar on right edge (Screenshots 1 & 2)
+        Positioned(
+          right: 4,
+          top: 40,
+          bottom: 140,
+          child: Container(
+            width: 4,
+            height: 120,
+            decoration: BoxDecoration(
+              color: const Color(0xFF94A3B8).withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
+
+        // Bottom Dock & Floating AI Pill (Preview Mode - Screenshots 1, 2, 4, 5)
+        Obx(
+          () => AnimatedPositioned(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            left: 0,
+            right: 0,
+            bottom: controller.isPanelOpen.value ? -400 : 0,
+            child: IgnorePointer(
+              ignoring: controller.isPanelOpen.value,
+              child: _buildFloatingBottomDock(context, controller),
+            ),
+          ),
+        ),
+
+        // Bottom Docked Panel (Edit/Layers/Add/Design - Screenshot 3)
+        Obx(
+          () => AnimatedPositioned(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            left: 0,
+            right: 0,
+            bottom: controller.isPanelOpen.value ? 0 : -450,
+            child: IgnorePointer(
+              ignoring: !controller.isPanelOpen.value,
+              child: _buildBottomPanel(context, controller),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLandscapeBody(BuildContext context, EditorController controller) {
+    return Row(
+      children: [
+        // Left: The Website Canvas
+        Expanded(
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Obx(
+                  () => Padding(
+                    padding: EdgeInsets.only(
+                      bottom: controller.isPanelOpen.value ? 8 : 60,
+                    ),
+                    child: Center(
+                      child: _buildCanvasContainer(context, controller, isLandscape: true),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Bottom floating dock in landscape (when side panel is closed)
+              Obx(
+                () => AnimatedPositioned(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  left: 20,
+                  right: 20,
+                  bottom: controller.isPanelOpen.value ? -120 : 8,
+                  child: IgnorePointer(
+                    ignoring: controller.isPanelOpen.value,
+                    child: _buildLandscapeFloatingDock(context, controller),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Right side: Slide-in Inspector Panel (Add, Edit, Layers, Design)
+        Obx(
+          () => AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            width: controller.isPanelOpen.value ? 350.0 : 0.0,
+            child: ClipRect(
+              child: OverflowBox(
+                minWidth: 350.0,
+                maxWidth: 350.0,
+                alignment: Alignment.topRight,
+                child: Container(
+                  width: 350.0,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: const Border(
+                      left: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 18,
+                        offset: const Offset(-4, 0),
+                      ),
+                    ],
+                  ),
+                  child: _buildPanelContent(context, controller, isLandscape: true),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCanvasContainer(
+    BuildContext context,
+    EditorController controller, {
+    bool isLandscape = false,
+  }) {
+    return Obx(
+      () => AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        width: _calculateCanvasWidth(context, controller, isLandscape: isLandscape),
+        margin: EdgeInsets.symmetric(
+          horizontal: isLandscape ? 8 : 12,
+          vertical: isLandscape ? 6 : 10,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(
+            controller.viewport.value == ViewportMode.desktop ? 14 : 24,
+          ),
+          border: Border.all(
+            color: const Color(0xFFE2E8F0),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 18,
+              offset: const Offset(0, 4),
             ),
           ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(
+            controller.viewport.value == ViewportMode.desktop ? 14 : 24,
+          ),
+          child: Column(
+            children: [
+              // Desktop browser title bar (Screenshots 4 & 5)
+              if (controller.viewport.value == ViewportMode.desktop)
+                _buildDesktopBrowserBar(controller),
+
+              // WebView
+              Expanded(
+                child: controller.isLoading.value ||
+                        controller.webViewController == null
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF0F172A),
+                        ),
+                      )
+                    : WebViewWidget(
+                        controller: controller.webViewController!,
+                        gestureRecognizers: {
+                          Factory<OneSequenceGestureRecognizer>(
+                            () => EagerGestureRecognizer(),
+                          ),
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  double? _calculateCanvasWidth(BuildContext context, EditorController controller) {
+  double? _calculateCanvasWidth(
+    BuildContext context,
+    EditorController controller, {
+    bool isLandscape = false,
+  }) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final availableWidth = isLandscape && controller.isPanelOpen.value
+        ? screenWidth - 350 - 24
+        : screenWidth - 24;
+
     switch (controller.viewport.value) {
       case ViewportMode.mobile:
-        return min(375.0, screenWidth - 20);
+        return min(375.0, availableWidth);
       case ViewportMode.tablet:
-        return min(600.0, screenWidth - 20);
+        return min(600.0, availableWidth);
       case ViewportMode.desktop:
         return double.infinity;
     }
@@ -375,62 +480,267 @@ class EditorScreen extends StatelessWidget {
               ),
 
               // Viewport Switcher Capsule
-              Obx(
-                () => Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                  ),
-                  child: Row(
-                    children: [
-                      // Mobile
-                      _buildViewportButton(
-                        controller: controller,
-                        mode: ViewportMode.mobile,
-                        icon: LucideIcons.smartphone,
-                        label: 'Mobile',
-                      ),
-                      const SizedBox(width: 2),
-                      // Tablet
-                      _buildViewportButton(
-                        controller: controller,
-                        mode: ViewportMode.tablet,
-                        icon: LucideIcons.tablet,
-                        label: 'Tablet',
-                        iconOnlyWhenInactive: true,
-                      ),
-                      const SizedBox(width: 2),
-                      // Desktop
-                      _buildViewportButton(
-                        controller: controller,
-                        mode: ViewportMode.desktop,
-                        icon: LucideIcons.monitor,
-                        label: 'Desktop',
-                        iconOnlyWhenInactive: true,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              _buildViewportCapsule(controller),
 
-              // Preview Eye
-              IconButton(
-                icon: const Icon(
-                  LucideIcons.eye,
-                  size: 20,
-                  color: Color(0xFF64748B),
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                onPressed: () {
-                  controller.isPanelOpen.value = !controller.isPanelOpen.value;
-                },
+              // Rotate & Preview Buttons
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildRotateButton(controller),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(
+                      LucideIcons.eye,
+                      size: 20,
+                      color: Color(0xFF64748B),
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    onPressed: () {
+                      controller.isPanelOpen.value = !controller.isPanelOpen.value;
+                    },
+                  ),
+                ],
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLandscapeTopBar(BuildContext context, EditorController controller) {
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Back button
+          IconButton(
+            icon: const Icon(LucideIcons.chevronLeft, size: 20, color: Color(0xFF0F172A)),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            onPressed: () => Get.back(),
+          ),
+          const SizedBox(width: 6),
+          // Website name & saved status
+          Obx(
+            () => Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  controller.websiteName.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0F172A),
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  controller.isSaving.value
+                      ? LucideIcons.refreshCw
+                      : LucideIcons.check,
+                  size: 12,
+                  color: controller.isSaving.value
+                      ? const Color(0xFF3B82F6)
+                      : const Color(0xFF64748B),
+                ),
+                const SizedBox(width: 3),
+                Text(
+                  controller.isSaving.value ? 'Saving...' : 'Saved',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const Spacer(),
+
+          // Undo / Redo
+          Obx(
+            () => Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(LucideIcons.undo2, size: 17),
+                  color: controller.canUndo
+                      ? const Color(0xFF0F172A)
+                      : const Color(0xFFCBD5E1),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                  onPressed: controller.canUndo ? controller.undo : null,
+                ),
+                IconButton(
+                  icon: const Icon(LucideIcons.redo2, size: 17),
+                  color: controller.canRedo
+                      ? const Color(0xFF0F172A)
+                      : const Color(0xFFCBD5E1),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                  onPressed: controller.canRedo ? controller.redo : null,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Viewport Switcher Capsule
+          _buildViewportCapsule(controller),
+
+          const SizedBox(width: 8),
+
+          // Rotate Button
+          _buildRotateButton(controller),
+
+          const SizedBox(width: 4),
+
+          // Toggle Inspector / Layers Button
+          IconButton(
+            icon: Obx(
+              () => Icon(
+                controller.isPanelOpen.value ? LucideIcons.panelRightClose : LucideIcons.panelRightOpen,
+                size: 19,
+                color: controller.isPanelOpen.value
+                    ? const Color(0xFF2563EB)
+                    : const Color(0xFF64748B),
+              ),
+            ),
+            tooltip: 'Toggle inspector panel',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            onPressed: () {
+              controller.isPanelOpen.value = !controller.isPanelOpen.value;
+            },
+          ),
+
+          const SizedBox(width: 10),
+
+          // Publish Button
+          Obx(
+            () => ElevatedButton(
+              onPressed: controller.isPublishing.value
+                  ? null
+                  : controller.publishWebsite,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F172A),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              child: controller.isPublishing.value
+                  ? const SizedBox(
+                      width: 12,
+                      height: 12,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Publish',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildViewportCapsule(EditorController controller) {
+    return Obx(
+      () => Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Mobile
+            _buildViewportButton(
+              controller: controller,
+              mode: ViewportMode.mobile,
+              icon: LucideIcons.smartphone,
+              label: 'Mobile',
+            ),
+            const SizedBox(width: 2),
+            // Tablet
+            _buildViewportButton(
+              controller: controller,
+              mode: ViewportMode.tablet,
+              icon: LucideIcons.tablet,
+              label: 'Tablet',
+              iconOnlyWhenInactive: true,
+            ),
+            const SizedBox(width: 2),
+            // Desktop
+            _buildViewportButton(
+              controller: controller,
+              mode: ViewportMode.desktop,
+              icon: LucideIcons.monitor,
+              label: 'Desktop',
+              iconOnlyWhenInactive: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRotateButton(EditorController controller) {
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          color: controller.isLandscape.value
+              ? const Color(0xFFEFF6FF)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: controller.isLandscape.value
+              ? Border.all(color: const Color(0xFFBFDBFE))
+              : null,
+        ),
+        child: IconButton(
+          icon: Icon(
+            LucideIcons.rotateCw,
+            size: 18,
+            color: controller.isLandscape.value
+                ? const Color(0xFF2563EB)
+                : const Color(0xFF64748B),
+          ),
+          tooltip: controller.isLandscape.value
+              ? 'Switch to Portrait view'
+              : 'Switch to Landscape view',
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+          onPressed: controller.toggleLandscape,
+        ),
       ),
     );
   }
@@ -500,114 +810,7 @@ class EditorScreen extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // 1. Floating "Ask AI" pill
-          Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: const Color(0xFFC084FC).withValues(alpha: 0.6),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF8B5CF6).withValues(alpha: 0.16),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                // Glowing AI Sphere
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      center: Alignment(-0.3, -0.3),
-                      radius: 0.8,
-                      colors: [
-                        Color(0xFF38BDF8),
-                        Color(0xFF818CF8),
-                        Color(0xFFC084FC),
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0xFF818CF8),
-                        blurRadius: 6,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: 10),
-
-                // Dynamic Placeholder text / input field
-                Expanded(
-                  child: Obx(
-                    () => TextField(
-                      controller: controller.aiPromptController,
-                      style: const TextStyle(
-                        fontSize: 13.5,
-                        color: Color(0xFF0F172A),
-                        fontWeight: FontWeight.w500,
-                      ),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        hintText: controller.aiPromptPlaceholder.value,
-                        hintStyle: const TextStyle(
-                          color: Color(0xFF64748B),
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      onSubmitted: (_) => controller.submitAiPrompt(),
-                    ),
-                  ),
-                ),
-
-                // Purple Upward Arrow Button
-                Obx(
-                  () => GestureDetector(
-                    onTap: controller.isAiEditing.value
-                        ? null
-                        : controller.submitAiPrompt,
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFEEF2FF),
-                        shape: BoxShape.circle,
-                      ),
-                      child: controller.isAiEditing.value
-                          ? const Center(
-                              child: SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Color(0xFF4F46E5),
-                                ),
-                              ),
-                            )
-                          : const Icon(
-                              LucideIcons.arrowUp,
-                              size: 17,
-                              color: Color(0xFF4F46E5),
-                            ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildFloatingAiPill(controller, isLandscape: false),
 
           const SizedBox(height: 10),
 
@@ -670,6 +873,216 @@ class EditorScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildLandscapeFloatingDock(BuildContext context, EditorController controller) {
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        children: [
+          // 1. Floating AI pill (flexible)
+          Expanded(
+            child: _buildFloatingAiPill(controller, isLandscape: true),
+          ),
+          const SizedBox(width: 12),
+          // 2. Navigation Dock Tabs
+          Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildCompactDockItem(
+                  icon: LucideIcons.plus,
+                  label: 'Add',
+                  onTap: () {
+                    controller.selectedTab.value = 0;
+                    controller.isPanelOpen.value = true;
+                  },
+                ),
+                _buildCompactDockItem(
+                  icon: LucideIcons.pencil,
+                  label: 'Edit',
+                  onTap: () {
+                    controller.selectedTab.value = 1;
+                    controller.isPanelOpen.value = true;
+                  },
+                ),
+                _buildCompactDockItem(
+                  icon: LucideIcons.layers,
+                  label: 'Layers',
+                  onTap: () {
+                    controller.selectedTab.value = 2;
+                    controller.isPanelOpen.value = true;
+                  },
+                ),
+                _buildCompactDockItem(
+                  icon: LucideIcons.palette,
+                  label: 'Design',
+                  onTap: () {
+                    controller.selectedTab.value = 3;
+                    controller.isPanelOpen.value = true;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactDockItem({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: const Color(0xFF0F172A)),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingAiPill(EditorController controller, {bool isLandscape = false}) {
+    return Container(
+      height: isLandscape ? 44 : 48,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: const Color(0xFFC084FC).withValues(alpha: 0.6),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF8B5CF6).withValues(alpha: 0.16),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Glowing AI Sphere
+          Container(
+            width: isLandscape ? 24 : 28,
+            height: isLandscape ? 24 : 28,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                center: Alignment(-0.3, -0.3),
+                radius: 0.8,
+                colors: [
+                  Color(0xFF38BDF8),
+                  Color(0xFF818CF8),
+                  Color(0xFFC084FC),
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFF818CF8),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Dynamic Placeholder text / input field
+          Expanded(
+            child: Obx(
+              () => TextField(
+                controller: controller.aiPromptController,
+                style: TextStyle(
+                  fontSize: isLandscape ? 12.5 : 13.5,
+                  color: const Color(0xFF0F172A),
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  isDense: true,
+                  hintText: controller.aiPromptPlaceholder.value,
+                  hintStyle: TextStyle(
+                    color: const Color(0xFF64748B),
+                    fontSize: isLandscape ? 12.5 : 13.5,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                onSubmitted: (_) => controller.submitAiPrompt(),
+              ),
+            ),
+          ),
+
+          // Purple Upward Arrow Button
+          Obx(
+            () => GestureDetector(
+              onTap: controller.isAiEditing.value
+                  ? null
+                  : controller.submitAiPrompt,
+              child: Container(
+                width: isLandscape ? 28 : 32,
+                height: isLandscape ? 28 : 32,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEEF2FF),
+                  shape: BoxShape.circle,
+                ),
+                child: controller.isAiEditing.value
+                    ? const Center(
+                        child: SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFF4F46E5),
+                          ),
+                        ),
+                      )
+                    : Icon(
+                        LucideIcons.arrowUp,
+                        size: isLandscape ? 15 : 17,
+                        color: const Color(0xFF4F46E5),
+                      ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDockItem({
     required IconData icon,
     required String label,
@@ -716,10 +1129,15 @@ class EditorScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Drag handle pill
+      child: _buildPanelContent(context, controller, isLandscape: false),
+    );
+  }
+
+  Widget _buildPanelContent(BuildContext context, EditorController controller, {bool isLandscape = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!isLandscape)
           Center(
             child: Container(
               width: 36,
@@ -730,80 +1148,81 @@ class EditorScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-          ),
+          )
+        else
+          const SizedBox(height: 10),
 
-          // Tabs row: [ Add | Edit | Layers | Design ] and (✕)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Row(
-              children: [
-                // Tabs Capsule
-                Expanded(
-                  child: Container(
-                    height: 38,
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Obx(
-                      () => Row(
-                        children: [
-                          _buildTabItem(controller, index: 0, title: 'Add'),
-                          _buildTabItem(controller, index: 1, title: 'Edit'),
-                          _buildTabItem(controller, index: 2, title: 'Layers'),
-                          _buildTabItem(controller, index: 3, title: 'Design'),
-                        ],
-                      ),
+        // Tabs row: [ Add | Edit | Layers | Design ] and (✕)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Row(
+            children: [
+              // Tabs Capsule
+              Expanded(
+                child: Container(
+                  height: 38,
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Obx(
+                    () => Row(
+                      children: [
+                        _buildTabItem(controller, index: 0, title: 'Add'),
+                        _buildTabItem(controller, index: 1, title: 'Edit'),
+                        _buildTabItem(controller, index: 2, title: 'Layers'),
+                        _buildTabItem(controller, index: 3, title: 'Design'),
+                      ],
                     ),
                   ),
                 ),
+              ),
 
-                const SizedBox(width: 8),
+              const SizedBox(width: 8),
 
-                // Round Close Button (✕)
-                GestureDetector(
-                  onTap: () => controller.isPanelOpen.value = false,
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    width: 34,
-                    height: 34,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF1F5F9),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      LucideIcons.x,
-                      size: 16,
-                      color: Color(0xFF0F172A),
-                    ),
+              // Round Close Button (✕)
+              GestureDetector(
+                onTap: () => controller.isPanelOpen.value = false,
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  width: 34,
+                  height: 34,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF1F5F9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    LucideIcons.x,
+                    size: 16,
+                    color: Color(0xFF0F172A),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
 
-          const SizedBox(height: 12),
+        const SizedBox(height: 12),
 
-          // Active Tab Body
-          Expanded(
-            child: Obx(() {
-              switch (controller.selectedTab.value) {
-                case 0:
-                  return _buildAddTab(controller);
-                case 1:
-                  return _buildEditTab(controller);
-                case 2:
-                  return _buildLayersTab(controller);
-                case 3:
-                  return _buildDesignTab(controller);
-                default:
-                  return _buildAddTab(controller);
-              }
-            }),
-          ),
-        ],
-      ),
+        // Active Tab Body
+        Expanded(
+          child: Obx(() {
+            switch (controller.selectedTab.value) {
+              case 0:
+                return _buildAddTab(controller);
+              case 1:
+                return _buildEditTab(controller);
+              case 2:
+                return _buildLayersTab(controller);
+              case 3:
+                return _buildDesignTab(controller);
+              default:
+                return _buildAddTab(controller);
+            }
+          }),
+        ),
+      ],
     );
   }
 
