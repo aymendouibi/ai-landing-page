@@ -28,7 +28,7 @@ class EditorScreen extends StatelessWidget {
                     child: Obx(
                       () => Padding(
                         padding: EdgeInsets.only(
-                          bottom: controller.isPanelOpen.value ? 360 : 130,
+                          bottom: controller.isPanelOpen.value ? 420 : 130,
                         ),
                         child: Center(
                           child: AnimatedContainer(
@@ -126,7 +126,7 @@ class EditorScreen extends StatelessWidget {
                       curve: Curves.easeInOut,
                       left: 0,
                       right: 0,
-                      bottom: controller.isPanelOpen.value ? 0 : -400,
+                      bottom: controller.isPanelOpen.value ? 0 : -450,
                       child: _buildBottomPanel(context, controller),
                     ),
                   ),
@@ -687,7 +687,7 @@ class EditorScreen extends StatelessWidget {
   // BOTTOM DOCKED PANEL (Screenshot 3 & Modal Tabs)
   Widget _buildBottomPanel(BuildContext context, EditorController controller) {
     return Container(
-      height: 360,
+      height: 420,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -1511,93 +1511,187 @@ class EditorScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Primary Brand Color',
+            'Colors',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
               color: Color(0xFF0F172A),
             ),
           ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildColorSwatch(controller, '#B85028', const Color(0xFFB85028)),
-              _buildColorSwatch(controller, '#2563EB', const Color(0xFF2563EB)),
-              _buildColorSwatch(controller, '#15803D', const Color(0xFF15803D)),
-              _buildColorSwatch(controller, '#BE123C', const Color(0xFFBE123C)),
-              _buildColorSwatch(controller, '#0F172A', const Color(0xFF0F172A)),
-            ],
+          const SizedBox(height: 12),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: controller.colorPresets.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 1.36,
+            ),
+            itemBuilder: (context, index) {
+              final preset = controller.colorPresets[index];
+              return Obx(() {
+                final isSelected =
+                    controller.selectedColorPreset.value == preset.name;
+                return GestureDetector(
+                  onTap: () => controller.selectColorPreset(preset),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: preset.bg,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF2563EB)
+                            : const Color(0xFFE2E8F0),
+                        width: isSelected ? 2 : 1,
+                      ),
+                      boxShadow: [
+                        if (isSelected)
+                          BoxShadow(
+                            color: const Color(0xFF2563EB).withValues(alpha: 0.15),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Aa',
+                              style: TextStyle(
+                                fontFamily: 'serif',
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: preset.aaColor,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  decoration: BoxDecoration(
+                                    color: preset.dot1,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  decoration: BoxDecoration(
+                                    color: preset.dot2,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.black.withValues(alpha: 0.08),
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Text(
+                          preset.name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: preset.aaColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              });
+            },
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
           const Text(
-            'Heading Font Family',
+            'Fonts',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
               color: Color(0xFF0F172A),
             ),
           ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildFontChip(controller, 'Inter'),
-              _buildFontChip(controller, 'Playfair Display'),
-              _buildFontChip(controller, 'Plus Jakarta Sans'),
-              _buildFontChip(controller, 'Cinzel'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildColorSwatch(
-    EditorController controller,
-    String hex,
-    Color color,
-  ) {
-    return GestureDetector(
-      onTap: () => controller.updateThemeColor(hex),
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+          const SizedBox(height: 12),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: controller.fontPresets.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 1.36,
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFontChip(EditorController controller, String fontName) {
-    return GestureDetector(
-      onTap: () => controller.updateTypography(fontName),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF1F5F9),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: Text(
-          fontName,
-          style: const TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF0F172A),
+            itemBuilder: (context, index) {
+              final preset = controller.fontPresets[index];
+              return Obx(() {
+                final isSelected =
+                    controller.selectedFontPreset.value == preset.name;
+                return GestureDetector(
+                  onTap: () => controller.selectFontPreset(preset),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF2563EB)
+                            : const Color(0xFFE2E8F0),
+                        width: isSelected ? 2 : 1,
+                      ),
+                      boxShadow: [
+                        if (isSelected)
+                          BoxShadow(
+                            color: const Color(0xFF2563EB).withValues(alpha: 0.15),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Center(
+                          child: Text(
+                            'Aa',
+                            style: preset.aaStyle.copyWith(
+                              fontSize: 22,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          preset.name,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected
+                                ? const Color(0xFF0F172A)
+                                : const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              });
+            },
           ),
-        ),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -7,6 +8,36 @@ import '../../core/network/api_client.dart';
 import '../dashboard/dashboard_controller.dart';
 
 enum ViewportMode { mobile, tablet, desktop }
+
+class ColorPreset {
+  final String name;
+  final Color bg;
+  final Color aaColor;
+  final Color dot1;
+  final Color dot2;
+  final Map<String, dynamic> themeColors;
+
+  const ColorPreset({
+    required this.name,
+    required this.bg,
+    required this.aaColor,
+    required this.dot1,
+    required this.dot2,
+    required this.themeColors,
+  });
+}
+
+class FontPreset {
+  final String name;
+  final String family;
+  final TextStyle aaStyle;
+
+  const FontPreset({
+    required this.name,
+    required this.family,
+    required this.aaStyle,
+  });
+}
 
 class EditorController extends GetxController {
   late final String websiteId;
@@ -21,8 +52,11 @@ class EditorController extends GetxController {
 
   // Bottom panel state: 0 = Add, 1 = Edit, 2 = Layers, 3 = Design
   final selectedTab = 0.obs;
-  // Default is false (preview mode with floating AI pill + bottom dock)
   final isPanelOpen = false.obs;
+
+  // Selected Presets in Design Tab
+  final selectedColorPreset = 'Crema'.obs;
+  final selectedFontPreset = 'Serif'.obs;
 
   // AI prompt state
   final aiPromptPlaceholder = 'Ask AI to change your site'.obs;
@@ -54,6 +88,188 @@ class EditorController extends GetxController {
     return clean.isEmpty ? 'lumencoffee.com' : '$clean.com';
   }
 
+  // Curated Design Presets (Screenshot from user)
+  final colorPresets = const [
+    ColorPreset(
+      name: 'Crema',
+      bg: Color(0xFFFAF6F0),
+      aaColor: Color(0xFF0F172A),
+      dot1: Color(0xFFB85028),
+      dot2: Color(0xFFEFE8DE),
+      themeColors: {
+        'primary': '#B85028',
+        'secondary': '#78716C',
+        'accent': '#D97706',
+        'background': '#FAF6F0',
+        'surface': '#FFFFFF',
+        'text': {
+          'primary': '#0F172A',
+          'secondary': '#78716C',
+          'inverse': '#FFFFFF',
+        },
+      },
+    ),
+    ColorPreset(
+      name: 'Espresso',
+      bg: Color(0xFF1C1917),
+      aaColor: Colors.white,
+      dot1: Color(0xFFEA580C),
+      dot2: Color(0xFF292524),
+      themeColors: {
+        'primary': '#D97706',
+        'secondary': '#A8A29E',
+        'accent': '#EA580C',
+        'background': '#1C1917',
+        'surface': '#292524',
+        'text': {
+          'primary': '#F5F5F4',
+          'secondary': '#A8A29E',
+          'inverse': '#0F172A',
+        },
+      },
+    ),
+    ColorPreset(
+      name: 'Matcha',
+      bg: Color(0xFFF0FDF4),
+      aaColor: Color(0xFF14532D),
+      dot1: Color(0xFF15803D),
+      dot2: Color(0xFFDCFCE7),
+      themeColors: {
+        'primary': '#15803D',
+        'secondary': '#16A34A',
+        'accent': '#22C55E',
+        'background': '#F0FDF4',
+        'surface': '#FFFFFF',
+        'text': {
+          'primary': '#14532D',
+          'secondary': '#15803D',
+          'inverse': '#FFFFFF',
+        },
+      },
+    ),
+    ColorPreset(
+      name: 'Riviera',
+      bg: Color(0xFFF0F7FF),
+      aaColor: Color(0xFF1E3A8A),
+      dot1: Color(0xFF2563EB),
+      dot2: Color(0xFFDBEAFE),
+      themeColors: {
+        'primary': '#2563EB',
+        'secondary': '#0284C7',
+        'accent': '#06B6D4',
+        'background': '#F0F7FF',
+        'surface': '#FFFFFF',
+        'text': {
+          'primary': '#0F172A',
+          'secondary': '#64748B',
+          'inverse': '#FFFFFF',
+        },
+      },
+    ),
+    ColorPreset(
+      name: 'Blush',
+      bg: Color(0xFFFFF1F2),
+      aaColor: Color(0xFF881337),
+      dot1: Color(0xFFBE123C),
+      dot2: Color(0xFFFFE4E6),
+      themeColors: {
+        'primary': '#BE123C',
+        'secondary': '#E11D48',
+        'accent': '#FB7185',
+        'background': '#FFF1F2',
+        'surface': '#FFFFFF',
+        'text': {
+          'primary': '#1E1B4B',
+          'secondary': '#881337',
+          'inverse': '#FFFFFF',
+        },
+      },
+    ),
+    ColorPreset(
+      name: 'Mono',
+      bg: Colors.white,
+      aaColor: Color(0xFF09090B),
+      dot1: Color(0xFF09090B),
+      dot2: Color(0xFFE4E4E7),
+      themeColors: {
+        'primary': '#09090B',
+        'secondary': '#52525B',
+        'accent': '#27272A',
+        'background': '#FFFFFF',
+        'surface': '#F4F4F5',
+        'text': {
+          'primary': '#09090B',
+          'secondary': '#71717A',
+          'inverse': '#FFFFFF',
+        },
+      },
+    ),
+  ];
+
+  final fontPresets = const [
+    FontPreset(
+      name: 'Serif',
+      family: 'Playfair Display',
+      aaStyle: TextStyle(
+        fontFamily: 'serif',
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+        color: Color(0xFF0F172A),
+      ),
+    ),
+    FontPreset(
+      name: 'Sans',
+      family: 'Inter',
+      aaStyle: TextStyle(
+        fontFamily: 'sans-serif',
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+        color: Color(0xFF0F172A),
+      ),
+    ),
+    FontPreset(
+      name: 'Editorial',
+      family: 'Cinzel',
+      aaStyle: TextStyle(
+        fontFamily: 'serif',
+        fontSize: 22,
+        fontWeight: FontWeight.w900,
+        letterSpacing: 1,
+        color: Color(0xFF0F172A),
+      ),
+    ),
+    FontPreset(
+      name: 'Mono',
+      family: 'Space Mono',
+      aaStyle: TextStyle(
+        fontFamily: 'monospace',
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFF0F172A),
+      ),
+    ),
+    FontPreset(
+      name: 'Warm',
+      family: 'Merriweather',
+      aaStyle: TextStyle(
+        fontFamily: 'serif',
+        fontSize: 21,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFF0F172A),
+      ),
+    ),
+    FontPreset(
+      name: 'Display',
+      family: 'Plus Jakarta Sans',
+      aaStyle: TextStyle(
+        fontFamily: 'sans-serif',
+        fontSize: 22,
+        fontWeight: FontWeight.w800,
+        color: Color(0xFF0F172A),
+      ),
+    ),
+  ];
+
   @override
   void onInit() {
     super.onInit();
@@ -66,6 +282,9 @@ class EditorController extends GetxController {
   }
 
   void _initWebView() {
+    // 127.0.0.1 on iOS simulator connects directly to Mac host! 10.0.2.2 on Android emulator.
+    final host = Platform.isAndroid ? '10.0.2.2' : '127.0.0.1';
+
     webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.white)
@@ -110,7 +329,7 @@ class EditorController extends GetxController {
           },
         ),
       )
-      ..loadRequest(Uri.parse('http://10.0.2.2:3000/'));
+      ..loadRequest(Uri.parse('http://$host:3000/'));
   }
 
   Future<void> loadWebsite() async {
@@ -156,7 +375,6 @@ class EditorController extends GetxController {
         selectedElementSize.value = props['headlineSize'] ?? 'Large';
         aiPromptPlaceholder.value = 'Ask AI about this ${comp.toLowerCase()}';
       } else {
-        // If blank, open the add panel directly
         selectedTab.value = 0;
         isPanelOpen.value = true;
         aiPromptPlaceholder.value = 'Ask AI to change your site';
@@ -458,7 +676,7 @@ class EditorController extends GetxController {
     selectedElementSize.value = 'Large';
 
     syncDocumentToWebView();
-    selectedTab.value = 1; // Switch to Edit tab
+    selectedTab.value = 1;
     isPanelOpen.value = true;
 
     _saveCurrentDocument();
@@ -659,6 +877,60 @@ class EditorController extends GetxController {
     document.value = docCopy;
     syncDocumentToWebView();
     _saveCurrentDocument();
+  }
+
+  // Design Tab: Apply Color Preset
+  void selectColorPreset(ColorPreset preset) {
+    selectedColorPreset.value = preset.name;
+    final doc = document.value;
+    if (doc == null) return;
+    _pushUndoState();
+
+    final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+    docCopy['site'] ??= {};
+    docCopy['site']['theme'] ??= {};
+    docCopy['site']['theme']['colors'] = {
+      ...(docCopy['site']['theme']['colors'] ?? {}),
+      ...preset.themeColors,
+    };
+
+    document.value = docCopy;
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+
+    Get.snackbar(
+      'Theme Updated',
+      'Applied ${preset.name} color palette',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 1),
+      backgroundColor: Colors.white.withValues(alpha: 0.95),
+    );
+  }
+
+  // Design Tab: Apply Font Preset
+  void selectFontPreset(FontPreset preset) {
+    selectedFontPreset.value = preset.name;
+    final doc = document.value;
+    if (doc == null) return;
+    _pushUndoState();
+
+    final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+    docCopy['site'] ??= {};
+    docCopy['site']['theme'] ??= {};
+    docCopy['site']['theme']['typography'] ??= {};
+    docCopy['site']['theme']['typography']['headingFamily'] = preset.family;
+
+    document.value = docCopy;
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+
+    Get.snackbar(
+      'Typography Updated',
+      'Applied ${preset.name} font style',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 1),
+      backgroundColor: Colors.white.withValues(alpha: 0.95),
+    );
   }
 
   void updateThemeColor(String hex) {
