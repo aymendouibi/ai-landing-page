@@ -1325,91 +1325,80 @@ class EditorScreen extends StatelessWidget {
     );
   }
 
-  // TAB 2: LAYERS (Screenshot 3 Hierarchical View)
+  // TAB 2: LAYERS (Screenshot matching media_1793959339832_3e85492f.jpg)
   Widget _buildLayersTab(EditorController controller) {
-    final sections = controller.currentSections;
+    return Obx(() {
+      final sections = controller.currentSections;
 
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-      children: [
-        // 1. Navigation layer
-        _buildLayerRow(
-          icon: Icons.web_asset_outlined,
-          title: 'Navigation',
-          isVisible: true,
-          isSelected: false,
-          onTap: () {},
-          onToggleVisibility: () {},
-        ),
+      return ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        children: [
+          // 1. Navigation layer
+          _buildLayerRow(
+            iconWidget: _buildNavIcon(false),
+            title: 'Navigation',
+            isVisible: true,
+            isSelected: false,
+            onTap: () {},
+            onToggleVisibility: () {},
+          ),
 
-        // 2. Dynamic sections list
-        ...sections.map((sec) {
-          final id = sec['id'] as String? ?? '';
-          final comp = (sec['component'] as String? ?? 'section').capitalizeFirst ?? 'Section';
-          final isSelected = controller.selectedSectionId.value == id;
-          final isVisible = sec['visible'] ?? true;
+          // 2. Dynamic sections list
+          ...sections.map((sec) {
+            final id = sec['id'] as String? ?? '';
+            final compRaw = (sec['component'] as String? ?? 'section').toLowerCase();
+            final comp = compRaw.capitalizeFirst ?? 'Section';
+            final isSelected = controller.selectedSectionId.value == id;
+            final isVisible = sec['visible'] ?? true;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildLayerRow(
-                icon: _getSectionIcon(sec['component'] as String?),
-                title: comp,
-                isVisible: isVisible,
-                isSelected: isSelected,
-                onTap: () {
-                  controller.selectedSectionId.value = id;
-                  controller.selectedElementContext.value = 'Heading in $comp';
-                  controller.textController.text = sec['props']?['headline'] ?? sec['props']?['title'] ?? '';
-                  controller.aiPromptPlaceholder.value = 'Ask AI about this ${comp.toLowerCase()}';
-                  controller.selectedTab.value = 1;
-                },
-                onToggleVisibility: () => controller.toggleSectionVisibility(id),
-                onMoveUp: () => controller.moveSection(id, 'up'),
-                onMoveDown: () => controller.moveSection(id, 'down'),
-              ),
-              // Indented child: Heading (Screenshot 3)
-              if (isSelected)
-                Padding(
-                  padding: const EdgeInsets.only(left: 36, top: 4, bottom: 6),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 1,
-                        color: const Color(0xFFCBD5E1),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Heading',
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          color: Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildLayerRow(
+                  iconWidget: _getSectionIconWidget(compRaw, isSelected),
+                  title: comp,
+                  isVisible: isVisible,
+                  isSelected: isSelected,
+                  onTap: () {
+                    controller.selectedSectionId.value = id;
+                    controller.selectedElementContext.value = 'Heading in $comp';
+                    controller.textController.text =
+                        sec['props']?['headline'] ?? sec['props']?['title'] ?? '';
+                    controller.aiPromptPlaceholder.value =
+                        'Ask AI about this ${comp.toLowerCase()}';
+                  },
+                  onToggleVisibility: () => controller.toggleSectionVisibility(id),
+                  onMoveUp: () => controller.moveSection(id, 'up'),
+                  onMoveDown: () => controller.moveSection(id, 'down'),
                 ),
-            ],
-          );
-        }),
+                // Indented child: Heading (Matching Screenshot exactly)
+                if (isSelected)
+                  _buildChildLayerRow(
+                    label: 'Heading',
+                    onTap: () {
+                      controller.selectedTab.value = 1; // Open Edit tab
+                    },
+                  ),
+              ],
+            );
+          }),
 
-        // 3. Footer layer
-        _buildLayerRow(
-          icon: Icons.vertical_align_bottom,
-          title: 'Footer',
-          isVisible: true,
-          isSelected: false,
-          onTap: () {},
-          onToggleVisibility: () {},
-        ),
-      ],
-    );
+          // 3. Footer layer
+          _buildLayerRow(
+            iconWidget: _buildFooterIcon(false),
+            title: 'Footer',
+            isVisible: true,
+            isSelected: false,
+            onTap: () {},
+            onToggleVisibility: () {},
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildLayerRow({
-    required IconData icon,
+    required Widget iconWidget,
     required String title,
     required bool isVisible,
     required bool isSelected,
@@ -1420,59 +1409,76 @@ class EditorScreen extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 3),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        height: 48,
+        margin: const EdgeInsets.symmetric(vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: isSelected
-              ? Border.all(color: const Color(0xFFBFDBFE))
-              : Border.all(color: Colors.transparent),
+          color: isSelected ? const Color(0xFFEFF6FF) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 19,
-              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: Center(child: iconWidget),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   color: const Color(0xFF0F172A),
                 ),
               ),
             ),
-            if (isSelected && onMoveUp != null && onMoveDown != null) ...[
-              IconButton(
-                icon: const Icon(Icons.keyboard_arrow_up, size: 18),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                color: const Color(0xFF64748B),
-                onPressed: onMoveUp,
+            if (isSelected) ...[
+              GestureDetector(
+                onTap: onMoveUp,
+                behavior: HitTestBehavior.opaque,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                  child: Icon(
+                    Icons.keyboard_arrow_up,
+                    size: 20,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.keyboard_arrow_down, size: 18),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                color: const Color(0xFF64748B),
-                onPressed: onMoveDown,
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: onMoveDown,
+                behavior: HitTestBehavior.opaque,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
               ),
+              const SizedBox(width: 8),
             ],
-            IconButton(
-              icon: Icon(
-                isVisible ? Icons.remove_red_eye_outlined : Icons.visibility_off_outlined,
-                size: 18,
-                color: const Color(0xFF64748B),
+            GestureDetector(
+              onTap: onToggleVisibility,
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                child: Icon(
+                  isVisible
+                      ? Icons.remove_red_eye_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 20,
+                  color: isVisible
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFFCBD5E1),
+                ),
               ),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-              onPressed: onToggleVisibility,
             ),
           ],
         ),
@@ -1480,26 +1486,156 @@ class EditorScreen extends StatelessWidget {
     );
   }
 
-  IconData _getSectionIcon(String? component) {
-    switch (component?.toLowerCase()) {
+  Widget _buildChildLayerRow({
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: 38,
+        child: Stack(
+          children: [
+            // Vertical tree line aligned with the center of the icon above (left = 21px)
+            Positioned(
+              left: 21,
+              top: 0,
+              bottom: 0,
+              child: Container(
+                width: 1.2,
+                color: const Color(0xFFCBD5E1),
+              ),
+            ),
+            // Indented child element text
+            Positioned(
+              left: 50,
+              top: 0,
+              bottom: 0,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF334155),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavIcon(bool isSelected) {
+    final color = isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A);
+    return Container(
+      width: 17,
+      height: 15,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2.5),
+        border: Border.all(color: color, width: 1.4),
+      ),
+      child: Column(
+        children: [
+          Container(
+            height: 3.5,
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: color, width: 1.2)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroIcon(bool isSelected) {
+    final color = isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A);
+    return Container(
+      width: 17,
+      height: 15,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2.5),
+        border: Border.all(color: color, width: 1.4),
+      ),
+      child: Column(
+        children: [
+          Container(
+            height: 4.5,
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: color, width: 1.2)),
+            ),
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(right: BorderSide(color: color, width: 1.2)),
+                    ),
+                  ),
+                ),
+                const Expanded(flex: 5, child: SizedBox()),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooterIcon(bool isSelected) {
+    final color = isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A);
+    return Container(
+      width: 17,
+      height: 15,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2.5),
+        border: Border.all(color: color, width: 1.4),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Container(
+            height: 3.5,
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: color, width: 1.2)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _getSectionIconWidget(String component, bool isSelected) {
+    final color = isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A);
+
+    switch (component.toLowerCase()) {
       case 'hero':
-        return Icons.view_agenda_outlined;
+        return _buildHeroIcon(isSelected);
       case 'products':
-        return Icons.shopping_bag_outlined;
+        return Icon(Icons.shopping_bag_outlined, size: 20, color: color);
       case 'story':
       case 'about':
-        return Icons.menu_book_outlined;
-      case 'gallery':
-        return Icons.photo_library_outlined;
-      case 'text':
-        return Icons.article_outlined;
-      case 'cta':
-        return Icons.touch_app_outlined;
+        return Icon(Icons.menu_book_outlined, size: 20, color: color);
       case 'visit':
       case 'contact':
-        return Icons.location_on_outlined;
+        return Icon(Icons.location_on_outlined, size: 20, color: color);
+      case 'gallery':
+        return Icon(Icons.photo_library_outlined, size: 20, color: color);
+      case 'text':
+        return Icon(Icons.article_outlined, size: 20, color: color);
+      case 'cta':
+        return Icon(Icons.touch_app_outlined, size: 20, color: color);
+      case 'footer':
+        return _buildFooterIcon(isSelected);
       default:
-        return Icons.view_quilt_outlined;
+        return Icon(Icons.view_quilt_outlined, size: 20, color: color);
     }
   }
 

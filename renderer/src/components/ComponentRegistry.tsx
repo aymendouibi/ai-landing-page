@@ -28,6 +28,7 @@ export const COMPONENT_MAP: Record<string, React.FC<any>> = {
   reviews: Testimonials,
   faq: Faq,
   contact: Contact,
+  visit: Contact,
   forms: Contact,
   footer: Footer,
 };

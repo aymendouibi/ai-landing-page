@@ -362,10 +362,16 @@ class EditorController extends GetxController {
     if (pages != null && pages.isNotEmpty) {
       final sections = pages[0]['sections'] as List?;
       if (sections != null && sections.isNotEmpty) {
-        final firstSec = sections[0] as Map<String, dynamic>;
-        final secId = firstSec['id'] as String?;
-        final comp = (firstSec['component'] as String? ?? 'hero').capitalizeFirst ?? 'Hero';
-        final props = firstSec['props'] as Map<String, dynamic>? ?? {};
+        Map<String, dynamic> targetSec = sections[0] as Map<String, dynamic>;
+        for (final s in sections) {
+          if ((s as Map<String, dynamic>)['component'] == 'products') {
+            targetSec = s;
+            break;
+          }
+        }
+        final secId = targetSec['id'] as String?;
+        final comp = (targetSec['component'] as String? ?? 'hero').capitalizeFirst ?? 'Hero';
+        final props = targetSec['props'] as Map<String, dynamic>? ?? {};
 
         selectedSectionId.value = secId;
         selectedElementContext.value = 'Heading in $comp';
