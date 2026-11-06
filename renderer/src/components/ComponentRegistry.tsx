@@ -9,17 +9,24 @@ import { Faq } from './Faq';
 import { Cta } from './Cta';
 import { Contact } from './Contact';
 import { Footer } from './Footer';
+import { Products } from './Products';
+import { Gallery } from './Gallery';
+import { TextSection } from './TextSection';
 
 export const COMPONENT_MAP: Record<string, React.FC<any>> = {
   hero: Hero,
+  products: Products,
+  story: About,
+  gallery: Gallery,
+  text: TextSection,
+  cta: Cta,
   features: Features,
-  benefits: Features, // Reuses features renderer with variant mapping
+  benefits: Features,
   about: About,
   statistics: Statistics,
   testimonials: Testimonials,
   reviews: Testimonials,
   faq: Faq,
-  cta: Cta,
   contact: Contact,
   forms: Contact,
   footer: Footer,

@@ -187,6 +187,7 @@ declare global {
   interface Window {
     AndroidBridge?: {
       postMessage: (message: string) => void;
+      onSectionSelected?: (sectionId: string) => void;
     };
     updateDocument?: (jsonString: string) => void;
   }

@@ -4,7 +4,7 @@ import '../models/website.dart';
 import '../storage/session_manager.dart';
 
 class ApiClient {
-  static const String baseUrl = 'http://10.0.2.2:8000';
+  static const String baseUrl = 'http://127.0.0.1:8000';
 
   static Future<Map<String, String>> _headers() async {
     final token = await SessionManager.getToken();
@@ -15,10 +15,16 @@ class ApiClient {
     };
   }
 
-  static Future<Map<String, dynamic>> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(
+    String email,
+    String password,
+  ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/v1/auth/login'),
-      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
       body: jsonEncode({'email': email, 'password': password}),
     );
 
@@ -34,7 +40,9 @@ class ApiClient {
       );
       return data;
     } else {
-      throw Exception(data['message'] ?? 'Login failed (${response.statusCode})');
+      throw Exception(
+        data['message'] ?? 'Login failed (${response.statusCode})',
+      );
     }
   }
 
@@ -46,7 +54,9 @@ class ApiClient {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final list = (data['data'] as List).map((e) => Project.fromJson(e)).toList();
+      final list = (data['data'] as List)
+          .map((e) => Project.fromJson(e))
+          .toList();
       return list;
     }
     return [];
@@ -60,17 +70,28 @@ class ApiClient {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final list = (data['data'] as List).map((e) => Website.fromJson(e)).toList();
+      final list = (data['data'] as List)
+          .map((e) => Website.fromJson(e))
+          .toList();
       return list;
     }
     return [];
   }
 
-  static Future<Website> createWebsite(String name, String projectId) async {
+  static Future<Website> createWebsite(
+    String name,
+    String projectId, {
+    Map<String, dynamic>? document,
+  }) async {
+    final body = <String, dynamic>{
+      'name': name,
+      'project_id': projectId,
+      'document': ?document,
+    };
     final response = await http.post(
       Uri.parse('$baseUrl/api/v1/websites'),
       headers: await _headers(),
-      body: jsonEncode({'name': name, 'project_id': projectId}),
+      body: jsonEncode(body),
     );
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -81,7 +102,9 @@ class ApiClient {
     }
   }
 
-  static Future<Map<String, dynamic>> getWebsiteDetails(String websiteId) async {
+  static Future<Map<String, dynamic>> getWebsiteDetails(
+    String websiteId,
+  ) async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/v1/websites/$websiteId'),
       headers: await _headers(),
@@ -90,7 +113,9 @@ class ApiClient {
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
-      throw Exception('Failed to load website details (${response.statusCode})');
+      throw Exception(
+        'Failed to load website details (${response.statusCode})',
+      );
     }
   }
 
@@ -101,10 +126,7 @@ class ApiClient {
     final response = await http.put(
       Uri.parse('$baseUrl/api/v1/websites/$websiteId/document'),
       headers: await _headers(),
-      body: jsonEncode({
-        'document': document,
-        'source': 'manual',
-      }),
+      body: jsonEncode({'document': document, 'source': 'manual'}),
     );
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -134,7 +156,9 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return data;
     } else {
-      throw Exception(data['message'] ?? 'Generation failed (${response.statusCode})');
+      throw Exception(
+        data['message'] ?? 'Generation failed (${response.statusCode})',
+      );
     }
   }
 
@@ -160,17 +184,16 @@ class ApiClient {
     final response = await http.post(
       Uri.parse('$baseUrl/api/v1/templates/$templateId/use'),
       headers: await _headers(),
-      body: jsonEncode({
-        'project_id': projectId,
-        'name': name,
-      }),
+      body: jsonEncode({'project_id': projectId, 'name': name}),
     );
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return Website.fromJson(data['website']);
     } else {
-      throw Exception(data['message'] ?? 'Failed to use template (${response.statusCode})');
+      throw Exception(
+        data['message'] ?? 'Failed to use template (${response.statusCode})',
+      );
     }
   }
 
@@ -184,7 +207,9 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return data;
     } else {
-      throw Exception(data['message'] ?? 'Publishing failed (${response.statusCode})');
+      throw Exception(
+        data['message'] ?? 'Publishing failed (${response.statusCode})',
+      );
     }
   }
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,17 +13,36 @@ class EditorController extends GetxController {
   late final String websiteId;
   WebViewController? webViewController;
 
-  final websiteName = 'Website Editor'.obs;
+  final websiteName = 'Untitled site'.obs;
   final revisionNumber = 1.obs;
   final isSaving = false.obs;
   final isPublishing = false.obs;
   final isLoading = true.obs;
   final viewport = ViewportMode.mobile.obs;
+
+  // Bottom panel state: 0 = Add, 1 = Edit, 2 = Layers, 3 = Design
+  final selectedTab = 0.obs;
+  final isPanelOpen = true.obs;
+
+  // Selected element / section details
   final selectedSectionId = RxnString();
+  final selectedElementContext = 'Heading in Hero'.obs;
+  final selectedElementKey = 'headline'.obs;
+  final selectedElementSize = 'Large'.obs; // 'Small', 'Medium', 'Large'
+
+  final textController = TextEditingController();
+  final subheadlineController = TextEditingController();
+
   final document = Rxn<Map<String, dynamic>>();
 
-  final headlineController = TextEditingController();
-  final subheadlineController = TextEditingController();
+  // Undo / Redo history stacks
+  final undoStack = <Map<String, dynamic>>[].obs;
+  final redoStack = <Map<String, dynamic>>[].obs;
+
+  Timer? _saveDebounceTimer;
+
+  bool get canUndo => undoStack.isNotEmpty;
+  bool get canRedo => redoStack.isNotEmpty;
 
   @override
   void onInit() {
@@ -38,7 +58,7 @@ class EditorController extends GetxController {
   void _initWebView() {
     webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0xFF0F172A))
+      ..setBackgroundColor(Colors.white)
       ..addJavaScriptChannel(
         'AndroidBridge',
         onMessageReceived: (message) {
@@ -47,6 +67,9 @@ class EditorController extends GetxController {
             final action = data['action'] ?? data['type'];
             if (action == 'EDITOR_READY' || action == 'RENDERER_READY') {
               syncDocumentToWebView();
+            } else if (action == 'SELECT_ELEMENT') {
+              final payload = (data['payload'] ?? data) as Map<String, dynamic>;
+              onElementSelected(payload);
             } else if (action == 'SELECT_SECTION' || action == 'SECTION_SELECTED') {
               final payload = data['payload'] as Map<String, dynamic>?;
               final sectionId = (payload?['sectionId'] ?? data['sectionId']) as String?;
@@ -72,11 +95,14 @@ class EditorController extends GetxController {
       final website = res['website'] as Map<String, dynamic>;
       final currentRev = website['current_revision'] as Map<String, dynamic>?;
 
-      websiteName.value = website['name'] ?? 'Website Editor';
+      websiteName.value = website['name'] ?? 'Untitled site';
       revisionNumber.value = currentRev?['revision_number'] ?? (website['revision_number'] ?? 1);
       final rawDoc = (currentRev?['document'] as Map<String, dynamic>?) ??
           (website['document'] as Map<String, dynamic>?);
       document.value = rawDoc;
+
+      // If document has sections, select the first section and element
+      _autoSelectInitialElement();
 
       syncDocumentToWebView();
     } catch (e) {
@@ -84,6 +110,32 @@ class EditorController extends GetxController {
           snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void _autoSelectInitialElement() {
+    final doc = document.value;
+    if (doc == null) return;
+    final pages = doc['pages'] as List?;
+    if (pages != null && pages.isNotEmpty) {
+      final sections = pages[0]['sections'] as List?;
+      if (sections != null && sections.isNotEmpty) {
+        final firstSec = sections[0] as Map<String, dynamic>;
+        final secId = firstSec['id'] as String?;
+        final comp = (firstSec['component'] as String? ?? 'hero').capitalizeFirst ?? 'Hero';
+        final props = firstSec['props'] as Map<String, dynamic>? ?? {};
+
+        selectedSectionId.value = secId;
+        selectedElementContext.value = 'Heading in $comp';
+        selectedElementKey.value = 'headline';
+        textController.text = props['headline'] ?? props['title'] ?? '';
+        subheadlineController.text = props['subheadline'] ?? props['subtitle'] ?? props['description'] ?? '';
+        selectedElementSize.value = props['headlineSize'] ?? 'Large';
+        // Keep in Add tab initially unless empty, per reference
+        selectedTab.value = 0;
+      } else {
+        selectedTab.value = 0; // Add tab for empty state
+      }
     }
   }
 
@@ -98,11 +150,30 @@ class EditorController extends GetxController {
     } catch (_) {}
   }
 
+  void onElementSelected(Map<String, dynamic> payload) {
+    final sectionId = payload['sectionId'] as String?;
+    final elementKey = payload['elementKey'] as String? ?? 'headline';
+    final elementName = payload['elementName'] as String? ?? 'Heading in Hero';
+    final text = payload['text'] as String? ?? '';
+    final size = payload['size'] as String? ?? 'Large';
+
+    selectedSectionId.value = sectionId;
+    selectedElementKey.value = elementKey;
+    selectedElementContext.value = elementName;
+    textController.text = text;
+    selectedElementSize.value = size;
+
+    // Switch to Edit tab and open panel
+    selectedTab.value = 1;
+    isPanelOpen.value = true;
+  }
+
   void onSectionSelected(String? sectionId) {
     if (sectionId == null) return;
     selectedSectionId.value = sectionId;
     _populateSectionInputs(sectionId);
-    showSectionEditorSheet();
+    selectedTab.value = 1;
+    isPanelOpen.value = true;
   }
 
   void _populateSectionInputs(String sectionId) {
@@ -113,9 +184,13 @@ class EditorController extends GetxController {
       if (sections != null) {
         for (final sec in sections) {
           if (sec['id'] == sectionId) {
-            final props = sec['props'] as Map<String, dynamic>?;
-            headlineController.text = props?['headline'] ?? '';
-            subheadlineController.text = props?['subheadline'] ?? '';
+            final comp = (sec['component'] as String? ?? 'hero').capitalizeFirst ?? 'Section';
+            final props = sec['props'] as Map<String, dynamic>? ?? {};
+            selectedElementContext.value = 'Heading in $comp';
+            selectedElementKey.value = 'headline';
+            textController.text = props['headline'] ?? props['title'] ?? '';
+            subheadlineController.text = props['subheadline'] ?? props['subtitle'] ?? props['description'] ?? '';
+            selectedElementSize.value = props['headlineSize'] ?? 'Large';
             return;
           }
         }
@@ -123,118 +198,228 @@ class EditorController extends GetxController {
     }
   }
 
-  void showSectionEditorSheet() {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 36),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceMuted,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Editing Section',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.ink,
-                  ),
-                ),
-                Text(
-                  selectedSectionId.value ?? '',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.atmosphereViolet,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: headlineController,
-              decoration: InputDecoration(
-                labelText: 'Headline / Title',
-                filled: true,
-                fillColor: AppColors.background,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: subheadlineController,
-              decoration: InputDecoration(
-                labelText: 'Subheadline / Description',
-                filled: true,
-                fillColor: AppColors.background,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Get.back(),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    ),
-                    child: const Text('Cancel', style: TextStyle(color: AppColors.ink)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Get.back();
-                      saveSectionUpdates();
-                    },
-                    icon: const Icon(Icons.check, size: 18),
-                    label: const Text('Apply & Save'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.ink,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      isScrollControlled: true,
+  void _pushUndoState() {
+    if (document.value != null) {
+      undoStack.add(jsonDecode(jsonEncode(document.value!)) as Map<String, dynamic>);
+      redoStack.clear();
+    }
+  }
+
+  void undo() {
+    if (undoStack.isEmpty || document.value == null) return;
+    redoStack.add(jsonDecode(jsonEncode(document.value!)) as Map<String, dynamic>);
+    final prev = undoStack.removeLast();
+    document.value = prev;
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+  }
+
+  void redo() {
+    if (redoStack.isEmpty || document.value == null) return;
+    undoStack.add(jsonDecode(jsonEncode(document.value!)) as Map<String, dynamic>);
+    final next = redoStack.removeLast();
+    document.value = next;
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+  }
+
+  void addSection(String type) {
+    if (document.value == null) return;
+    _pushUndoState();
+
+    final ts = DateTime.now().millisecondsSinceEpoch;
+    final sectionId = 'sec_${type}_$ts';
+
+    Map<String, dynamic> newSec;
+    switch (type.toLowerCase()) {
+      case 'hero':
+        newSec = {
+          'id': sectionId,
+          'component': 'hero',
+          'variant': 'split_image',
+          'order': 0,
+          'props': {
+            'headline': 'Small-batch coffee, roasted every Friday',
+            'subheadline':
+                'Single-origin beans from farms we visit, roasted in our Alberta Street shop and shipped the same day.',
+            'ctaText': 'Order beans',
+            'ctaLink': '#products',
+            'secondaryCtaText': 'Visit cafe',
+            'secondaryCtaLink': '#about',
+            'image': {
+              'src':
+                  'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80',
+              'alt': 'Small Batch Roasting',
+            },
+          },
+          'styles': {'background': 'default'},
+        };
+        break;
+
+      case 'products':
+        newSec = {
+          'id': sectionId,
+          'component': 'products',
+          'variant': 'grid_3col',
+          'order': 1,
+          'props': {
+            'title': 'Fresh Roast Offerings',
+            'subtitle': 'Carefully selected beans from ethical farm partnerships.',
+            'items': [
+              {
+                'name': 'Ethiopia Yirgacheffe',
+                'price': '\$18.00',
+                'description': 'Floral jasmine, bergamot, and sweet peach notes.',
+                'image':
+                    'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=400&q=80',
+              },
+              {
+                'name': 'Colombia Huila Reserve',
+                'price': '\$17.50',
+                'description': 'Milk chocolate, caramel, and bright crisp apple.',
+                'image':
+                    'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80',
+              },
+              {
+                'name': 'Guatemala Antigua',
+                'price': '\$19.00',
+                'description': 'Rich dark cocoa, toasted hazelnut, and warm spice.',
+                'image':
+                    'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=400&q=80',
+              },
+            ],
+          },
+          'styles': {'background': 'surface'},
+        };
+        break;
+
+      case 'story':
+        newSec = {
+          'id': sectionId,
+          'component': 'story',
+          'variant': 'split_image',
+          'order': 2,
+          'props': {
+            'headline': 'Crafted in Alberta Street',
+            'description':
+                'We believe great coffee is an intentional craft. Every single origin lot is meticulously roasted on our vintage cast iron drum roaster.',
+            'highlights': ['Direct farm partnerships', 'Carbon neutral delivery', 'Roasted weekly'],
+            'image': {
+              'src':
+                  'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80',
+              'alt': 'Coffee Roaster in Action',
+            },
+          },
+          'styles': {'background': 'default'},
+        };
+        break;
+
+      case 'gallery':
+        newSec = {
+          'id': sectionId,
+          'component': 'gallery',
+          'order': 3,
+          'props': {
+            'title': 'The Roastery Atmosphere',
+            'subtitle': 'A glance into our daily roasting rituals.',
+            'items': [
+              {
+                'src':
+                    'https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=600&q=80',
+                'caption': 'Pour Over Bar',
+              },
+              {
+                'src':
+                    'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80',
+                'caption': 'Single Origin Green Beans',
+              },
+              {
+                'src':
+                    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80',
+                'caption': 'Fresh Morning Brew',
+              },
+            ],
+          },
+          'styles': {'background': 'surface'},
+        };
+        break;
+
+      case 'text':
+        newSec = {
+          'id': sectionId,
+          'component': 'text',
+          'order': 4,
+          'props': {
+            'headline': 'The Philosophy of Slow Coffee',
+            'subheadline': 'Patience in cultivation, discipline in roasting.',
+            'content':
+                'Coffee is more than morning caffeine. It is the culmination of hundreds of hands working in harmony across continents.',
+          },
+          'styles': {'background': 'default'},
+        };
+        break;
+
+      case 'cta':
+      case 'call to action':
+      default:
+        newSec = {
+          'id': sectionId,
+          'component': 'cta',
+          'variant': 'centered',
+          'order': 5,
+          'props': {
+            'headline': 'Roasted Fresh Every Friday',
+            'description': 'Order today and experience artisanal coffee shipped direct to your kitchen.',
+            'buttonText': 'Order Coffee Now',
+            'buttonLink': '#products',
+          },
+          'styles': {'background': 'accent'},
+        };
+        break;
+    }
+
+    final docCopy = jsonDecode(jsonEncode(document.value!)) as Map<String, dynamic>;
+    final pages = docCopy['pages'] as List? ?? [];
+    if (pages.isEmpty) {
+      docCopy['pages'] = [
+        {'id': 'page_home', 'slug': '/', 'title': 'Home', 'sections': [newSec]}
+      ];
+    } else {
+      final currentSections = (pages[0]['sections'] as List? ?? []);
+      newSec['order'] = currentSections.length;
+      currentSections.add(newSec);
+      pages[0]['sections'] = currentSections;
+    }
+
+    document.value = docCopy;
+    selectedSectionId.value = sectionId;
+    final compCapitalized = type.capitalizeFirst ?? 'Section';
+    selectedElementContext.value = 'Heading in $compCapitalized';
+    selectedElementKey.value = 'headline';
+    textController.text = newSec['props']['headline'] ?? newSec['props']['title'] ?? '';
+    subheadlineController.text = newSec['props']['subheadline'] ?? newSec['props']['subtitle'] ?? '';
+    selectedElementSize.value = 'Large';
+
+    syncDocumentToWebView();
+    selectedTab.value = 1; // Switch to Edit tab
+
+    _saveCurrentDocument();
+
+    Get.snackbar(
+      'Section Added',
+      'Added $compCapitalized section to page',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+      backgroundColor: Colors.white.withValues(alpha: 0.95),
     );
   }
 
-  Future<void> saveSectionUpdates() async {
+  void updateText(String newText) {
     final sectionId = selectedSectionId.value;
+    final key = selectedElementKey.value;
     final doc = document.value;
     if (sectionId == null || doc == null) return;
 
-    isSaving.value = true;
-
-    // Deep copy document and apply mutations
     final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
     final pages = docCopy['pages'] as List?;
     if (pages != null && pages.isNotEmpty) {
@@ -243,41 +428,182 @@ class EditorController extends GetxController {
         for (final sec in sections) {
           if (sec['id'] == sectionId) {
             sec['props'] ??= <String, dynamic>{};
-            if (headlineController.text.isNotEmpty) {
-              sec['props']['headline'] = headlineController.text;
-            }
-            if (subheadlineController.text.isNotEmpty) {
-              sec['props']['subheadline'] = subheadlineController.text;
+            if (key == 'headline') {
+              sec['props']['headline'] = newText;
+              sec['props']['title'] = newText;
+            } else if (key == 'subheadline') {
+              sec['props']['subheadline'] = newText;
+              sec['props']['subtitle'] = newText;
+              sec['props']['description'] = newText;
+            } else if (key == 'ctaText') {
+              sec['props']['ctaText'] = newText;
+              sec['props']['buttonText'] = newText;
+            } else {
+              sec['props'][key] = newText;
             }
           }
         }
       }
     }
 
+    document.value = docCopy;
+
+    // Fast inline update in WebView
+    if (webViewController != null) {
+      final safeText = jsonEncode(newText);
+      final safeKey = jsonEncode(key);
+      final safeSecId = jsonEncode(sectionId);
+      final safeSize = jsonEncode(selectedElementSize.value);
+      webViewController!.runJavaScript(
+        "if (window.updateElementText) { window.updateElementText($safeSecId, $safeKey, $safeText, $safeSize); }",
+      );
+    }
+
+    _debounceSave();
+  }
+
+  void updateSize(String size) {
+    selectedElementSize.value = size;
+    final sectionId = selectedSectionId.value;
+    final doc = document.value;
+    if (sectionId == null || doc == null) return;
+
+    _pushUndoState();
+    final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+    final pages = docCopy['pages'] as List?;
+    if (pages != null && pages.isNotEmpty) {
+      final sections = pages[0]['sections'] as List?;
+      if (sections != null) {
+        for (final sec in sections) {
+          if (sec['id'] == sectionId) {
+            sec['props'] ??= <String, dynamic>{};
+            sec['props']['headlineSize'] = size;
+          }
+        }
+      }
+    }
+
+    document.value = docCopy;
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+  }
+
+  void deleteSection(String sectionId) {
+    final doc = document.value;
+    if (doc == null) return;
+    _pushUndoState();
+
+    final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+    final pages = docCopy['pages'] as List?;
+    if (pages != null && pages.isNotEmpty) {
+      final sections = pages[0]['sections'] as List?;
+      if (sections != null) {
+        sections.removeWhere((s) => s['id'] == sectionId);
+        // Re-index orders
+        for (int i = 0; i < sections.length; i++) {
+          sections[i]['order'] = i;
+        }
+      }
+    }
+
+    document.value = docCopy;
+    if (selectedSectionId.value == sectionId) {
+      selectedSectionId.value = null;
+      selectedTab.value = 0;
+    }
+
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+
+    Get.snackbar(
+      'Removed',
+      'Section removed from page',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  void reorderSections(int oldIndex, int newIndex) {
+    final doc = document.value;
+    if (doc == null) return;
+    _pushUndoState();
+
+    final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+    final pages = docCopy['pages'] as List?;
+    if (pages != null && pages.isNotEmpty) {
+      final sections = pages[0]['sections'] as List?;
+      if (sections != null && sections.length > 1) {
+        if (oldIndex < newIndex) {
+          newIndex -= 1;
+        }
+        final item = sections.removeAt(oldIndex);
+        sections.insert(newIndex, item);
+        for (int i = 0; i < sections.length; i++) {
+          sections[i]['order'] = i;
+        }
+      }
+    }
+
+    document.value = docCopy;
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+  }
+
+  void updateThemeColor(String hex) {
+    final doc = document.value;
+    if (doc == null) return;
+    _pushUndoState();
+
+    final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+    docCopy['site'] ??= {};
+    docCopy['site']['theme'] ??= {};
+    docCopy['site']['theme']['colors'] ??= {};
+    docCopy['site']['theme']['colors']['primary'] = hex;
+
+    document.value = docCopy;
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+  }
+
+  void updateTypography(String headingFamily) {
+    final doc = document.value;
+    if (doc == null) return;
+    _pushUndoState();
+
+    final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+    docCopy['site'] ??= {};
+    docCopy['site']['theme'] ??= {};
+    docCopy['site']['theme']['typography'] ??= {};
+    docCopy['site']['theme']['typography']['headingFamily'] = headingFamily;
+
+    document.value = docCopy;
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+  }
+
+  void _debounceSave() {
+    _saveDebounceTimer?.cancel();
+    _saveDebounceTimer = Timer(const Duration(milliseconds: 600), () {
+      _saveCurrentDocument();
+    });
+  }
+
+  Future<void> _saveCurrentDocument() async {
+    final doc = document.value;
+    if (doc == null || websiteId.isEmpty) return;
+
+    isSaving.value = true;
     try {
-      final res = await ApiClient.updateWebsiteDocument(websiteId, docCopy);
+      final res = await ApiClient.updateWebsiteDocument(websiteId, doc);
       final website = res['website'] as Map<String, dynamic>?;
       final currentRev = website?['current_revision'] as Map<String, dynamic>?;
 
-      document.value = docCopy;
       revisionNumber.value = currentRev?['revision_number'] ?? (revisionNumber.value + 1);
-      selectedSectionId.value = null;
 
-      syncDocumentToWebView();
-
-      // Refresh dashboard if active
       if (Get.isRegistered<DashboardController>()) {
         Get.find<DashboardController>().loadData();
       }
-
-      Get.snackbar(
-        'Saved',
-        'Revision #${revisionNumber.value} persisted successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.white.withValues(alpha: 0.9),
-      );
-    } catch (e) {
-      Get.snackbar('Save Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+    } catch (_) {
     } finally {
       isSaving.value = false;
     }
@@ -289,39 +615,46 @@ class EditorController extends GetxController {
       final res = await ApiClient.publishWebsite(websiteId);
       final liveUrl = res['live_url'] as String? ?? 'https://preview.aibuilder.local';
 
-      // Refresh dashboard
       if (Get.isRegistered<DashboardController>()) {
         Get.find<DashboardController>().loadData();
       }
 
       Get.dialog(
         AlertDialog(
-          backgroundColor: AppColors.surface,
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Row(
             children: [
-              Icon(Icons.cloud_done, color: Colors.green),
+              Icon(Icons.check_circle, color: Color(0xFF10B981)),
               SizedBox(width: 10),
-              Text('Website Published!'),
+              Text(
+                'Published!',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Your website is now live and deployed on CDN hosting.'),
-              const SizedBox(height: 12),
+              const Text(
+                'Your website is live and deployed on global CDN hosting.',
+                style: TextStyle(fontSize: 14, color: AppColors.inkMuted),
+              ),
+              const SizedBox(height: 14),
               Container(
-                padding: const EdgeInsets.all(10),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceMuted,
+                  color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: SelectableText(
                   liveUrl,
                   style: const TextStyle(
-                    color: AppColors.atmosphereViolet,
+                    color: Color(0xFF0F172A),
                     fontWeight: FontWeight.bold,
+                    fontSize: 13,
                   ),
                 ),
               ),
@@ -331,10 +664,12 @@ class EditorController extends GetxController {
             ElevatedButton(
               onPressed: () => Get.back(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.ink,
+                backgroundColor: const Color(0xFF0F172A),
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
-              child: const Text('Awesome', style: TextStyle(color: Colors.white)),
+              child: const Text('Done'),
             ),
           ],
         ),
@@ -361,11 +696,19 @@ class EditorController extends GetxController {
     }
   }
 
+  List<Map<String, dynamic>> get currentSections {
+    final doc = document.value;
+    if (doc == null) return [];
+    final pages = doc['pages'] as List?;
+    if (pages == null || pages.isEmpty) return [];
+    return List<Map<String, dynamic>>.from(pages[0]['sections'] ?? []);
+  }
+
   @override
   void onClose() {
-    headlineController.dispose();
+    _saveDebounceTimer?.cancel();
+    textController.dispose();
     subheadlineController.dispose();
     super.onClose();
   }
 }
-

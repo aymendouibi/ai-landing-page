@@ -166,7 +166,52 @@ class DashboardController extends GetxController {
         Get.snackbar('Notice', 'No workspace project found');
         return;
       }
-      final newSite = await ApiClient.createWebsite('Untitled Website', projects.first.id);
+      final emptyDocument = {
+        'schema_version': 1,
+        'site': {
+          'name': 'Untitled site',
+          'theme': {
+            'colors': {
+              'primary': '#0F172A',
+              'secondary': '#64748B',
+              'accent': '#B85028',
+              'background': '#FFFFFF',
+              'surface': '#F8FAFC',
+              'text': {
+                'primary': '#0F172A',
+                'secondary': '#475569',
+                'inverse': '#FFFFFF',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Inter',
+              'bodyFamily': 'Inter',
+            },
+          },
+          'settings': {
+            'language': 'en',
+            'googleFonts': ['Inter'],
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Untitled site'},
+          'items': [],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [],
+          },
+        ],
+      };
+
+      final newSite = await ApiClient.createWebsite(
+        'Untitled site',
+        projects.first.id,
+        document: emptyDocument,
+      );
       await loadData();
       openWebsite(newSite.id);
     } catch (e) {
