@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Pencil, ChevronUp, ChevronDown, Copy, Trash2, CornerUpLeft } from 'lucide-react';
 import { WebsiteDocument, BridgeMessage, SectionConfig } from '../types/schema';
 import { generateCssVariables, generateGoogleFontsUrl } from './theme';
 import { Navbar } from '../components/Navbar';
@@ -435,6 +436,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
         flexDirection: 'column',
         position: 'relative',
         backgroundColor: '#FFFFFF',
+        paddingBottom: isEditorMode ? '140px' : '0px',
       }}
     >
       {/* Dynamic Google Fonts Link */}
@@ -514,7 +516,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
                     className="floating-editor-toolbar"
                     style={{
                       position: 'absolute',
-                      top: '-20px',
+                      bottom: '-22px',
                       left: '20px',
                       backgroundColor: '#0F172A',
                       color: '#FFFFFF',
@@ -538,7 +540,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
                       title="Edit Section"
                       style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      <Pencil size={14} strokeWidth={2.5} />
                     </button>
 
                     {/* AI Orb */}
@@ -559,36 +561,36 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
                     <button
                       onClick={() => handleMoveSection('up')}
                       title="Move Up"
-                      style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', fontSize: '12px', padding: 0 }}
+                      style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
                     >
-                      ▲
+                      <ChevronUp size={15} strokeWidth={2.5} />
                     </button>
 
                     {/* Move Down */}
                     <button
                       onClick={() => handleMoveSection('down')}
                       title="Move Down"
-                      style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', fontSize: '12px', padding: 0 }}
+                      style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
                     >
-                      ▼
+                      <ChevronDown size={15} strokeWidth={2.5} />
                     </button>
 
                     {/* Duplicate */}
                     <button
                       onClick={handleDuplicateSection}
                       title="Duplicate Section"
-                      style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', fontSize: '13px', padding: 0 }}
+                      style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
                     >
-                      ❏
+                      <Copy size={14} strokeWidth={2.2} />
                     </button>
 
                     {/* Delete (coral red) */}
                     <button
                       onClick={handleDeleteSection}
                       title="Delete Section"
-                      style={{ background: 'none', border: 'none', color: '#F87171', cursor: 'pointer', fontSize: '14px', padding: 0 }}
+                      style={{ background: 'none', border: 'none', color: '#F87171', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
                     >
-                      🗑
+                      <Trash2 size={14} strokeWidth={2.2} />
                     </button>
                   </div>
                 )}
@@ -618,7 +620,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
               className="floating-editor-toolbar"
               style={{
                 position: 'absolute',
-                top: '-38px',
+                top: selectedElement.rect.top < 45 ? `${selectedElement.rect.height + 8}px` : '-38px',
                 left: '-2px',
                 backgroundColor: '#0F172A',
                 color: '#FFFFFF',
@@ -641,7 +643,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
                 title="Edit Text"
                 style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                <Pencil size={13} strokeWidth={2.5} />
               </button>
 
               {/* AI Orb */}
@@ -659,7 +661,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
               />
 
               {/* Reorder / turn arrow */}
-              <span style={{ fontSize: '12px', color: '#94A3B8' }}>↰</span>
+              <CornerUpLeft size={13} strokeWidth={2.2} color="#94A3B8" />
             </div>
 
             {/* 4 Circular Corner Handles (Screenshot 2) */}

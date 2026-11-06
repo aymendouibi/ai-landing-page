@@ -30,33 +30,12 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({
 
   const outlineStyle: React.CSSProperties = isEditorMode && isSelected
     ? {
-        outline: '3px solid var(--color-primary)',
-        outlineOffset: '-3px',
+        outline: '2px solid #2563EB',
+        outlineOffset: '-2px',
         position: 'relative',
         zIndex: 10,
       }
     : {};
-
-  const editorIndicator = isEditorMode && isSelected && (
-    <div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: '1rem',
-        background: 'var(--color-primary)',
-        color: '#ffffff',
-        padding: '0.2rem 0.6rem',
-        fontSize: '0.75rem',
-        fontWeight: 600,
-        borderRadius: '0 0 0.375rem 0.375rem',
-        zIndex: 20,
-        pointerEvents: 'none',
-        textTransform: 'uppercase',
-      }}
-    >
-      {section.component} ({section.variant})
-    </div>
-  );
 
   return (
     <section
@@ -72,7 +51,6 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({
         transition: 'outline 0.15s ease',
       }}
     >
-      {editorIndicator}
       {children}
     </section>
   );
