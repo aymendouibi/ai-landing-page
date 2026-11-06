@@ -136,6 +136,29 @@ class ApiClient {
     }
   }
 
+  static Future<Map<String, dynamic>> aiEdit({
+    required String websiteId,
+    required String instruction,
+    String? targetSectionId,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/v1/ai/edit'),
+      headers: await _headers(),
+      body: jsonEncode({
+        'website_id': websiteId,
+        'instruction': instruction,
+        'target_section_id': ?targetSectionId,
+      }),
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      final err = jsonDecode(response.body);
+      throw Exception(err['message'] ?? 'AI Edit failed (${response.statusCode})');
+    }
+  }
+
   static Future<Map<String, dynamic>> generateWebsite({
     required String prompt,
     required String projectId,

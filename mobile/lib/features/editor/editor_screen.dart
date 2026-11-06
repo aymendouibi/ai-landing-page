@@ -16,19 +16,19 @@ class EditorScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Bar: Row 1 & Row 2
+            // Top Bar: Two rows
             _buildTopBar(context, controller),
 
-            // Canvas & Bottom Panel
+            // Canvas & Bottom Floating / Docked UI
             Expanded(
               child: Stack(
                 children: [
-                  // Canvas (Webview) Area
+                  // Canvas (WebView) Area
                   Positioned.fill(
                     child: Obx(
                       () => Padding(
                         padding: EdgeInsets.only(
-                          bottom: controller.isPanelOpen.value ? 350 : 60,
+                          bottom: controller.isPanelOpen.value ? 360 : 130,
                         ),
                         child: Center(
                           child: AnimatedContainer(
@@ -43,8 +43,8 @@ class EditorScreen extends StatelessWidget {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(
                                 controller.viewport.value == ViewportMode.desktop
-                                    ? 0
-                                    : 20,
+                                    ? 14
+                                    : 24,
                               ),
                               border: Border.all(
                                 color: const Color(0xFFE2E8F0),
@@ -61,19 +61,30 @@ class EditorScreen extends StatelessWidget {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(
                                 controller.viewport.value == ViewportMode.desktop
-                                    ? 0
-                                    : 20,
+                                    ? 14
+                                    : 24,
                               ),
-                              child: controller.isLoading.value ||
-                                      controller.webViewController == null
-                                  ? const Center(
-                                      child: CircularProgressIndicator(
-                                        color: Color(0xFF0F172A),
-                                      ),
-                                    )
-                                  : WebViewWidget(
-                                      controller: controller.webViewController!,
-                                    ),
+                              child: Column(
+                                children: [
+                                  // Desktop browser title bar (Screenshots 4 & 5)
+                                  if (controller.viewport.value == ViewportMode.desktop)
+                                    _buildDesktopBrowserBar(controller),
+
+                                  // WebView
+                                  Expanded(
+                                    child: controller.isLoading.value ||
+                                            controller.webViewController == null
+                                        ? const Center(
+                                            child: CircularProgressIndicator(
+                                              color: Color(0xFF0F172A),
+                                            ),
+                                          )
+                                        : WebViewWidget(
+                                            controller: controller.webViewController!,
+                                          ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -81,61 +92,43 @@ class EditorScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Bottom Docked Panel
+                  // Slim vertical scrollbar on right edge (Screenshots 1 & 2)
+                  Positioned(
+                    right: 4,
+                    top: 40,
+                    bottom: 140,
+                    child: Container(
+                      width: 4,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF94A3B8).withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+
+                  // Bottom Dock & Floating AI Pill (Preview Mode - Screenshots 1, 2, 4, 5)
                   Obx(
-                    () => controller.isPanelOpen.value
-                        ? Positioned(
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            child: _buildBottomPanel(context, controller),
-                          )
-                        : Positioned(
-                            bottom: 16,
-                            left: 0,
-                            right: 0,
-                            child: Center(
-                              child: GestureDetector(
-                                onTap: () => controller.isPanelOpen.value = true,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF0F172A),
-                                    borderRadius: BorderRadius.circular(999),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.2),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.tune,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Open Editor Panel',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                    () => AnimatedPositioned(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                      left: 0,
+                      right: 0,
+                      bottom: controller.isPanelOpen.value ? -400 : 0,
+                      child: _buildFloatingBottomDock(context, controller),
+                    ),
+                  ),
+
+                  // Bottom Docked Panel (Edit/Layers/Add/Design - Screenshot 3)
+                  Obx(
+                    () => AnimatedPositioned(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                      left: 0,
+                      right: 0,
+                      bottom: controller.isPanelOpen.value ? 0 : -400,
+                      child: _buildBottomPanel(context, controller),
+                    ),
                   ),
                 ],
               ),
@@ -156,6 +149,76 @@ class EditorScreen extends StatelessWidget {
       case ViewportMode.desktop:
         return double.infinity;
     }
+  }
+
+  Widget _buildDesktopBrowserBar(EditorController controller) {
+    return Container(
+      height: 38,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF1F5F9),
+        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+      ),
+      child: Row(
+        children: [
+          // 3 window dots
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEF4444),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 5),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF59E0B),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 5),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF10B981),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ),
+
+          // Centered URL Pill (Screenshot 4 & 5: lumencoffee.com)
+          Expanded(
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Text(
+                  controller.siteDomain,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 32),
+        ],
+      ),
+    );
   }
 
   Widget _buildTopBar(BuildContext context, EditorController controller) {
@@ -348,7 +411,6 @@ class EditorScreen extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 onPressed: () {
-                  // Toggle panel to preview full page
                   controller.isPanelOpen.value = !controller.isPanelOpen.value;
                 },
               ),
@@ -416,9 +478,216 @@ class EditorScreen extends StatelessWidget {
     );
   }
 
+  // FLOATING BOTTOM DOCK (Screenshots 1, 2, 4, 5)
+  Widget _buildFloatingBottomDock(BuildContext context, EditorController controller) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 1. Floating "Ask AI" pill
+          Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: const Color(0xFFC084FC).withValues(alpha: 0.6),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF8B5CF6).withValues(alpha: 0.16),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Glowing AI Sphere
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      center: Alignment(-0.3, -0.3),
+                      radius: 0.8,
+                      colors: [
+                        Color(0xFF38BDF8),
+                        Color(0xFF818CF8),
+                        Color(0xFFC084FC),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xFF818CF8),
+                        blurRadius: 6,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                // Dynamic Placeholder text / input field
+                Expanded(
+                  child: Obx(
+                    () => TextField(
+                      controller: controller.aiPromptController,
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        color: Color(0xFF0F172A),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: controller.aiPromptPlaceholder.value,
+                        hintStyle: const TextStyle(
+                          color: Color(0xFF64748B),
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      onSubmitted: (_) => controller.submitAiPrompt(),
+                    ),
+                  ),
+                ),
+
+                // Purple Upward Arrow Button
+                Obx(
+                  () => GestureDetector(
+                    onTap: controller.isAiEditing.value
+                        ? null
+                        : controller.submitAiPrompt,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFEEF2FF),
+                        shape: BoxShape.circle,
+                      ),
+                      child: controller.isAiEditing.value
+                          ? const Center(
+                              child: SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFF4F46E5),
+                                ),
+                              ),
+                            )
+                          : const Icon(
+                              Icons.arrow_upward,
+                              size: 17,
+                              color: Color(0xFF4F46E5),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // 2. White Rounded Navigation Dock: [+ Add | ✎ Edit | Layers | Design]
+          Container(
+            height: 64,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildDockItem(
+                  icon: Icons.add,
+                  label: 'Add',
+                  onTap: () {
+                    controller.selectedTab.value = 0;
+                    controller.isPanelOpen.value = true;
+                  },
+                ),
+                _buildDockItem(
+                  icon: Icons.edit_outlined,
+                  label: 'Edit',
+                  onTap: () {
+                    controller.selectedTab.value = 1;
+                    controller.isPanelOpen.value = true;
+                  },
+                ),
+                _buildDockItem(
+                  icon: Icons.layers_outlined,
+                  label: 'Layers',
+                  onTap: () {
+                    controller.selectedTab.value = 2;
+                    controller.isPanelOpen.value = true;
+                  },
+                ),
+                _buildDockItem(
+                  icon: Icons.palette_outlined,
+                  label: 'Design',
+                  onTap: () {
+                    controller.selectedTab.value = 3;
+                    controller.isPanelOpen.value = true;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDockItem({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 21, color: const Color(0xFF0F172A)),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // BOTTOM DOCKED PANEL (Screenshot 3 & Modal Tabs)
   Widget _buildBottomPanel(BuildContext context, EditorController controller) {
     return Container(
-      height: 350,
+      height: 360,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -888,7 +1157,6 @@ class EditorScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Context title: e.g. Heading in Hero
           Obx(
             () => Text(
               controller.selectedElementContext.value,
@@ -1057,108 +1325,181 @@ class EditorScreen extends StatelessWidget {
     );
   }
 
-  // TAB 2: LAYERS
+  // TAB 2: LAYERS (Screenshot 3 Hierarchical View)
   Widget _buildLayersTab(EditorController controller) {
     final sections = controller.currentSections;
-    if (sections.isEmpty) {
-      return const Center(
-        child: Text(
-          'No sections on page. Add one from the Add tab!',
-          style: TextStyle(color: Color(0xFF64748B)),
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      children: [
+        // 1. Navigation layer
+        _buildLayerRow(
+          icon: Icons.web_asset_outlined,
+          title: 'Navigation',
+          isVisible: true,
+          isSelected: false,
+          onTap: () {},
+          onToggleVisibility: () {},
         ),
-      );
-    }
 
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      itemCount: sections.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 6),
-      itemBuilder: (context, index) {
-        final sec = sections[index];
-        final id = sec['id'] as String? ?? '';
-        final comp = (sec['component'] as String? ?? 'section').capitalizeFirst ?? 'Section';
-        final isSelected = controller.selectedSectionId.value == id;
+        // 2. Dynamic sections list
+        ...sections.map((sec) {
+          final id = sec['id'] as String? ?? '';
+          final comp = (sec['component'] as String? ?? 'section').capitalizeFirst ?? 'Section';
+          final isSelected = controller.selectedSectionId.value == id;
+          final isVisible = sec['visible'] ?? true;
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFF1F5F9) : Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
-            ),
-          ),
-          child: Row(
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                _getSectionIcon(sec['component'] as String?),
-                size: 18,
-                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+              _buildLayerRow(
+                icon: _getSectionIcon(sec['component'] as String?),
+                title: comp,
+                isVisible: isVisible,
+                isSelected: isSelected,
+                onTap: () {
+                  controller.selectedSectionId.value = id;
+                  controller.selectedElementContext.value = 'Heading in $comp';
+                  controller.textController.text = sec['props']?['headline'] ?? sec['props']?['title'] ?? '';
+                  controller.aiPromptPlaceholder.value = 'Ask AI about this ${comp.toLowerCase()}';
+                  controller.selectedTab.value = 1;
+                },
+                onToggleVisibility: () => controller.toggleSectionVisibility(id),
+                onMoveUp: () => controller.moveSection(id, 'up'),
+                onMoveDown: () => controller.moveSection(id, 'down'),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  '$comp Section',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: const Color(0xFF0F172A),
+              // Indented child: Heading (Screenshot 3)
+              if (isSelected)
+                Padding(
+                  padding: const EdgeInsets.only(left: 36, top: 4, bottom: 6),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 1,
+                        color: const Color(0xFFCBD5E1),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Heading',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_upward, size: 16),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                onPressed: index > 0
-                    ? () => controller.reorderSections(index, index - 1)
-                    : null,
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_downward, size: 16),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                onPressed: index < sections.length - 1
-                    ? () => controller.reorderSections(index, index + 2)
-                    : null,
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  size: 18,
-                  color: Color(0xFFEF4444),
+            ],
+          );
+        }),
+
+        // 3. Footer layer
+        _buildLayerRow(
+          icon: Icons.vertical_align_bottom,
+          title: 'Footer',
+          isVisible: true,
+          isSelected: false,
+          onTap: () {},
+          onToggleVisibility: () {},
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLayerRow({
+    required IconData icon,
+    required String title,
+    required bool isVisible,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required VoidCallback onToggleVisibility,
+    VoidCallback? onMoveUp,
+    VoidCallback? onMoveDown,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: isSelected
+              ? Border.all(color: const Color(0xFFBFDBFE))
+              : Border.all(color: Colors.transparent),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 19,
+              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: const Color(0xFF0F172A),
                 ),
+              ),
+            ),
+            if (isSelected && onMoveUp != null && onMoveDown != null) ...[
+              IconButton(
+                icon: const Icon(Icons.keyboard_arrow_up, size: 18),
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                onPressed: () => controller.deleteSection(id),
+                constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                color: const Color(0xFF64748B),
+                onPressed: onMoveUp,
+              ),
+              IconButton(
+                icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                color: const Color(0xFF64748B),
+                onPressed: onMoveDown,
               ),
             ],
-          ),
-        );
-      },
+            IconButton(
+              icon: Icon(
+                isVisible ? Icons.remove_red_eye_outlined : Icons.visibility_off_outlined,
+                size: 18,
+                color: const Color(0xFF64748B),
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              onPressed: onToggleVisibility,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   IconData _getSectionIcon(String? component) {
     switch (component?.toLowerCase()) {
       case 'hero':
-        return Icons.view_headline;
+        return Icons.view_agenda_outlined;
       case 'products':
-        return Icons.grid_view;
+        return Icons.shopping_bag_outlined;
       case 'story':
-        return Icons.auto_stories;
+      case 'about':
+        return Icons.menu_book_outlined;
       case 'gallery':
-        return Icons.photo_library;
+        return Icons.photo_library_outlined;
       case 'text':
-        return Icons.article;
+        return Icons.article_outlined;
       case 'cta':
-        return Icons.touch_app;
-      case 'features':
-        return Icons.star_outline;
-      case 'testimonials':
-        return Icons.format_quote;
+        return Icons.touch_app_outlined;
+      case 'visit':
+      case 'contact':
+        return Icons.location_on_outlined;
       default:
-        return Icons.layers;
+        return Icons.view_quilt_outlined;
     }
   }
 

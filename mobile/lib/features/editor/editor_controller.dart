@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import '../../core/designsystem/colors.dart';
 import '../../core/network/api_client.dart';
 import '../dashboard/dashboard_controller.dart';
 
@@ -22,7 +21,13 @@ class EditorController extends GetxController {
 
   // Bottom panel state: 0 = Add, 1 = Edit, 2 = Layers, 3 = Design
   final selectedTab = 0.obs;
-  final isPanelOpen = true.obs;
+  // Default is false (preview mode with floating AI pill + bottom dock)
+  final isPanelOpen = false.obs;
+
+  // AI prompt state
+  final aiPromptPlaceholder = 'Ask AI to change your site'.obs;
+  final aiPromptController = TextEditingController();
+  final isAiEditing = false.obs;
 
   // Selected element / section details
   final selectedSectionId = RxnString();
@@ -43,6 +48,11 @@ class EditorController extends GetxController {
 
   bool get canUndo => undoStack.isNotEmpty;
   bool get canRedo => redoStack.isNotEmpty;
+
+  String get siteDomain {
+    final clean = websiteName.value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    return clean.isEmpty ? 'lumencoffee.com' : '$clean.com';
+  }
 
   @override
   void onInit() {
@@ -72,8 +82,23 @@ class EditorController extends GetxController {
               onElementSelected(payload);
             } else if (action == 'SELECT_SECTION' || action == 'SECTION_SELECTED') {
               final payload = data['payload'] as Map<String, dynamic>?;
-              final sectionId = (payload?['sectionId'] ?? data['sectionId']) as String?;
-              onSectionSelected(sectionId);
+              onSectionSelected(payload);
+            } else if (action == 'OPEN_EDIT_TAB') {
+              selectedTab.value = 1;
+              isPanelOpen.value = true;
+            } else if (action == 'FOCUS_AI_PROMPT') {
+              final payload = data['payload'] as Map<String, dynamic>?;
+              final ctx = payload?['context'] as String? ?? 'element';
+              aiPromptPlaceholder.value = 'Ask AI about this ${ctx.toLowerCase()}';
+            } else if (action == 'MOVE_SECTION_UP') {
+              final secId = data['payload']?['sectionId'] as String?;
+              if (secId != null) moveSection(secId, 'up');
+            } else if (action == 'MOVE_SECTION_DOWN') {
+              final secId = data['payload']?['sectionId'] as String?;
+              if (secId != null) moveSection(secId, 'down');
+            } else if (action == 'DELETE_SECTION') {
+              final secId = data['payload']?['sectionId'] as String?;
+              if (secId != null) deleteSection(secId);
             }
           } catch (_) {}
         },
@@ -101,9 +126,7 @@ class EditorController extends GetxController {
           (website['document'] as Map<String, dynamic>?);
       document.value = rawDoc;
 
-      // If document has sections, select the first section and element
       _autoSelectInitialElement();
-
       syncDocumentToWebView();
     } catch (e) {
       Get.snackbar('Error', 'Failed to load website: $e',
@@ -131,10 +154,12 @@ class EditorController extends GetxController {
         textController.text = props['headline'] ?? props['title'] ?? '';
         subheadlineController.text = props['subheadline'] ?? props['subtitle'] ?? props['description'] ?? '';
         selectedElementSize.value = props['headlineSize'] ?? 'Large';
-        // Keep in Add tab initially unless empty, per reference
-        selectedTab.value = 0;
+        aiPromptPlaceholder.value = 'Ask AI about this ${comp.toLowerCase()}';
       } else {
-        selectedTab.value = 0; // Add tab for empty state
+        // If blank, open the add panel directly
+        selectedTab.value = 0;
+        isPanelOpen.value = true;
+        aiPromptPlaceholder.value = 'Ask AI to change your site';
       }
     }
   }
@@ -163,17 +188,18 @@ class EditorController extends GetxController {
     textController.text = text;
     selectedElementSize.value = size;
 
-    // Switch to Edit tab and open panel
-    selectedTab.value = 1;
-    isPanelOpen.value = true;
+    final typeLabel = elementKey == 'headline' ? 'heading' : (elementKey == 'subheadline' ? 'text' : 'element');
+    aiPromptPlaceholder.value = 'Ask AI about this $typeLabel';
   }
 
-  void onSectionSelected(String? sectionId) {
+  void onSectionSelected(Map<String, dynamic>? payload) {
+    final sectionId = (payload?['sectionId'] ?? payload?['id']) as String?;
     if (sectionId == null) return;
     selectedSectionId.value = sectionId;
     _populateSectionInputs(sectionId);
-    selectedTab.value = 1;
-    isPanelOpen.value = true;
+
+    final comp = (payload?['component'] as String? ?? 'section').toLowerCase();
+    aiPromptPlaceholder.value = 'Ask AI about this $comp';
   }
 
   void _populateSectionInputs(String sectionId) {
@@ -221,6 +247,37 @@ class EditorController extends GetxController {
     document.value = next;
     syncDocumentToWebView();
     _saveCurrentDocument();
+  }
+
+  Future<void> submitAiPrompt() async {
+    final text = aiPromptController.text.trim();
+    if (text.isEmpty || websiteId.isEmpty) return;
+
+    isAiEditing.value = true;
+    try {
+      final res = await ApiClient.aiEdit(
+        websiteId: websiteId,
+        instruction: text,
+        targetSectionId: selectedSectionId.value,
+      );
+      final website = res['website'] as Map<String, dynamic>?;
+      final newDoc = website?['document'] as Map<String, dynamic>?;
+      if (newDoc != null) {
+        document.value = newDoc;
+        syncDocumentToWebView();
+      }
+      aiPromptController.clear();
+      Get.snackbar(
+        'AI Edit Complete',
+        res['summary'] ?? 'Updated website with your AI instruction.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.white.withValues(alpha: 0.95),
+      );
+    } catch (e) {
+      Get.snackbar('AI Edit Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+    } finally {
+      isAiEditing.value = false;
+    }
   }
 
   void addSection(String type) {
@@ -402,6 +459,7 @@ class EditorController extends GetxController {
 
     syncDocumentToWebView();
     selectedTab.value = 1; // Switch to Edit tab
+    isPanelOpen.value = true;
 
     _saveCurrentDocument();
 
@@ -448,7 +506,6 @@ class EditorController extends GetxController {
 
     document.value = docCopy;
 
-    // Fast inline update in WebView
     if (webViewController != null) {
       final safeText = jsonEncode(newText);
       final safeKey = jsonEncode(key);
@@ -488,6 +545,62 @@ class EditorController extends GetxController {
     _saveCurrentDocument();
   }
 
+  void moveSection(String sectionId, String direction) {
+    final doc = document.value;
+    if (doc == null) return;
+    _pushUndoState();
+
+    final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+    final pages = docCopy['pages'] as List?;
+    if (pages != null && pages.isNotEmpty) {
+      final sections = pages[0]['sections'] as List?;
+      if (sections != null) {
+        final idx = sections.indexWhere((s) => s['id'] == sectionId);
+        if (idx != -1) {
+          if (direction == 'up' && idx > 0) {
+            final temp = sections[idx];
+            sections[idx] = sections[idx - 1];
+            sections[idx - 1] = temp;
+          } else if (direction == 'down' && idx < sections.length - 1) {
+            final temp = sections[idx];
+            sections[idx] = sections[idx + 1];
+            sections[idx + 1] = temp;
+          }
+          for (int i = 0; i < sections.length; i++) {
+            sections[i]['order'] = i;
+          }
+        }
+      }
+    }
+
+    document.value = docCopy;
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+  }
+
+  void toggleSectionVisibility(String sectionId) {
+    final doc = document.value;
+    if (doc == null) return;
+    _pushUndoState();
+
+    final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+    final pages = docCopy['pages'] as List?;
+    if (pages != null && pages.isNotEmpty) {
+      final sections = pages[0]['sections'] as List?;
+      if (sections != null) {
+        for (final sec in sections) {
+          if (sec['id'] == sectionId) {
+            sec['visible'] = !(sec['visible'] ?? true);
+          }
+        }
+      }
+    }
+
+    document.value = docCopy;
+    syncDocumentToWebView();
+    _saveCurrentDocument();
+  }
+
   void deleteSection(String sectionId) {
     final doc = document.value;
     if (doc == null) return;
@@ -499,7 +612,6 @@ class EditorController extends GetxController {
       final sections = pages[0]['sections'] as List?;
       if (sections != null) {
         sections.removeWhere((s) => s['id'] == sectionId);
-        // Re-index orders
         for (int i = 0; i < sections.length; i++) {
           sections[i]['order'] = i;
         }
@@ -509,7 +621,7 @@ class EditorController extends GetxController {
     document.value = docCopy;
     if (selectedSectionId.value == sectionId) {
       selectedSectionId.value = null;
-      selectedTab.value = 0;
+      aiPromptPlaceholder.value = 'Ask AI to change your site';
     }
 
     syncDocumentToWebView();
@@ -639,7 +751,7 @@ class EditorController extends GetxController {
             children: [
               const Text(
                 'Your website is live and deployed on global CDN hosting.',
-                style: TextStyle(fontSize: 14, color: AppColors.inkMuted),
+                style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
               ),
               const SizedBox(height: 14),
               Container(
@@ -707,6 +819,7 @@ class EditorController extends GetxController {
   @override
   void onClose() {
     _saveDebounceTimer?.cancel();
+    aiPromptController.dispose();
     textController.dispose();
     subheadlineController.dispose();
     super.onClose();

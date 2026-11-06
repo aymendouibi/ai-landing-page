@@ -201,6 +201,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
 
     window.selectSection = (sectionId: string) => {
       setSelectedSectionId(sectionId);
+      setSelectedElement(null);
       const el = document.getElementById(sectionId);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -217,9 +218,15 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     };
   }, [currentSlug, selectedElement, selectedSectionId]);
 
-  // Handle section click in editor mode
+  // Section level selection
   const handleSectionSelect = (sectionId: string) => {
     setSelectedSectionId(sectionId);
+    setSelectedElement(null);
+
+    const activePage = doc.pages.find(p => p.slug === currentSlug) || doc.pages[0];
+    const sec = activePage?.sections.find(s => s.id === sectionId);
+    const comp = sec?.component || 'section';
+    const compName = comp.charAt(0).toUpperCase() + comp.slice(1);
 
     if (onSectionSelect) {
       onSectionSelect(sectionId);
@@ -229,15 +236,11 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       window.AndroidBridge.postMessage(
         JSON.stringify({
           action: 'SELECT_SECTION',
-          payload: { sectionId },
+          payload: { sectionId, component: comp, componentName: compName },
         })
       );
     } else if (window.AndroidBridge?.onSectionSelected) {
       window.AndroidBridge.onSectionSelected(sectionId);
-    }
-
-    if (window.parent && window.parent !== window) {
-      window.parent.postMessage({ action: 'SELECT_SECTION', payload: { sectionId } }, '*');
     }
   };
 
@@ -246,6 +249,9 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     if (!isEditorMode) return;
 
     const target = e.target as HTMLElement;
+    // Don't trigger if clicking inside a floating toolbar
+    if (target.closest('.floating-editor-toolbar')) return;
+
     const sectionEl = target.closest('[data-section-id]') as HTMLElement | null;
     if (!sectionEl) return;
 
@@ -256,6 +262,12 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     const isHeading = ['H1', 'H2', 'H3', 'H4'].includes(target.tagName);
     const isParagraph = target.tagName === 'P';
     const isButton = target.tagName === 'A' || target.tagName === 'BUTTON' || target.classList.contains('btn');
+
+    // If clicked on section container itself (not specific text element), select section
+    if (target === sectionEl || (!isHeading && !isParagraph && !isButton && target.children.length > 2)) {
+      handleSectionSelect(sectionId);
+      return;
+    }
 
     let elementKey = 'headline';
     let typeLabel = 'Heading';
@@ -315,8 +327,75 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     }
   };
 
+  const handleOpenEdit = () => {
+    if (window.AndroidBridge?.postMessage) {
+      window.AndroidBridge.postMessage(JSON.stringify({ action: 'OPEN_EDIT_TAB' }));
+    }
+  };
+
+  const handleFocusAi = (contextName: string) => {
+    if (window.AndroidBridge?.postMessage) {
+      window.AndroidBridge.postMessage(
+        JSON.stringify({
+          action: 'FOCUS_AI_PROMPT',
+          payload: { context: contextName, sectionId: selectedSectionId },
+        })
+      );
+    }
+  };
+
+  const handleMoveSection = (direction: 'up' | 'down') => {
+    if (!selectedSectionId) return;
+    const activePage = doc.pages.find(p => p.slug === currentSlug) || doc.pages[0];
+    const sections = [...activePage.sections];
+    const idx = sections.findIndex(s => s.id === selectedSectionId);
+    if (idx === -1) return;
+
+    if (direction === 'up' && idx > 0) {
+      const temp = sections[idx];
+      sections[idx] = sections[idx - 1];
+      sections[idx - 1] = temp;
+    } else if (direction === 'down' && idx < sections.length - 1) {
+      const temp = sections[idx];
+      sections[idx] = sections[idx + 1];
+      sections[idx + 1] = temp;
+    }
+
+    const reorderedIds = sections.map(s => s.id);
+    window.reorderSections?.(reorderedIds);
+    if (window.AndroidBridge?.postMessage) {
+      window.AndroidBridge.postMessage(JSON.stringify({ action: 'REORDER_SECTIONS', payload: { sectionIds: reorderedIds } }));
+    }
+  };
+
+  const handleDuplicateSection = () => {
+    if (!selectedSectionId) return;
+    const activePage = doc.pages.find(p => p.slug === currentSlug) || doc.pages[0];
+    const sec = activePage.sections.find(s => s.id === selectedSectionId);
+    if (!sec) return;
+
+    const newId = `sec_${sec.component}_${Date.now()}`;
+    const clone: SectionConfig = {
+      ...JSON.parse(JSON.stringify(sec)),
+      id: newId,
+      order: sec.order + 1,
+    };
+    window.addSection?.(clone);
+  };
+
+  const handleDeleteSection = () => {
+    if (!selectedSectionId) return;
+    window.deleteSection?.(selectedSectionId);
+    if (window.AndroidBridge?.postMessage) {
+      window.AndroidBridge.postMessage(JSON.stringify({ action: 'DELETE_SECTION', payload: { sectionId: selectedSectionId } }));
+    }
+  };
+
   const activePage = doc.pages.find(p => p.slug === currentSlug) || doc.pages[0];
   const sortedSections = [...(activePage?.sections || [])].sort((a, b) => a.order - b.order);
+  const selectedSecConfig = sortedSections.find(s => s.id === selectedSectionId);
+  const selectedSecComponent = selectedSecConfig?.component || 'Section';
+  const selectedSecTitle = selectedSecComponent.charAt(0).toUpperCase() + selectedSecComponent.slice(1);
 
   // Dynamic CSS variables from theme
   const cssVariables = generateCssVariables(doc.site.theme) as React.CSSProperties;
@@ -394,20 +473,109 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
             </div>
           </div>
         ) : (
-          sortedSections.map(section => (
-            <SectionWrapper
-              key={section.id}
-              section={section}
-              isSelected={selectedSectionId === section.id && !selectedElement}
-              isEditorMode={isEditorMode}
-              onSelect={handleSectionSelect}
-            >
-              {renderComponent(section)}
-            </SectionWrapper>
-          ))
+          sortedSections.map(section => {
+            const isSecSelected = selectedSectionId === section.id;
+            return (
+              <div key={section.id} style={{ position: 'relative' }}>
+                <SectionWrapper
+                  section={section}
+                  isSelected={isSecSelected && !selectedElement}
+                  isEditorMode={isEditorMode}
+                  onSelect={handleSectionSelect}
+                >
+                  {renderComponent(section)}
+                </SectionWrapper>
+
+                {/* Section Level Floating Toolbar (Screenshot 4 & 5) */}
+                {isEditorMode && isSecSelected && !selectedElement && (
+                  <div
+                    className="floating-editor-toolbar"
+                    style={{
+                      position: 'absolute',
+                      top: '-20px',
+                      left: '20px',
+                      backgroundColor: '#0F172A',
+                      color: '#FFFFFF',
+                      borderRadius: '999px',
+                      padding: '6px 14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      boxShadow: '0 8px 20px rgba(0, 0, 0, 0.35)',
+                      zIndex: 1000,
+                      pointerEvents: 'auto',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <span style={{ fontWeight: 700, fontSize: '13px' }}>{selectedSecTitle}</span>
+                    <span style={{ color: '#475569', fontSize: '12px' }}>|</span>
+
+                    {/* Edit Pencil */}
+                    <button
+                      onClick={handleOpenEdit}
+                      title="Edit Section"
+                      style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    </button>
+
+                    {/* AI Orb */}
+                    <div
+                      onClick={() => handleFocusAi(selectedSecComponent)}
+                      title="Ask AI about this section"
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        background: 'radial-gradient(circle at 35% 35%, #38BDF8, #818CF8 50%, #C084FC)',
+                        boxShadow: '0 0 8px rgba(129, 140, 248, 0.8)',
+                        cursor: 'pointer',
+                      }}
+                    />
+
+                    {/* Move Up */}
+                    <button
+                      onClick={() => handleMoveSection('up')}
+                      title="Move Up"
+                      style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', fontSize: '12px', padding: 0 }}
+                    >
+                      ▲
+                    </button>
+
+                    {/* Move Down */}
+                    <button
+                      onClick={() => handleMoveSection('down')}
+                      title="Move Down"
+                      style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', fontSize: '12px', padding: 0 }}
+                    >
+                      ▼
+                    </button>
+
+                    {/* Duplicate */}
+                    <button
+                      onClick={handleDuplicateSection}
+                      title="Duplicate Section"
+                      style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', fontSize: '13px', padding: 0 }}
+                    >
+                      ❏
+                    </button>
+
+                    {/* Delete (coral red) */}
+                    <button
+                      onClick={handleDeleteSection}
+                      title="Delete Section"
+                      style={{ background: 'none', border: 'none', color: '#F87171', cursor: 'pointer', fontSize: '14px', padding: 0 }}
+                    >
+                      🗑
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
 
-        {/* Floating Selection Box & Pill for selected element */}
+        {/* Element Level Floating Box & Toolbar (Screenshot 2) */}
         {isEditorMode && selectedElement && (
           <div
             style={{
@@ -423,33 +591,60 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
               boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.8)',
             }}
           >
-            {/* Top-left pill label: Heading */}
+            {/* Top-left dark pill toolbar (Screenshot 2) */}
             <div
+              className="floating-editor-toolbar"
               style={{
                 position: 'absolute',
-                top: '-28px',
+                top: '-38px',
                 left: '-2px',
-                backgroundColor: '#2563EB',
+                backgroundColor: '#0F172A',
                 color: '#FFFFFF',
-                fontSize: '11px',
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: '6px',
+                borderRadius: '999px',
+                padding: '5px 12px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                gap: '10px',
+                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)',
                 whiteSpace: 'nowrap',
+                pointerEvents: 'auto',
               }}
             >
-              <span style={{ fontSize: '10px' }}>✎</span> {selectedElement.typeLabel}
+              <span style={{ fontWeight: 700, fontSize: '12px' }}>{selectedElement.typeLabel}</span>
+              <span style={{ color: '#475569', fontSize: '11px' }}>|</span>
+
+              {/* Edit Pencil */}
+              <button
+                onClick={handleOpenEdit}
+                title="Edit Text"
+                style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              </button>
+
+              {/* AI Orb */}
+              <div
+                onClick={() => handleFocusAi(selectedElement.typeLabel)}
+                title="Ask AI about this heading"
+                style={{
+                  width: '15px',
+                  height: '15px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle at 35% 35%, #38BDF8, #818CF8 50%, #C084FC)',
+                  boxShadow: '0 0 6px rgba(129, 140, 248, 0.8)',
+                  cursor: 'pointer',
+                }}
+              />
+
+              {/* Reorder / turn arrow */}
+              <span style={{ fontSize: '12px', color: '#94A3B8' }}>↰</span>
             </div>
 
-            {/* Corner Resize Handles */}
-            <div style={{ position: 'absolute', top: '-4px', left: '-4px', width: '8px', height: '8px', backgroundColor: '#FFFFFF', border: '1.5px solid #2563EB', borderRadius: '1px' }} />
-            <div style={{ position: 'absolute', top: '-4px', right: '-4px', width: '8px', height: '8px', backgroundColor: '#FFFFFF', border: '1.5px solid #2563EB', borderRadius: '1px' }} />
-            <div style={{ position: 'absolute', bottom: '-4px', left: '-4px', width: '8px', height: '8px', backgroundColor: '#FFFFFF', border: '1.5px solid #2563EB', borderRadius: '1px' }} />
-            <div style={{ position: 'absolute', bottom: '-4px', right: '-4px', width: '8px', height: '8px', backgroundColor: '#FFFFFF', border: '1.5px solid #2563EB', borderRadius: '1px' }} />
+            {/* 4 Circular Corner Handles (Screenshot 2) */}
+            <div style={{ position: 'absolute', top: '-5px', left: '-5px', width: '9px', height: '9px', backgroundColor: '#FFFFFF', border: '2px solid #2563EB', borderRadius: '50%' }} />
+            <div style={{ position: 'absolute', top: '-5px', right: '-5px', width: '9px', height: '9px', backgroundColor: '#FFFFFF', border: '2px solid #2563EB', borderRadius: '50%' }} />
+            <div style={{ position: 'absolute', bottom: '-5px', left: '-5px', width: '9px', height: '9px', backgroundColor: '#FFFFFF', border: '2px solid #2563EB', borderRadius: '50%' }} />
+            <div style={{ position: 'absolute', bottom: '-5px', right: '-5px', width: '9px', height: '9px', backgroundColor: '#FFFFFF', border: '2px solid #2563EB', borderRadius: '50%' }} />
           </div>
         )}
       </main>

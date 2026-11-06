@@ -93,3 +93,4 @@ export const Gallery: React.FC<GalleryProps> = ({ props, styles = {} }) => {
     </div>
   );
 };
+

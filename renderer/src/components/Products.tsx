@@ -113,3 +113,4 @@ export const Products: React.FC<ProductsProps> = ({ props, styles = {} }) => {
     </div>
   );
 };
+
