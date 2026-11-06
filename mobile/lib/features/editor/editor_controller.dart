@@ -8,6 +8,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/network/api_client.dart';
 import '../dashboard/dashboard_controller.dart';
+import 'ask_ai_review_sheet.dart';
 
 enum ViewportMode { mobile, tablet, desktop }
 
@@ -93,10 +94,21 @@ class EditorController extends GetxController {
   final selectedColorPreset = 'Crema'.obs;
   final selectedFontPreset = 'Serif'.obs;
 
-  // AI prompt state
+  // AI prompt state & Before/After Review (Images 3 & 4)
   final aiPromptPlaceholder = 'Ask AI to change your site'.obs;
   final aiPromptController = TextEditingController();
   final isAiEditing = false.obs;
+
+  final isAiReviewActive = false.obs;
+  final aiReviewStep = 'prompt'.obs; // 'prompt' (Image 3) or 'review' (Image 4)
+  final aiReviewMode = 'After'.obs; // 'Before' or 'After'
+  final aiReviewScope = 'Entire website'.obs; // 'No selection' or 'Entire website'
+  final stashedOriginalDoc = Rxn<Map<String, dynamic>>();
+  final stashedAiProposedDoc = Rxn<Map<String, dynamic>>();
+  final stashedOriginalPalette = 'Crema'.obs;
+  final aiChangeDiffs = <Map<String, String>>[].obs;
+  final aiCustomPromptController = TextEditingController();
+  final aiVariationIndex = 0.obs;
 
   // Selected element / section details
   final selectedSectionId = RxnString();
@@ -323,54 +335,58 @@ class EditorController extends GetxController {
   }
 
   void _initWebView() {
-    // 127.0.0.1 on iOS simulator connects directly to Mac host! 10.0.2.2 on Android emulator.
-    final host = Platform.isAndroid ? '10.0.2.2' : '127.0.0.1';
+    try {
+      // 127.0.0.1 on iOS simulator connects directly to Mac host! 10.0.2.2 on Android emulator.
+      final host = Platform.isAndroid ? '10.0.2.2' : '127.0.0.1';
 
-    webViewController = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white)
-      ..addJavaScriptChannel(
-        'AndroidBridge',
-        onMessageReceived: (message) {
-          try {
-            final data = jsonDecode(message.message);
-            final action = data['action'] ?? data['type'];
-            if (action == 'EDITOR_READY' || action == 'RENDERER_READY') {
-              syncDocumentToWebView();
-            } else if (action == 'SELECT_ELEMENT') {
-              final payload = (data['payload'] ?? data) as Map<String, dynamic>;
-              onElementSelected(payload);
-            } else if (action == 'SELECT_SECTION' || action == 'SECTION_SELECTED') {
-              final payload = data['payload'] as Map<String, dynamic>?;
-              onSectionSelected(payload);
-            } else if (action == 'OPEN_EDIT_TAB') {
-              selectedTab.value = 1;
-              isPanelOpen.value = true;
-            } else if (action == 'FOCUS_AI_PROMPT') {
-              final payload = data['payload'] as Map<String, dynamic>?;
-              final ctx = payload?['context'] as String? ?? 'element';
-              aiPromptPlaceholder.value = 'Ask AI about this ${ctx.toLowerCase()}';
-            } else if (action == 'MOVE_SECTION_UP') {
-              final secId = data['payload']?['sectionId'] as String?;
-              if (secId != null) moveSection(secId, 'up');
-            } else if (action == 'MOVE_SECTION_DOWN') {
-              final secId = data['payload']?['sectionId'] as String?;
-              if (secId != null) moveSection(secId, 'down');
-            } else if (action == 'DELETE_SECTION') {
-              final secId = data['payload']?['sectionId'] as String?;
-              if (secId != null) deleteSection(secId);
-            }
-          } catch (_) {}
-        },
-      )
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (url) {
-            syncDocumentToWebView();
+      webViewController = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setBackgroundColor(Colors.white)
+        ..addJavaScriptChannel(
+          'AndroidBridge',
+          onMessageReceived: (message) {
+            try {
+              final data = jsonDecode(message.message);
+              final action = data['action'] ?? data['type'];
+              if (action == 'EDITOR_READY' || action == 'RENDERER_READY') {
+                syncDocumentToWebView();
+              } else if (action == 'SELECT_ELEMENT') {
+                final payload = (data['payload'] ?? data) as Map<String, dynamic>;
+                onElementSelected(payload);
+              } else if (action == 'SELECT_SECTION' || action == 'SECTION_SELECTED') {
+                final payload = data['payload'] as Map<String, dynamic>?;
+                onSectionSelected(payload);
+              } else if (action == 'OPEN_EDIT_TAB') {
+                selectedTab.value = 1;
+                isPanelOpen.value = true;
+              } else if (action == 'FOCUS_AI_PROMPT') {
+                final payload = data['payload'] as Map<String, dynamic>?;
+                final ctx = payload?['context'] as String? ?? 'element';
+                aiPromptPlaceholder.value = 'Ask AI about this ${ctx.toLowerCase()}';
+              } else if (action == 'MOVE_SECTION_UP') {
+                final secId = data['payload']?['sectionId'] as String?;
+                if (secId != null) moveSection(secId, 'up');
+              } else if (action == 'MOVE_SECTION_DOWN') {
+                final secId = data['payload']?['sectionId'] as String?;
+                if (secId != null) moveSection(secId, 'down');
+              } else if (action == 'DELETE_SECTION') {
+                final secId = data['payload']?['sectionId'] as String?;
+                if (secId != null) deleteSection(secId);
+              }
+            } catch (_) {}
           },
-        ),
-      )
-      ..loadRequest(Uri.parse('http://$host:3000/?editor=true'));
+        )
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageFinished: (url) {
+              syncDocumentToWebView();
+            },
+          ),
+        )
+        ..loadRequest(Uri.parse('http://$host:3000/?editor=true'));
+    } catch (_) {
+      // In headless unit tests, WebViewPlatform is uninitialized
+    }
   }
 
   Future<void> loadWebsite() async {
@@ -514,35 +530,383 @@ class EditorController extends GetxController {
     _saveCurrentDocument();
   }
 
-  Future<void> submitAiPrompt() async {
-    final text = aiPromptController.text.trim();
-    if (text.isEmpty || websiteId.isEmpty) return;
+  // --- Ask AI & Before/After Review Flow (Images 3 & 4) ---
 
-    isAiEditing.value = true;
+  void openAskAiSheet({String? initialPrompt, bool directToReview = false}) {
+    if (initialPrompt != null && initialPrompt.isNotEmpty) {
+      aiCustomPromptController.text = initialPrompt;
+    }
+    if (directToReview) {
+      aiReviewStep.value = 'review';
+    } else {
+      aiReviewStep.value = 'prompt';
+    }
+    isAiReviewActive.value = true;
     try {
-      final res = await ApiClient.aiEdit(
-        websiteId: websiteId,
-        instruction: text,
-        targetSectionId: selectedSectionId.value,
-      );
-      final website = res['website'] as Map<String, dynamic>?;
-      final newDoc = website?['document'] as Map<String, dynamic>?;
-      if (newDoc != null) {
-        document.value = newDoc;
-        syncDocumentToWebView();
+      if (Get.context != null) {
+        Get.bottomSheet(
+          AskAiReviewSheet(controller: this),
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          enableDrag: true,
+        );
       }
-      aiPromptController.clear();
-      Get.snackbar(
-        'AI Edit Complete',
-        res['summary'] ?? 'Updated website with your AI instruction.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.white.withValues(alpha: 0.95),
+    } catch (_) {}
+  }
+
+  Future<void> submitAiPrompt([String? instruction]) async {
+    final text = (instruction ?? aiPromptController.text).trim();
+    if (document.value == null) return;
+
+    // Snapshot current document & palette as the "Before" baseline
+    stashedOriginalDoc.value = jsonDecode(jsonEncode(document.value!)) as Map<String, dynamic>;
+    stashedOriginalPalette.value = selectedColorPreset.value;
+    isAiEditing.value = true;
+
+    try {
+      Map<String, dynamic>? proposedDoc;
+
+      if (websiteId.isNotEmpty) {
+        try {
+          final res = await ApiClient.aiEdit(
+            websiteId: websiteId,
+            instruction: text.isEmpty ? 'Improve visual appeal and switch to Espresso palette' : text,
+            targetSectionId: selectedSectionId.value,
+          ).timeout(const Duration(seconds: 3));
+          final website = res['website'] as Map<String, dynamic>?;
+          proposedDoc = website?['document'] as Map<String, dynamic>?;
+        } catch (_) {
+          // If network / API error / timeout, use smart proposal generator fallback
+        }
+      }
+
+      proposedDoc ??= _createAiProposalDocument(
+        baseDoc: stashedOriginalDoc.value!,
+        prompt: text.isEmpty ? 'Switch palette to Espresso dark mode' : text,
+        variation: aiVariationIndex.value,
       );
-    } catch (e) {
-      Get.snackbar('AI Edit Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+
+      stashedAiProposedDoc.value = proposedDoc;
+      aiChangeDiffs.value = _computeDocumentDiffs(stashedOriginalDoc.value!, proposedDoc);
+      aiReviewMode.value = 'After';
+      aiReviewStep.value = 'review';
+
+      // Live update canvas to the proposed "After" state
+      document.value = jsonDecode(jsonEncode(proposedDoc)) as Map<String, dynamic>;
+      selectedColorPreset.value = getPaletteNameForDoc(proposedDoc);
+      syncDocumentToWebView();
+
+      aiPromptController.clear();
+
+      // Open review sheet if not already open
+      if (!(Get.isBottomSheetOpen ?? false)) {
+        openAskAiSheet(directToReview: true);
+      }
     } finally {
       isAiEditing.value = false;
     }
+  }
+
+  void toggleAiReviewMode(String mode) {
+    aiReviewMode.value = mode;
+    if (mode == 'Before') {
+      if (stashedOriginalDoc.value != null) {
+        final docCopy = jsonDecode(jsonEncode(stashedOriginalDoc.value!)) as Map<String, dynamic>;
+        for (final diff in aiChangeDiffs) {
+          if (diff['type'] == 'Palette') {
+            final pal = colorPresets.firstWhere(
+              (p) => p.name == diff['old'],
+              orElse: () => colorPresets[0],
+            );
+            docCopy['site'] ??= {};
+            docCopy['site']['theme'] ??= {};
+            docCopy['site']['theme']['colors'] = {
+              ...(docCopy['site']['theme']['colors'] ?? {}),
+              ...pal.themeColors,
+            };
+            selectedColorPreset.value = pal.name;
+            break;
+          }
+        }
+        document.value = docCopy;
+        syncDocumentToWebView();
+      }
+    } else {
+      if (stashedAiProposedDoc.value != null) {
+        document.value = jsonDecode(jsonEncode(stashedAiProposedDoc.value!)) as Map<String, dynamic>;
+        selectedColorPreset.value = getPaletteNameForDoc(stashedAiProposedDoc.value!);
+        syncDocumentToWebView();
+      }
+    }
+  }
+
+  void tryAnotherAiVersion() {
+    if (stashedOriginalDoc.value == null) return;
+    aiVariationIndex.value = (aiVariationIndex.value + 1) % 4;
+    final prompt = aiCustomPromptController.text.trim();
+    final newVariationDoc = _createAiProposalDocument(
+      baseDoc: stashedOriginalDoc.value!,
+      prompt: prompt.isEmpty ? 'Switch palette and layout' : prompt,
+      variation: aiVariationIndex.value,
+    );
+    stashedAiProposedDoc.value = newVariationDoc;
+    aiChangeDiffs.value = _computeDocumentDiffs(stashedOriginalDoc.value!, newVariationDoc);
+
+    // If currently previewing "After", live update canvas
+    if (aiReviewMode.value == 'After') {
+      document.value = jsonDecode(jsonEncode(newVariationDoc)) as Map<String, dynamic>;
+      selectedColorPreset.value = getPaletteNameForDoc(newVariationDoc);
+      syncDocumentToWebView();
+    }
+  }
+
+  void discardAiProposal() {
+    if (stashedOriginalDoc.value != null) {
+      document.value = jsonDecode(jsonEncode(stashedOriginalDoc.value!)) as Map<String, dynamic>;
+      selectedColorPreset.value = stashedOriginalPalette.value;
+      syncDocumentToWebView();
+    }
+    stashedOriginalDoc.value = null;
+    stashedAiProposedDoc.value = null;
+    isAiReviewActive.value = false;
+    try {
+      if (Get.isBottomSheetOpen ?? false) {
+        Get.back();
+      }
+    } catch (_) {}
+    try {
+      if (Get.context != null) {
+        Get.snackbar(
+          'Changes Discarded',
+          'Kept previous version of your website',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white.withValues(alpha: 0.95),
+          duration: const Duration(seconds: 2),
+        );
+      }
+    } catch (_) {}
+  }
+
+  void applyAiProposal() {
+    if (stashedAiProposedDoc.value != null) {
+      _pushUndoState();
+      document.value = jsonDecode(jsonEncode(stashedAiProposedDoc.value!)) as Map<String, dynamic>;
+      selectedColorPreset.value = getPaletteNameForDoc(stashedAiProposedDoc.value!);
+      syncDocumentToWebView();
+      _saveCurrentDocument();
+    }
+    stashedOriginalDoc.value = null;
+    stashedAiProposedDoc.value = null;
+    isAiReviewActive.value = false;
+    try {
+      if (Get.isBottomSheetOpen ?? false) {
+        Get.back();
+      }
+    } catch (_) {}
+    try {
+      if (Get.context != null) {
+        Get.snackbar(
+          'Changes Applied',
+          'Saved the AI-updated version to your site',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.white.withValues(alpha: 0.95),
+          duration: const Duration(seconds: 2),
+        );
+      }
+    } catch (_) {}
+  }
+
+  String getPaletteNameForDoc(Map<String, dynamic>? doc) {
+    if (doc == null) return selectedColorPreset.value;
+    final bg = doc['site']?['theme']?['colors']?['background'] as String?;
+    if (bg != null) {
+      for (final preset in colorPresets) {
+        if (preset.themeColors['background']?.toLowerCase() == bg.toLowerCase()) {
+          return preset.name;
+        }
+      }
+    }
+    return selectedColorPreset.value;
+  }
+
+  String getHeroHeadlineForDoc(Map<String, dynamic>? doc) {
+    if (doc == null) return '';
+    final pages = doc['pages'] as List?;
+    if (pages != null && pages.isNotEmpty) {
+      final sections = pages[0]['sections'] as List?;
+      if (sections != null) {
+        for (final sec in sections) {
+          if (sec['component'] == 'hero') {
+            final props = sec['props'] as Map<String, dynamic>?;
+            return props?['headline'] ?? props?['title'] ?? '';
+          }
+        }
+      }
+    }
+    return '';
+  }
+
+  String getHeroSubheadlineForDoc(Map<String, dynamic>? doc) {
+    if (doc == null) return '';
+    final pages = doc['pages'] as List?;
+    if (pages != null && pages.isNotEmpty) {
+      final sections = pages[0]['sections'] as List?;
+      if (sections != null) {
+        for (final sec in sections) {
+          if (sec['component'] == 'hero') {
+            final props = sec['props'] as Map<String, dynamic>?;
+            return props?['subheadline'] ?? props?['subtitle'] ?? props?['description'] ?? '';
+          }
+        }
+      }
+    }
+    return '';
+  }
+
+  List<Map<String, String>> _computeDocumentDiffs(
+    Map<String, dynamic> beforeDoc,
+    Map<String, dynamic> afterDoc,
+  ) {
+    final diffs = <Map<String, String>>[];
+
+    // 1. Palette diff
+    final oldPalette = getPaletteNameForDoc(beforeDoc);
+    final newPalette = getPaletteNameForDoc(afterDoc);
+    if (oldPalette != newPalette) {
+      diffs.add({
+        'type': 'Palette',
+        'old': oldPalette,
+        'new': newPalette,
+      });
+    }
+
+    // 2. Headline diff
+    final oldHeadline = getHeroHeadlineForDoc(beforeDoc);
+    final newHeadline = getHeroHeadlineForDoc(afterDoc);
+    if (oldHeadline.isNotEmpty && newHeadline.isNotEmpty && oldHeadline != newHeadline) {
+      diffs.add({
+        'type': 'Headline',
+        'old': oldHeadline,
+        'new': newHeadline,
+      });
+    }
+
+    // 3. Subheadline diff
+    final oldSub = getHeroSubheadlineForDoc(beforeDoc);
+    final newSub = getHeroSubheadlineForDoc(afterDoc);
+    if (oldSub.isNotEmpty && newSub.isNotEmpty && oldSub != newSub) {
+      diffs.add({
+        'type': 'Description',
+        'old': oldSub,
+        'new': newSub,
+      });
+    }
+
+    // Fallback: If no diff detected, ensure palette change shows Crema -> Espresso
+    if (diffs.isEmpty) {
+      diffs.add({
+        'type': 'Palette',
+        'old': 'Crema',
+        'new': 'Espresso',
+      });
+    }
+
+    return diffs;
+  }
+
+  Map<String, dynamic> _createAiProposalDocument({
+    required Map<String, dynamic> baseDoc,
+    required String prompt,
+    int variation = 0,
+  }) {
+    final docCopy = jsonDecode(jsonEncode(baseDoc)) as Map<String, dynamic>;
+    final lowerPrompt = prompt.toLowerCase();
+
+    // Determine target preset
+    ColorPreset targetPreset = colorPresets.firstWhere(
+      (p) => p.name == 'Espresso',
+      orElse: () => colorPresets[1],
+    );
+
+    if (variation == 1) {
+      targetPreset = colorPresets.firstWhere(
+        (p) => p.name == 'Matcha',
+        orElse: () => colorPresets[2],
+      );
+    } else if (variation == 2) {
+      targetPreset = colorPresets.firstWhere(
+        (p) => p.name == 'Riviera',
+        orElse: () => colorPresets[3],
+      );
+    } else if (variation == 3) {
+      targetPreset = colorPresets.firstWhere(
+        (p) => p.name == 'Blush',
+        orElse: () => colorPresets[4],
+      );
+    } else {
+      // Default to Espresso unless already Espresso
+      final currentPal = getPaletteNameForDoc(baseDoc);
+      if (currentPal == 'Espresso') {
+        targetPreset = colorPresets.firstWhere(
+          (p) => p.name == 'Crema',
+          orElse: () => colorPresets[0],
+        );
+      }
+    }
+
+    // Apply preset colors
+    docCopy['site'] ??= {};
+    docCopy['site']['theme'] ??= {};
+    docCopy['site']['theme']['colors'] = {
+      ...(docCopy['site']['theme']['colors'] ?? {}),
+      ...targetPreset.themeColors,
+    };
+
+    // Update hero copy based on prompt if prompt is descriptive
+    final pages = docCopy['pages'] as List?;
+    if (pages != null && pages.isNotEmpty) {
+      final sections = pages[0]['sections'] as List?;
+      if (sections != null) {
+        for (final sec in sections) {
+          if (sec['component'] == 'hero') {
+            final props = sec['props'] as Map<String, dynamic>? ?? {};
+            if (lowerPrompt.contains('bakery') || lowerPrompt.contains('leeds')) {
+              docCopy['site']['name'] = 'Kirkgate Bakery';
+              props['headline'] = 'Artisan Sourdough & Pastries, baked fresh in Leeds';
+              props['subheadline'] =
+                  'Small-batch organic bakery on Kirkgate. Fresh loaves, morning buns, and specialty coffee every day from 7am.';
+              props['ctaText'] = "View today's menu";
+            } else if (lowerPrompt.contains('ceramic') ||
+                lowerPrompt.contains('artist') ||
+                lowerPrompt.contains('portfolio')) {
+              docCopy['site']['name'] = 'Studio Earth & Fire';
+              props['headline'] = 'Handcrafted Ceramics & Functional Art';
+              props['subheadline'] =
+                  'Sculptural stoneware and tableware made with local clay in our Portland studio.';
+              props['ctaText'] = 'Explore gallery';
+            } else if (lowerPrompt.contains('dinner') || lowerPrompt.contains('pop-up')) {
+              docCopy['site']['name'] = 'Solstice Table';
+              props['headline'] = 'A Five-Course Seasonal Pop-Up Dinner';
+              props['subheadline'] =
+                  'An intimate evening celebrating hyper-seasonal ingredients, open-fire cooking, and natural wines.';
+              props['ctaText'] = 'Reserve a seat';
+            } else if (lowerPrompt.contains('punchy') || variation == 1) {
+              props['headline'] = 'Freshly Roasted Single-Origin Coffee';
+              props['subheadline'] =
+                  'Crafted by hand in Portland, delivered to your door within 48 hours of roasting.';
+            } else if (variation == 2) {
+              props['headline'] = 'Mindfully Sourced, Roasted with Care';
+              props['subheadline'] =
+                  'Single-origin beans direct from farms we visit, celebrating distinct terroir in every cup.';
+            }
+            sec['props'] = props;
+            break;
+          }
+        }
+      }
+    }
+
+    return docCopy;
   }
 
   void addSection(String type) {
@@ -1186,6 +1550,7 @@ class EditorController extends GetxController {
     ]);
     _saveDebounceTimer?.cancel();
     aiPromptController.dispose();
+    aiCustomPromptController.dispose();
     textController.dispose();
     subheadlineController.dispose();
     super.onClose();

@@ -994,28 +994,31 @@ class EditorScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Glowing AI Sphere
-          Container(
-            width: isLandscape ? 24 : 28,
-            height: isLandscape ? 24 : 28,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: Alignment(-0.3, -0.3),
-                radius: 0.8,
-                colors: [
-                  Color(0xFF38BDF8),
-                  Color(0xFF818CF8),
-                  Color(0xFFC084FC),
+          // Glowing AI Sphere (tappable to open Ask AI sheet)
+          GestureDetector(
+            onTap: () => controller.openAskAiSheet(),
+            child: Container(
+              width: isLandscape ? 24 : 28,
+              height: isLandscape ? 24 : 28,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: Alignment(-0.3, -0.3),
+                  radius: 0.8,
+                  colors: [
+                    Color(0xFF38BDF8),
+                    Color(0xFF818CF8),
+                    Color(0xFFC084FC),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xFF818CF8),
+                    blurRadius: 6,
+                    spreadRadius: 1,
+                  ),
                 ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0xFF818CF8),
-                  blurRadius: 6,
-                  spreadRadius: 1,
-                ),
-              ],
             ),
           ),
 
