@@ -266,7 +266,7 @@ class EditorScreen extends StatelessWidget {
       case ViewportMode.tablet:
         return min(600.0, availableWidth);
       case ViewportMode.desktop:
-        return double.infinity;
+        return availableWidth;
     }
   }
 
@@ -407,6 +407,10 @@ class EditorScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+              // Rotate Button
+              _buildRotateButton(controller),
+              const SizedBox(width: 8),
               // Black Publish Pill
               Obx(
                 () => ElevatedButton(
@@ -458,6 +462,7 @@ class EditorScreen extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: const Icon(LucideIcons.undo2, size: 19),
+                      visualDensity: VisualDensity.compact,
                       color: controller.canUndo
                           ? const Color(0xFF0F172A)
                           : const Color(0xFFCBD5E1),
@@ -468,6 +473,7 @@ class EditorScreen extends StatelessWidget {
                     const SizedBox(width: 4),
                     IconButton(
                       icon: const Icon(LucideIcons.redo2, size: 19),
+                      visualDensity: VisualDensity.compact,
                       color: controller.canRedo
                           ? const Color(0xFF0F172A)
                           : const Color(0xFFCBD5E1),
@@ -482,25 +488,19 @@ class EditorScreen extends StatelessWidget {
               // Viewport Switcher Capsule
               _buildViewportCapsule(controller),
 
-              // Rotate & Preview Buttons
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildRotateButton(controller),
-                  const SizedBox(width: 4),
-                  IconButton(
-                    icon: const Icon(
-                      LucideIcons.eye,
-                      size: 20,
-                      color: Color(0xFF64748B),
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                    onPressed: () {
-                      controller.isPanelOpen.value = !controller.isPanelOpen.value;
-                    },
-                  ),
-                ],
+              // Preview Eye Button
+              IconButton(
+                icon: const Icon(
+                  LucideIcons.eye,
+                  size: 20,
+                  color: Color(0xFF64748B),
+                ),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                onPressed: () {
+                  controller.isPanelOpen.value = !controller.isPanelOpen.value;
+                },
               ),
             ],
           ),
@@ -738,6 +738,7 @@ class EditorScreen extends StatelessWidget {
               ? 'Switch to Portrait view'
               : 'Switch to Landscape view',
           padding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
           constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
           onPressed: controller.toggleLandscape,
         ),
