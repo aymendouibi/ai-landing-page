@@ -18,6 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({ navigation, siteName }) => {
 
   return (
     <header
+      id="sec_navigation"
       style={{
         position: 'sticky',
         top: 0,

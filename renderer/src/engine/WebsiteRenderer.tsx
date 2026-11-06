@@ -111,13 +111,18 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
           sections: page.sections.map(sec => {
             if (sec.id !== sectionId) return sec;
             const updatedProps = { ...sec.props };
-            if (elementKey === 'headline') {
+            if (elementKey === 'headline' || elementKey === 'title') {
               updatedProps.headline = newText;
+              updatedProps.title = newText;
               if (size) updatedProps.headlineSize = size;
-            } else if (elementKey === 'subheadline') {
+            } else if (elementKey === 'subheadline' || elementKey === 'subtitle' || elementKey === 'description' || elementKey === 'body') {
               updatedProps.subheadline = newText;
-            } else if (elementKey === 'ctaText') {
+              updatedProps.subtitle = newText;
+              updatedProps.description = newText;
+              updatedProps.body = newText;
+            } else if (elementKey === 'ctaText' || elementKey === 'buttonText') {
               updatedProps.ctaText = newText;
+              updatedProps.buttonText = newText;
             } else {
               updatedProps[elementKey] = newText;
             }
@@ -202,7 +207,24 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     window.selectSection = (sectionId: string) => {
       setSelectedSectionId(sectionId);
       setSelectedElement(null);
-      const el = document.getElementById(sectionId);
+
+      if (sectionId === 'sec_navigation' || sectionId === 'navigation') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (sectionId === 'sec_footer' || sectionId === 'footer') {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        return;
+      }
+
+      let el = document.getElementById(sectionId);
+      if (!el) {
+        el = document.querySelector(`[data-section-id="${sectionId}"]`) as HTMLElement;
+      }
+      if (!el) {
+        const cleanName = sectionId.replace(/^sec_/, '');
+        el = document.querySelector(`[data-component="${cleanName}"]`) as HTMLElement;
+      }
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }

@@ -329,7 +329,7 @@ class EditorController extends GetxController {
           },
         ),
       )
-      ..loadRequest(Uri.parse('http://$host:3000/'));
+      ..loadRequest(Uri.parse('http://$host:3000/?editor=true'));
   }
 
   Future<void> loadWebsite() async {
@@ -696,6 +696,40 @@ class EditorController extends GetxController {
     );
   }
 
+  void selectSection(String sectionId) {
+    selectedSectionId.value = sectionId;
+    final doc = document.value;
+    if (doc != null) {
+      final pages = doc['pages'] as List?;
+      if (pages != null && pages.isNotEmpty) {
+        final sections = pages[0]['sections'] as List?;
+        if (sections != null) {
+          for (final s in sections) {
+            if (s['id'] == sectionId) {
+              final comp = (s['component'] as String? ?? 'section').capitalizeFirst ?? 'Section';
+              selectedElementContext.value = 'Heading in $comp';
+              selectedElementKey.value = 'headline';
+              final props = s['props'] as Map<String, dynamic>? ?? {};
+              textController.text = props['headline'] ?? props['title'] ?? '';
+              subheadlineController.text =
+                  props['subheadline'] ?? props['subtitle'] ?? props['description'] ?? '';
+              selectedElementSize.value = props['headlineSize'] ?? 'Large';
+              aiPromptPlaceholder.value = 'Ask AI about this ${comp.toLowerCase()}';
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (webViewController != null) {
+      final safeId = jsonEncode(sectionId);
+      webViewController!.runJavaScript(
+        "if (window.selectSection) { window.selectSection($safeId); }",
+      );
+    }
+  }
+
   void updateText(String newText) {
     final sectionId = selectedSectionId.value;
     final key = selectedElementKey.value;
@@ -735,8 +769,9 @@ class EditorController extends GetxController {
       final safeKey = jsonEncode(key);
       final safeSecId = jsonEncode(sectionId);
       final safeSize = jsonEncode(selectedElementSize.value);
+      final jsonLiteral = jsonEncode(jsonEncode(docCopy));
       webViewController!.runJavaScript(
-        "if (window.updateElementText) { window.updateElementText($safeSecId, $safeKey, $safeText, $safeSize); }",
+        "if (window.updateElementText) { window.updateElementText($safeSecId, $safeKey, $safeText, $safeSize); } else if (window.updateDocument) { window.updateDocument($jsonLiteral); }",
       );
     }
 
@@ -765,7 +800,15 @@ class EditorController extends GetxController {
     }
 
     document.value = docCopy;
-    syncDocumentToWebView();
+    if (webViewController != null) {
+      final safeText = jsonEncode(textController.text);
+      final safeKey = jsonEncode(selectedElementKey.value);
+      final safeSecId = jsonEncode(sectionId);
+      final safeSize = jsonEncode(size);
+      webViewController!.runJavaScript(
+        "if (window.updateElementText) { window.updateElementText($safeSecId, $safeKey, $safeText, $safeSize); }",
+      );
+    }
     _saveCurrentDocument();
   }
 

@@ -18,6 +18,7 @@ export const Footer: React.FC<FooterProps> = ({ props, styles = {} }) => {
 
   return (
     <footer
+      id="sec_footer"
       className={`section ${bgClass}`}
       style={{
         paddingTop: '4rem',

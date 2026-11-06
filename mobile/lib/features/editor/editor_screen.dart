@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -81,6 +83,11 @@ class EditorScreen extends StatelessWidget {
                                           )
                                         : WebViewWidget(
                                             controller: controller.webViewController!,
+                                            gestureRecognizers: {
+                                              Factory<OneSequenceGestureRecognizer>(
+                                                () => EagerGestureRecognizer(),
+                                              ),
+                                            },
                                           ),
                                   ),
                                 ],
@@ -115,7 +122,10 @@ class EditorScreen extends StatelessWidget {
                       left: 0,
                       right: 0,
                       bottom: controller.isPanelOpen.value ? -400 : 0,
-                      child: _buildFloatingBottomDock(context, controller),
+                      child: IgnorePointer(
+                        ignoring: controller.isPanelOpen.value,
+                        child: _buildFloatingBottomDock(context, controller),
+                      ),
                     ),
                   ),
 
@@ -127,7 +137,10 @@ class EditorScreen extends StatelessWidget {
                       left: 0,
                       right: 0,
                       bottom: controller.isPanelOpen.value ? 0 : -450,
-                      child: _buildBottomPanel(context, controller),
+                      child: IgnorePointer(
+                        ignoring: !controller.isPanelOpen.value,
+                        child: _buildBottomPanel(context, controller),
+                      ),
                     ),
                   ),
                 ],
@@ -802,6 +815,7 @@ class EditorScreen extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () => controller.selectedTab.value = index,
+        behavior: HitTestBehavior.opaque,
         child: Container(
           decoration: BoxDecoration(
             color: isSelected ? Colors.white : Colors.transparent,
@@ -1335,11 +1349,11 @@ class EditorScreen extends StatelessWidget {
         children: [
           // 1. Navigation layer
           _buildLayerRow(
-            iconWidget: _buildNavIcon(false),
+            iconWidget: _buildNavIcon(controller.selectedSectionId.value == 'sec_navigation'),
             title: 'Navigation',
             isVisible: true,
-            isSelected: false,
-            onTap: () {},
+            isSelected: controller.selectedSectionId.value == 'sec_navigation',
+            onTap: () => controller.selectSection('sec_navigation'),
             onToggleVisibility: () {},
           ),
 
@@ -1359,14 +1373,7 @@ class EditorScreen extends StatelessWidget {
                   title: comp,
                   isVisible: isVisible,
                   isSelected: isSelected,
-                  onTap: () {
-                    controller.selectedSectionId.value = id;
-                    controller.selectedElementContext.value = 'Heading in $comp';
-                    controller.textController.text =
-                        sec['props']?['headline'] ?? sec['props']?['title'] ?? '';
-                    controller.aiPromptPlaceholder.value =
-                        'Ask AI about this ${comp.toLowerCase()}';
-                  },
+                  onTap: () => controller.selectSection(id),
                   onToggleVisibility: () => controller.toggleSectionVisibility(id),
                   onMoveUp: () => controller.moveSection(id, 'up'),
                   onMoveDown: () => controller.moveSection(id, 'down'),
@@ -1385,11 +1392,11 @@ class EditorScreen extends StatelessWidget {
 
           // 3. Footer layer
           _buildLayerRow(
-            iconWidget: _buildFooterIcon(false),
+            iconWidget: _buildFooterIcon(controller.selectedSectionId.value == 'sec_footer'),
             title: 'Footer',
             isVisible: true,
-            isSelected: false,
-            onTap: () {},
+            isSelected: controller.selectedSectionId.value == 'sec_footer',
+            onTap: () => controller.selectSection('sec_footer'),
             onToggleVisibility: () {},
           ),
         ],

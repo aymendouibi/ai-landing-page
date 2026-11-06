@@ -195,30 +195,25 @@ declare global {
 
 function App() {
   const [viewport, setViewport] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-  const [currentDoc, setCurrentDoc] = useState<WebsiteDocument>(sampleDocument);
-  const isAndroidWebView = typeof window.AndroidBridge !== 'undefined';
+  const [currentDoc] = useState<WebsiteDocument>(sampleDocument);
+  const isMobileEditor =
+    window.location.search.includes('editor=true') ||
+    typeof (window as any).AndroidBridge !== 'undefined' ||
+    typeof (window as any).webkit?.messageHandlers?.AndroidBridge !== 'undefined' ||
+    window.innerWidth < 640;
 
   React.useEffect(() => {
-    window.updateDocument = (data: any) => {
-      try {
-        const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-        if (parsed && typeof parsed === 'object') {
-          setCurrentDoc(parsed);
-        }
-      } catch (e) {
-        console.error('Failed to parse updated document', e);
-      }
-    };
-
     // Notify mobile container that webview renderer is ready
-    if (window.AndroidBridge?.postMessage) {
-      window.AndroidBridge.postMessage(JSON.stringify({ type: 'RENDERER_READY' }));
+    const bridge = (window as any).AndroidBridge || (window as any).webkit?.messageHandlers?.AndroidBridge;
+    if (bridge?.postMessage) {
+      bridge.postMessage(JSON.stringify({ type: 'RENDERER_READY' }));
     }
   }, []);
 
   const handleSectionSelect = (sectionId: string) => {
-    if (window.AndroidBridge?.postMessage) {
-      window.AndroidBridge.postMessage(
+    const bridge = (window as any).AndroidBridge || (window as any).webkit?.messageHandlers?.AndroidBridge;
+    if (bridge?.postMessage) {
+      bridge.postMessage(
         JSON.stringify({
           type: 'SECTION_SELECTED',
           sectionId,
@@ -233,8 +228,8 @@ function App() {
     desktop: '100%',
   };
 
-  // In Android WebView, render directly full width without the preview toolbar
-  if (isAndroidWebView) {
+  // In mobile WebView / editor mode, render full width directly without preview frame
+  if (isMobileEditor) {
     return (
       <WebsiteRenderer
         initialDocument={currentDoc}
