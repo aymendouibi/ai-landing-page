@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/designsystem/colors.dart';
 import 'auth_controller.dart';
 
@@ -26,7 +27,7 @@ class AuthScreen extends StatelessWidget {
                     color: AppColors.ink,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.auto_awesome, color: Colors.white, size: 28),
+                  child: const Icon(LucideIcons.sparkles, color: Colors.white, size: 28),
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -57,7 +58,7 @@ class AuthScreen extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red.shade700, size: 18),
+                        Icon(LucideIcons.circleAlert, color: Colors.red.shade700, size: 18),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(

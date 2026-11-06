@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
 import '../../../core/designsystem/gradients.dart';
 import '../../../core/designsystem/typography.dart';
@@ -94,7 +95,7 @@ class NewWebsiteBottomSheet extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Icons.close,
+                        LucideIcons.x,
                         size: 18,
                         color: AppColors.ink,
                       ),
@@ -136,8 +137,8 @@ class NewWebsiteBottomSheet extends StatelessWidget {
                       ),
                     ),
                     const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
+                      LucideIcons.chevronRight,
+                      size: 18,
                       color: AppColors.inkMuted,
                     ),
                   ],
@@ -177,8 +178,8 @@ class NewWebsiteBottomSheet extends StatelessWidget {
                       ),
                     ),
                     const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
+                      LucideIcons.chevronRight,
+                      size: 18,
                       color: AppColors.inkMuted,
                     ),
                   ],
@@ -218,8 +219,8 @@ class NewWebsiteBottomSheet extends StatelessWidget {
                       ),
                     ),
                     const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
+                      LucideIcons.chevronRight,
+                      size: 18,
                       color: AppColors.inkMuted,
                     ),
                   ],
@@ -393,7 +394,7 @@ class _DashedPlusBox extends StatelessWidget {
             painter: _DashedBorderPainter(),
           ),
           const Icon(
-            Icons.add,
+            LucideIcons.plus,
             size: 20,
             color: AppColors.inkSecondary,
           ),

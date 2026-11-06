@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
 
 class WebsitePreviewItem {
@@ -80,7 +81,7 @@ class RecentProjectCard extends StatelessWidget {
                           color: const Color(0xFF1E1E24),
                         ),
                       ),
-                      const Icon(Icons.menu, size: 14, color: Color(0xFF1E1E24)),
+                      const Icon(LucideIcons.menu, size: 14, color: Color(0xFF1E1E24)),
                     ],
                   ),
                   const SizedBox(height: 14),

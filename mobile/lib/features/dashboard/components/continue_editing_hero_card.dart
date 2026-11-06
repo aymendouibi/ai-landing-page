@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
 import '../../../core/designsystem/typography.dart';
 import '../../../core/models/website.dart';
@@ -218,7 +219,7 @@ class ContinueEditingHeroCard extends StatelessWidget {
                                   color: Color(0xFF2C241E),
                                 ),
                               ),
-                              const Icon(Icons.menu, size: 10, color: Color(0xFF2C241E)),
+                              const Icon(LucideIcons.menu, size: 10, color: Color(0xFF2C241E)),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -335,9 +336,9 @@ class ContinueEditingHeroCard extends StatelessWidget {
                         ),
                         SizedBox(width: 4),
                         Icon(
-                          Icons.arrow_forward_ios,
+                          LucideIcons.chevronRight,
                           color: Colors.white,
-                          size: 14,
+                          size: 15,
                         ),
                       ],
                     ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/designsystem/colors.dart';
 import '../../core/designsystem/typography.dart';
 import 'ai_creation_controller.dart';
@@ -17,7 +18,7 @@ class AiCreationScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.ink),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.ink),
           onPressed: () => Get.back(),
         ),
         title: const Text(
@@ -48,7 +49,7 @@ class AiCreationScreen extends StatelessWidget {
                         color: AppColors.atmosphereViolet.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.auto_awesome, color: AppColors.atmosphereViolet),
+                      child: const Icon(LucideIcons.sparkles, color: AppColors.atmosphereViolet),
                     ),
                     const SizedBox(width: 14),
                     const Expanded(
@@ -95,7 +96,7 @@ class AiCreationScreen extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                      Icon(LucideIcons.circleAlert, color: Colors.red.shade700, size: 20),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -228,7 +229,7 @@ class AiCreationScreen extends StatelessWidget {
                         : const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.auto_awesome, size: 20),
+                              Icon(LucideIcons.sparkles, size: 20),
                               SizedBox(width: 8),
                               Text(
                                 'Generate Website with AI',

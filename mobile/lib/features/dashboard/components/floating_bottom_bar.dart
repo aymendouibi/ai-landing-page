@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
 import '../../../core/designsystem/gradients.dart';
 
@@ -164,7 +165,7 @@ class FloatingBottomBar extends StatelessWidget {
                           color: AppColors.ink,
                         ),
                         child: const Icon(
-                          Icons.add,
+                          LucideIcons.plus,
                           color: Colors.white,
                           size: 26,
                         ),

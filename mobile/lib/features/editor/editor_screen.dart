@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'editor_controller.dart';
 
 class EditorScreen extends StatelessWidget {
@@ -250,8 +251,8 @@ class EditorScreen extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 18,
+                  LucideIcons.chevronLeft,
+                  size: 20,
                   color: Color(0xFF0F172A),
                 ),
                 padding: EdgeInsets.zero,
@@ -279,8 +280,8 @@ class EditorScreen extends StatelessWidget {
                         children: [
                           Icon(
                             controller.isSaving.value
-                                ? Icons.sync
-                                : Icons.check,
+                                ? LucideIcons.refreshCw
+                                : LucideIcons.check,
                             size: 13,
                             color: controller.isSaving.value
                                 ? const Color(0xFF3B82F6)
@@ -351,7 +352,7 @@ class EditorScreen extends StatelessWidget {
                 () => Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.undo, size: 20),
+                      icon: const Icon(LucideIcons.undo2, size: 19),
                       color: controller.canUndo
                           ? const Color(0xFF0F172A)
                           : const Color(0xFFCBD5E1),
@@ -361,7 +362,7 @@ class EditorScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     IconButton(
-                      icon: const Icon(Icons.redo, size: 20),
+                      icon: const Icon(LucideIcons.redo2, size: 19),
                       color: controller.canRedo
                           ? const Color(0xFF0F172A)
                           : const Color(0xFFCBD5E1),
@@ -388,7 +389,7 @@ class EditorScreen extends StatelessWidget {
                       _buildViewportButton(
                         controller: controller,
                         mode: ViewportMode.mobile,
-                        icon: Icons.phone_android,
+                        icon: LucideIcons.smartphone,
                         label: 'Mobile',
                       ),
                       const SizedBox(width: 2),
@@ -396,7 +397,7 @@ class EditorScreen extends StatelessWidget {
                       _buildViewportButton(
                         controller: controller,
                         mode: ViewportMode.tablet,
-                        icon: Icons.tablet_mac_outlined,
+                        icon: LucideIcons.tablet,
                         label: 'Tablet',
                         iconOnlyWhenInactive: true,
                       ),
@@ -405,7 +406,7 @@ class EditorScreen extends StatelessWidget {
                       _buildViewportButton(
                         controller: controller,
                         mode: ViewportMode.desktop,
-                        icon: Icons.desktop_windows_outlined,
+                        icon: LucideIcons.monitor,
                         label: 'Desktop',
                         iconOnlyWhenInactive: true,
                       ),
@@ -417,8 +418,8 @@ class EditorScreen extends StatelessWidget {
               // Preview Eye
               IconButton(
                 icon: const Icon(
-                  Icons.remove_red_eye_outlined,
-                  size: 21,
+                  LucideIcons.eye,
+                  size: 20,
                   color: Color(0xFF64748B),
                 ),
                 padding: EdgeInsets.zero,
@@ -597,7 +598,7 @@ class EditorScreen extends StatelessWidget {
                               ),
                             )
                           : const Icon(
-                              Icons.arrow_upward,
+                              LucideIcons.arrowUp,
                               size: 17,
                               color: Color(0xFF4F46E5),
                             ),
@@ -630,7 +631,7 @@ class EditorScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildDockItem(
-                  icon: Icons.add,
+                  icon: LucideIcons.plus,
                   label: 'Add',
                   onTap: () {
                     controller.selectedTab.value = 0;
@@ -638,7 +639,7 @@ class EditorScreen extends StatelessWidget {
                   },
                 ),
                 _buildDockItem(
-                  icon: Icons.edit_outlined,
+                  icon: LucideIcons.pencil,
                   label: 'Edit',
                   onTap: () {
                     controller.selectedTab.value = 1;
@@ -646,7 +647,7 @@ class EditorScreen extends StatelessWidget {
                   },
                 ),
                 _buildDockItem(
-                  icon: Icons.layers_outlined,
+                  icon: LucideIcons.layers,
                   label: 'Layers',
                   onTap: () {
                     controller.selectedTab.value = 2;
@@ -654,7 +655,7 @@ class EditorScreen extends StatelessWidget {
                   },
                 ),
                 _buildDockItem(
-                  icon: Icons.palette_outlined,
+                  icon: LucideIcons.palette,
                   label: 'Design',
                   onTap: () {
                     controller.selectedTab.value = 3;
@@ -763,6 +764,7 @@ class EditorScreen extends StatelessWidget {
                 // Round Close Button (✕)
                 GestureDetector(
                   onTap: () => controller.isPanelOpen.value = false,
+                  behavior: HitTestBehavior.opaque,
                   child: Container(
                     width: 34,
                     height: 34,
@@ -771,7 +773,7 @@ class EditorScreen extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.close,
+                      LucideIcons.x,
                       size: 16,
                       color: Color(0xFF0F172A),
                     ),
@@ -1450,8 +1452,8 @@ class EditorScreen extends StatelessWidget {
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                   child: Icon(
-                    Icons.keyboard_arrow_up,
-                    size: 20,
+                    LucideIcons.chevronUp,
+                    size: 19,
                     color: Color(0xFF0F172A),
                   ),
                 ),
@@ -1463,8 +1465,8 @@ class EditorScreen extends StatelessWidget {
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                   child: Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 20,
+                    LucideIcons.chevronDown,
+                    size: 19,
                     color: Color(0xFF0F172A),
                   ),
                 ),
@@ -1478,9 +1480,9 @@ class EditorScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 child: Icon(
                   isVisible
-                      ? Icons.remove_red_eye_outlined
-                      : Icons.visibility_off_outlined,
-                  size: 20,
+                      ? LucideIcons.eye
+                      : LucideIcons.eyeOff,
+                  size: 19,
                   color: isVisible
                       ? const Color(0xFF64748B)
                       : const Color(0xFFCBD5E1),
@@ -1626,23 +1628,23 @@ class EditorScreen extends StatelessWidget {
       case 'hero':
         return _buildHeroIcon(isSelected);
       case 'products':
-        return Icon(Icons.shopping_bag_outlined, size: 20, color: color);
+        return Icon(LucideIcons.shoppingBag, size: 20, color: color);
       case 'story':
       case 'about':
-        return Icon(Icons.menu_book_outlined, size: 20, color: color);
+        return Icon(LucideIcons.bookOpen, size: 20, color: color);
       case 'visit':
       case 'contact':
-        return Icon(Icons.location_on_outlined, size: 20, color: color);
+        return Icon(LucideIcons.mapPin, size: 20, color: color);
       case 'gallery':
-        return Icon(Icons.photo_library_outlined, size: 20, color: color);
+        return Icon(LucideIcons.image, size: 20, color: color);
       case 'text':
-        return Icon(Icons.article_outlined, size: 20, color: color);
+        return Icon(LucideIcons.fileText, size: 20, color: color);
       case 'cta':
-        return Icon(Icons.touch_app_outlined, size: 20, color: color);
+        return Icon(LucideIcons.mousePointerClick, size: 20, color: color);
       case 'footer':
         return _buildFooterIcon(isSelected);
       default:
-        return Icon(Icons.view_quilt_outlined, size: 20, color: color);
+        return Icon(LucideIcons.layoutGrid, size: 20, color: color);
     }
   }
 

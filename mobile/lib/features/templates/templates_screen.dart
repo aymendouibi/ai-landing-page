@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/designsystem/colors.dart';
 import 'templates_controller.dart';
 
@@ -16,7 +17,7 @@ class TemplatesScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.ink),
+          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.ink),
           onPressed: () => Get.back(),
         ),
         title: const Text(

@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/network/api_client.dart';
 import '../dashboard/dashboard_controller.dart';
 
@@ -1058,7 +1059,7 @@ class EditorController extends GetxController {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Row(
             children: [
-              Icon(Icons.check_circle, color: Color(0xFF10B981)),
+              Icon(LucideIcons.circleCheck, color: Color(0xFF10B981)),
               SizedBox(width: 10),
               Text(
                 'Published!',
