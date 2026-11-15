@@ -21,8 +21,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/health', function () {
         return response()->json([
             'status' => 'ok',
+            'app_url' => config('app.url'),
             'hosting_disk' => config('filesystems.disks.hosting.driver'),
             's3_configured' => !empty(config('filesystems.disks.hosting.key')),
+            'editor_present' => file_exists(public_path('index.html')),
         ]);
     });
 

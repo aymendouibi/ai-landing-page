@@ -16,8 +16,14 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Root homepage
+// Root homepage / Editor canvas
 Route::get('/', function () {
+    $editorHtml = public_path('index.html');
+    if (file_exists($editorHtml)) {
+        return response()->file($editorHtml, [
+            'Content-Type' => 'text/html; charset=UTF-8',
+        ]);
+    }
     return view('welcome');
 });
 
@@ -81,6 +87,6 @@ Route::get('/sites/{subdomain}/{path?}', [PublicSiteController::class, 'serve'])
 
 // 3. Root path-based delivery: https://our-domain.com/{subdomain}/{path?}
 Route::get('/{subdomain}/{path?}', [PublicSiteController::class, 'serve'])
-    ->where('subdomain', '^(?!admin|api|sanctum|up|_ignition|storage|hosting)[a-zA-Z0-9\-]+$')
+    ->where('subdomain', '^(?!admin|api|sanctum|up|_ignition|storage|hosting|assets|favicon)[a-zA-Z0-9\-]+$')
     ->where('path', '.*')
     ->name('public.site.path');

@@ -14,9 +14,9 @@ services:
       - key: APP_DEBUG
         value: "false"
       - key: APP_URL
-        value: https://api.ai-landing-page.xyz
+        value: https://www.ai-landing-page.xyz
       - key: PLATFORM_DOMAIN
-        value: api.ai-landing-page.xyz
+        value: ai-landing-page.xyz
       - key: DB_CONNECTION
         value: pgsql
       - key: SESSION_DRIVER

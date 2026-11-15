@@ -40,12 +40,14 @@ class PublishingController extends Controller
                 ? "https://{$website->subdomain}.{$platformDomain}"
                 : "{$appUrl}/{$website->subdomain}";
             $pathUrl = "{$appUrl}/{$website->subdomain}";
+            $sitesUrl = "{$appUrl}/sites/{$website->subdomain}";
 
             return response()->json([
                 'message' => 'Website successfully published to global CDN.',
                 'deployment' => $deployment,
-                'live_url' => $primaryUrl,
+                'live_url' => $sitesUrl,
                 'path_url' => $pathUrl,
+                'sites_url' => $sitesUrl,
                 'website' => $website->fresh(),
             ]);
         } catch (Exception $e) {
