@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:http/http.dart' as http;
 import '../models/website.dart';
 import '../storage/session_manager.dart';
@@ -35,8 +36,12 @@ class ApiClient {
         msg.contains('custom_domains');
   }
 
-  static String get baseUrl =>
-      Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
+  static String get baseUrl {
+    const customUrl = String.fromEnvironment('API_BASE_URL');
+    if (customUrl.isNotEmpty) return customUrl;
+    if (kReleaseMode) return 'https://api.ai-landing-page.xyz';
+    return Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
+  }
 
   static Future<Map<String, String>> _headers() async {
     final token = await SessionManager.getToken();
