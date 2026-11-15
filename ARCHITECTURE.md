@@ -157,3 +157,13 @@ ai_builder2/
 - Images and assets uploaded by users are sent to `/api/v1/media-assets`.
 - Laravel stores them in the Neon Object Storage `assets` bucket using S3 path-style addressing.
 - Returns a durable public/signed URL stored in the website document.
+
+### 5. Website Publishing & Public CDN Delivery Flow
+- When a user clicks **Publish** in the app or via `POST /api/v1/websites/{id}/publish`:
+  1. `CloudflareHostingService` compiles the website document into standalone production HTML, CSS (`style.css`), and JavaScript (`main.js`).
+  2. The compiled assets are uploaded to the persistent **Neon S3 Object Storage** (`assets` bucket) under `hosting/sites/{website_id}/live/` and versioned under `hosting/sites/{website_id}/deployments/{deployment_id}/`.
+  3. The website's live status and subdomain routes are updated.
+- When any visitor opens `https://api.ai-landing-page.xyz/sites/{subdomain}` or `https://api.ai-landing-page.xyz/{subdomain}`:
+  1. `PublicSiteController` resolves the website model by slug or subdomain.
+  2. It serves the compiled HTML/assets directly from Neon S3 with automatic `<base href>` injection for asset isolation, proper MIME types, and 1-hour public cache headers.
+  3. Because files reside in Neon S3 rather than the container's ephemeral disk, published sites survive Render redeploys and restarts permanently.
