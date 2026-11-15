@@ -29,6 +29,8 @@ services:
         value: eu-central-1
       - key: AWS_BUCKET
         value: assets
+      - key: HOSTING_DISK
+        value: s3
       - key: DATABASE_URL
         sync: false
       - key: APP_KEY

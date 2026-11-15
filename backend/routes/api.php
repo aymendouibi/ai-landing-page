@@ -17,6 +17,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
+    // System Health & Info
+    Route::get('/health', function () {
+        return response()->json([
+            'status' => 'ok',
+            'hosting_disk' => config('filesystems.disks.hosting.driver'),
+            's3_configured' => !empty(config('filesystems.disks.hosting.key')),
+        ]);
+    });
+
     // Public Authentication
     Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
