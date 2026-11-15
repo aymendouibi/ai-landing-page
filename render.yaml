@@ -13,6 +13,10 @@ services:
         value: production
       - key: APP_DEBUG
         value: "false"
+      - key: APP_URL
+        value: https://api.ai-landing-page.xyz
+      - key: PLATFORM_DOMAIN
+        value: api.ai-landing-page.xyz
       - key: DB_CONNECTION
         value: pgsql
       - key: SESSION_DRIVER
