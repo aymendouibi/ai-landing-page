@@ -65,6 +65,13 @@ class WebsiteCompilerService
 
         $canonicalTag = $canonicalUrl ? '<link rel="canonical" href="' . htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') . '">' : '';
 
+        $favicon = $site['favicon'] ?? null;
+        $faviconTag = '';
+        if (!empty($favicon)) {
+            $faviconEscaped = htmlspecialchars($favicon, ENT_QUOTES, 'UTF-8');
+            $faviconTag = "<link rel=\"icon\" href=\"{$faviconEscaped}\">\n    <link rel=\"apple-touch-icon\" href=\"{$faviconEscaped}\">";
+        }
+
         // Complete HTML
         $indexHtml = <<<HTML
 <!DOCTYPE html>
@@ -75,6 +82,7 @@ class WebsiteCompilerService
     <title>{$title}</title>
     <meta name="description" content="{$description}">
     {$canonicalTag}
+    {$faviconTag}
     <meta property="og:title" content="{$title}">
     <meta property="og:description" content="{$description}">
     <meta property="og:type" content="website">
@@ -420,6 +428,12 @@ JS;
     protected function renderNavigation(array $navigation, string $siteName): string
     {
         $logoText = htmlspecialchars($navigation['logo']['text'] ?? $siteName, ENT_QUOTES, 'UTF-8');
+        $logoSrc = !empty($navigation['logo']['src']) ? htmlspecialchars($navigation['logo']['src'], ENT_QUOTES, 'UTF-8') : null;
+
+        $logoHtml = $logoSrc
+            ? "<a href=\"/\" class=\"nav-logo\" style=\"display: inline-flex; align-items: center; gap: 0.5rem;\"><img src=\"{$logoSrc}\" alt=\"{$logoText}\" style=\"height: 2rem; max-height: 36px; width: auto; object-fit: contain;\"><span>{$logoText}</span></a>"
+            : "<a href=\"/\" class=\"nav-logo\">{$logoText}</a>";
+
         $items = $navigation['items'] ?? [
             ['label' => 'Home', 'href' => '#', 'type' => 'link'],
             ['label' => 'Features', 'href' => '#features', 'type' => 'link'],
@@ -442,7 +456,7 @@ JS;
         return <<<HTML
 <header class="navbar">
     <div class="container nav-inner">
-        <a href="/" class="nav-logo">{$logoText}</a>
+        {$logoHtml}
         <nav class="nav-links">
             {$linksHtml}
         </nav>

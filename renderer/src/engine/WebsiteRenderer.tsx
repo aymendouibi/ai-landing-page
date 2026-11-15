@@ -60,6 +60,26 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     }
   }, [initialDocument]);
 
+  // Synchronize document title and custom favicon to the browser tab
+  useEffect(() => {
+    const siteName = doc?.site?.name;
+    const pageTitle = doc?.pages?.[0]?.seo?.title || siteName;
+    if (pageTitle && typeof document !== 'undefined') {
+      document.title = pageTitle;
+    }
+
+    const faviconUrl = doc?.site?.favicon;
+    if (faviconUrl && typeof document !== 'undefined') {
+      let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = faviconUrl;
+    }
+  }, [doc?.site?.name, doc?.site?.favicon, doc?.pages]);
+
   // Setup communication bridge with Android WebView and Parent Window
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {

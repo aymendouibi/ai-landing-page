@@ -60,6 +60,8 @@ class WebsiteConfigController extends GetxController {
   final domainInputController = TextEditingController();
   final nameController = TextEditingController();
   final subdomainController = TextEditingController();
+  final faviconController = TextEditingController();
+  final logoController = TextEditingController();
 
   bool get isLive => status.value == 'published' || status.value == 'live';
 
@@ -243,6 +245,11 @@ class WebsiteConfigController extends GetxController {
     status.value = site.status;
     final sub = site.subdomain ?? site.slug;
     liveUrl.value = 'https://www.ai-landing-page.xyz/sites/$sub';
+    final doc = site.document;
+    final siteMap = doc?['site'] as Map<String, dynamic>?;
+    final navMap = doc?['navigation'] as Map<String, dynamic>?;
+    faviconController.text = siteMap?['favicon']?.toString() ?? '';
+    logoController.text = navMap?['logo']?['src']?.toString() ?? '';
     final baseSlug = site.slug.isNotEmpty
         ? site.slug
         : (site.subdomain ?? 'portfolio');
@@ -407,6 +414,31 @@ class WebsiteConfigController extends GetxController {
         websiteName.value = updatedSite['name']?.toString() ?? targetName;
         subdomain.value = updatedSite['subdomain']?.toString() ?? targetSub;
         liveUrl.value = 'https://www.ai-landing-page.xyz/sites/${subdomain.value}';
+      }
+
+      // Persist Favicon & Brand Logo updates in document
+      final curDoc = currentWebsite.value?.document;
+      if (curDoc != null) {
+        final docCopy = jsonDecode(jsonEncode(curDoc)) as Map<String, dynamic>;
+        bool docChanged = false;
+        docCopy['site'] ??= <String, dynamic>{};
+        final newFav = faviconController.text.trim();
+        if (newFav != (docCopy['site']['favicon']?.toString() ?? '')) {
+          docCopy['site']['favicon'] = newFav.isNotEmpty ? newFav : null;
+          docChanged = true;
+        }
+        docCopy['navigation'] ??= <String, dynamic>{};
+        docCopy['navigation']['logo'] ??= <String, dynamic>{};
+        final newLogo = logoController.text.trim();
+        if (newLogo != (docCopy['navigation']['logo']['src']?.toString() ?? '')) {
+          docCopy['navigation']['logo']['src'] = newLogo.isNotEmpty ? newLogo : null;
+          docChanged = true;
+        }
+        if (docChanged) {
+          try {
+            await ApiClient.updateWebsiteDocument(websiteId.value, docCopy);
+          } catch (_) {}
+        }
       }
       if (Get.isRegistered<DashboardController>()) {
         Get.find<DashboardController>().loadData();
@@ -637,5 +669,15 @@ export default function ${title.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}Page() {
     } finally {
       isExportingZip.value = false;
     }
+  }
+
+  @override
+  void onClose() {
+    domainInputController.dispose();
+    nameController.dispose();
+    subdomainController.dispose();
+    faviconController.dispose();
+    logoController.dispose();
+    super.onClose();
   }
 }

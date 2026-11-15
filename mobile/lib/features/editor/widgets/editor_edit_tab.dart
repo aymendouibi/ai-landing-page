@@ -2551,6 +2551,144 @@ class _NavigationEditorCard extends StatelessWidget {
 
             const SizedBox(height: 12),
 
+            // Custom Brand Logo Image
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Custom Brand Logo Image',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.inkMutedOf(context),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: controller.pickAndSetLogo,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(LucideIcons.imagePlus, size: 13, color: Color(0xFF2563EB)),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Upload Image',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF2563EB),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            TextField(
+              controller: controller.navLogoSrcController,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.inkOf(context),
+              ),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: 'https://... or uploaded image URL',
+                hintStyle: TextStyle(color: AppColors.inkMutedOf(context)),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                filled: true,
+                fillColor: _EditTheme.fieldBg(context),
+                prefixIcon: const Icon(LucideIcons.image, size: 14),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: _EditTheme.fieldBorder(context),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF2563EB),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+              onChanged: (val) => controller.updateNavLogo(src: val),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Custom Favicon (Browser Icon)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Favicon (Browser Tab Icon)',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.inkMutedOf(context),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: controller.pickAndSetFavicon,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(LucideIcons.globe, size: 13, color: Color(0xFF10B981)),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Upload Favicon',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF10B981),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            TextField(
+              controller: controller.faviconController,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.inkOf(context),
+              ),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: 'https://.../favicon.png',
+                hintStyle: TextStyle(color: AppColors.inkMutedOf(context)),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                filled: true,
+                fillColor: _EditTheme.fieldBg(context),
+                prefixIcon: const Icon(LucideIcons.globe, size: 14),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: _EditTheme.fieldBorder(context),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF10B981),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+              onChanged: (val) => controller.updateFavicon(val),
+            ),
+
+            const SizedBox(height: 12),
+
             // Navigation Links
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

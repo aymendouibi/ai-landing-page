@@ -139,9 +139,14 @@ void main() {
       expect(find.text('Only visible to you in your projects.'), findsOneWidget);
 
       // Enter new site name
-      await tester.enterText(find.byType(TextField), 'Updated Studio');
+      await tester.enterText(find.byType(TextField).first, 'Updated Studio');
       await tester.pumpAndSettle();
       expect(controller.nameController.text, equals('Updated Studio'));
+
+      // Enter new favicon
+      await tester.enterText(find.byType(TextField).last, 'https://example.com/fav.png');
+      await tester.pumpAndSettle();
+      expect(controller.faviconController.text, equals('https://example.com/fav.png'));
     });
 
     testWidgets('WebsiteConfigPublishingCard displays Live badge and opens unpublish dialog', (tester) async {

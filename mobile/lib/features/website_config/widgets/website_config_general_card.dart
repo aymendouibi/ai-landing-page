@@ -90,6 +90,50 @@ class WebsiteConfigGeneralCard extends StatelessWidget {
                   color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                 ),
               ),
+              const SizedBox(height: 16),
+              Text(
+                'Favicon (Browser Tab Icon)',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.inkOf(context),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF161922) : const Color(0xFFF6F8FA),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                child: TextField(
+                  controller: controller.faviconController,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    hintText: 'https://.../favicon.png',
+                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.inkOf(context),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Icon displayed in browser tabs and mobile bookmarks.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
+              ),
             ],
           ),
         ),

@@ -134,5 +134,33 @@ void main() {
       await tester.tap(find.text('www.ai-landing-page.xyz/sites/lumen-coffee'));
       await tester.pump(const Duration(seconds: 4));
     });
+
+    test('EditorController can set custom logo and favicon in document', () async {
+      final controller = EditorController();
+      controller.document.value = {
+        'schema_version': 1,
+        'site': {'name': 'Lumen Coffee', 'theme': {}},
+        'navigation': {'items': []},
+        'pages': [],
+      };
+
+      // Set custom logo
+      controller.updateNavLogo(text: 'Lumen Artisans', src: 'https://example.com/logo.png');
+      expect(controller.document.value!['navigation']['logo']['text'], 'Lumen Artisans');
+      expect(controller.document.value!['navigation']['logo']['src'], 'https://example.com/logo.png');
+      expect(controller.document.value!['site']['name'], 'Lumen Artisans');
+
+      // Set custom favicon
+      controller.updateFavicon('https://example.com/favicon.ico');
+      expect(controller.document.value!['site']['favicon'], 'https://example.com/favicon.ico');
+      expect(controller.faviconUrl.value, 'https://example.com/favicon.ico');
+
+      // Test pick helper methods (fallback in test mode)
+      await controller.pickAndSetLogo();
+      expect(controller.navLogoSrcController.text, contains('unsplash.com'));
+
+      await controller.pickAndSetFavicon();
+      expect(controller.faviconUrl.value, contains('unsplash.com'));
+    });
   });
 }

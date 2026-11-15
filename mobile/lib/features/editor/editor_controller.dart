@@ -152,6 +152,8 @@ class EditorController extends GetxController {
   // Navigation, Footer, FAQ, Products & Contact properties
   final navLogoTextController = TextEditingController();
   final navLogoSrcController = TextEditingController();
+  final faviconController = TextEditingController();
+  final faviconUrl = ''.obs;
   final navItems = <Map<String, dynamic>>[].obs;
 
   final footerCopyrightController = TextEditingController();
@@ -644,6 +646,9 @@ class EditorController extends GetxController {
       final nav = Map<String, dynamic>.from(document.value!['navigation'] as Map? ?? {});
       navLogoTextController.text = nav['logo']?['text']?.toString() ?? document.value!['site']?['name']?.toString() ?? '';
       navLogoSrcController.text = nav['logo']?['src']?.toString() ?? '';
+      final fav = document.value!['site']?['favicon']?.toString() ?? '';
+      faviconController.text = fav;
+      faviconUrl.value = fav;
       final rawItems = nav['items'] as List? ?? [];
       navItems.assignAll(rawItems.map((e) => Map<String, dynamic>.from(e as Map)).toList());
       customProps.assignAll(nav);
@@ -2613,6 +2618,78 @@ class EditorController extends GetxController {
     _debounceSave();
   }
 
+  void updateFavicon(String url) {
+    final doc = document.value;
+    if (doc == null) return;
+    _pushUndoState();
+    final docCopy = jsonDecode(jsonEncode(doc)) as Map<String, dynamic>;
+    docCopy['site'] ??= <String, dynamic>{};
+    docCopy['site']['favicon'] = url;
+    faviconUrl.value = url;
+    faviconController.text = url;
+    document.value = docCopy;
+    syncDocumentToWebView();
+    _debounceSave();
+  }
+
+  Future<void> pickAndSetLogo() async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      const sampleLogo = 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=200&q=80';
+      navLogoSrcController.text = sampleLogo;
+      updateNavLogo(src: sampleLogo);
+      return;
+    }
+
+    try {
+      final picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 90,
+      );
+      if (pickedFile == null) return;
+      final bytes = await pickedFile.readAsBytes();
+      final ext = pickedFile.name.split('.').last.toLowerCase();
+      final mime = ext == 'png' ? 'image/png' : (ext == 'svg' ? 'image/svg+xml' : 'image/jpeg');
+      final base64Data = base64Encode(bytes);
+      final dataUrl = 'data:$mime;base64,$base64Data';
+      navLogoSrcController.text = dataUrl;
+      updateNavLogo(src: dataUrl);
+      AppSnackbar.success('Custom logo updated!', title: 'Logo');
+    } catch (e) {
+      debugPrint('pickAndSetLogo error: $e');
+    }
+  }
+
+  Future<void> pickAndSetFavicon() async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      const sampleFavicon = 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=64&q=80';
+      updateFavicon(sampleFavicon);
+      return;
+    }
+
+    try {
+      final picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 256,
+        maxHeight: 256,
+        imageQuality: 90,
+      );
+      if (pickedFile == null) return;
+      final bytes = await pickedFile.readAsBytes();
+      final ext = pickedFile.name.split('.').last.toLowerCase();
+      final mime = ext == 'png' ? 'image/png' : (ext == 'ico' ? 'image/x-icon' : 'image/jpeg');
+      final base64Data = base64Encode(bytes);
+      final dataUrl = 'data:$mime;base64,$base64Data';
+      updateFavicon(dataUrl);
+      AppSnackbar.success('Custom favicon updated!', title: 'Favicon');
+    } catch (e) {
+      debugPrint('pickAndSetFavicon error: $e');
+    }
+  }
+
   void updateNavItem(int index, Map<String, dynamic> item) {
     if (index < 0 || index >= navItems.length) return;
     navItems[index] = item;
@@ -3109,6 +3186,7 @@ class EditorController extends GetxController {
     badgeController.dispose();
     navLogoTextController.dispose();
     navLogoSrcController.dispose();
+    faviconController.dispose();
     footerCopyrightController.dispose();
     contactEmailController.dispose();
     contactPhoneController.dispose();
