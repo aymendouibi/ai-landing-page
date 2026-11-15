@@ -46,3 +46,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+
+# Sensitive Keys and Credentials
+*.key
+*.pem
+*.jks
+*.keystore
+**/.env*
+!**/.env.example
