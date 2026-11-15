@@ -427,11 +427,19 @@ class EditorController extends GetxController {
     }
   }
 
+  static String get rendererUrl {
+    const customUrl = String.fromEnvironment('RENDERER_URL');
+    if (customUrl.isNotEmpty) return customUrl;
+    const useLocal = bool.fromEnvironment('USE_LOCAL_RENDERER', defaultValue: false);
+    if (useLocal) {
+      final host = Platform.isAndroid ? '10.0.2.2' : '127.0.0.1';
+      return 'http://$host:3000/?editor=true';
+    }
+    return 'https://ai-landing-page.xyz/?editor=true';
+  }
+
   void _initWebView() {
     try {
-      // 127.0.0.1 on iOS simulator connects directly to Mac host! 10.0.2.2 on Android emulator.
-      final host = Platform.isAndroid ? '10.0.2.2' : '127.0.0.1';
-
       webViewController = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(Colors.white)
@@ -476,7 +484,7 @@ class EditorController extends GetxController {
             },
           ),
         )
-        ..loadRequest(Uri.parse('http://$host:3000/?editor=true'));
+        ..loadRequest(Uri.parse(rendererUrl));
     } catch (_) {
       // In headless unit tests, WebViewPlatform is uninitialized
     }

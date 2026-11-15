@@ -36,11 +36,16 @@ class ApiClient {
         msg.contains('custom_domains');
   }
 
+  static const bool useLocalBackend =
+      bool.fromEnvironment('USE_LOCAL_BACKEND', defaultValue: false);
+
   static String get baseUrl {
     const customUrl = String.fromEnvironment('API_BASE_URL');
     if (customUrl.isNotEmpty) return customUrl;
-    if (kReleaseMode) return 'https://api.ai-landing-page.xyz';
-    return Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
+    if (useLocalBackend) {
+      return Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
+    }
+    return 'https://api.ai-landing-page.xyz';
   }
 
   static Future<Map<String, String>> _headers() async {
@@ -575,7 +580,7 @@ CRITICAL RULES:
           headers: {
             'Authorization': 'Bearer $openRouterApiKey',
             'Content-Type': 'application/json',
-            'HTTP-Referer': 'http://localhost:8000',
+            'HTTP-Referer': 'https://ai-landing-page.xyz',
             'X-Title': 'AI Website Builder',
           },
           body: jsonEncode({
