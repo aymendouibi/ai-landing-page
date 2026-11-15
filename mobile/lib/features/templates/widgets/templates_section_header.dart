@@ -21,15 +21,20 @@ class TemplatesSectionHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.baseline,
         textBaseline: TextBaseline.alphabetic,
         children: [
-          Text(
-            'templates_curated_edit'.tr,
-            style: TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
-              color: isDark ? Colors.white : const Color(0xFF0F172A),
+          Expanded(
+            child: Text(
+              'templates_curated_edit'.tr,
+              style: TextStyle(
+                fontSize: 18.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
+          const SizedBox(width: 8),
           Obx(() {
             final count = controller.filteredTemplates.length;
             final isForYou = controller.activeTab.value == 'For you';
