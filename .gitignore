@@ -54,3 +54,5 @@ pnpm-debug.log*
 *.keystore
 **/.env*
 !**/.env.example
+.neon
+.env.local
