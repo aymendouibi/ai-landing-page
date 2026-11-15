@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
@@ -313,6 +314,56 @@ class ContinueEditingHeroCard extends StatelessWidget {
                           statusText,
                           style: AppTypography.helperOf(context),
                         ),
+                        if (website != null && (website!.status == 'published' || website!.status == 'live')) ...[
+                          const SizedBox(height: 5),
+                          GestureDetector(
+                            onTap: () {
+                              final sub = website!.subdomain ?? website!.slug;
+                              final fullUrl = 'https://www.ai-landing-page.xyz/sites/$sub';
+                              Clipboard.setData(ClipboardData(text: fullUrl));
+                              Get.snackbar(
+                                'Copied!',
+                                'Website link copied to clipboard',
+                                snackPosition: SnackPosition.BOTTOM,
+                                duration: const Duration(seconds: 2),
+                                backgroundColor: const Color(0xFF0F172A),
+                                colorText: Colors.white,
+                                margin: const EdgeInsets.all(16),
+                                borderRadius: 12,
+                              );
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  LucideIcons.globe,
+                                  size: 13,
+                                  color: Color(0xFF10B981),
+                                ),
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                    'www.ai-landing-page.xyz/sites/${website!.subdomain ?? website!.slug}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.inkMutedOf(context),
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                Icon(
+                                  LucideIcons.copy,
+                                  size: 12,
+                                  color: AppColors.inkMutedOf(context),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

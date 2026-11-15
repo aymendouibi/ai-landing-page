@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:aibuilder/core/localization/app_translations.dart';
+import 'package:aibuilder/core/models/website.dart';
 import 'package:aibuilder/features/editor/editor_controller.dart';
 import 'package:aibuilder/features/dashboard/components/recent_project_card.dart';
+import 'package:aibuilder/features/dashboard/components/continue_editing_hero_card.dart';
 import 'package:aibuilder/features/website_config/website_config_controller.dart';
 import 'package:aibuilder/features/website_config/widgets/website_config_publishing_card.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -96,6 +98,40 @@ void main() {
 
       // Tap Copy button and drain snackbar timer
       await tester.tap(find.text('Copy'));
+      await tester.pump(const Duration(seconds: 4));
+    });
+
+    testWidgets('ContinueEditingHeroCard displays live link and copy action when published', (tester) async {
+      final publishedSite = Website(
+        id: 'hero-site-1',
+        projectId: 'proj-1',
+        name: 'Lumen Coffee',
+        slug: 'lumen-coffee',
+        status: 'published',
+        subdomain: 'lumen-coffee',
+        revisionNumber: 1,
+      );
+
+      await tester.pumpWidget(
+        buildTestApp(
+          ContinueEditingHeroCard(
+            website: publishedSite,
+            onOpenClick: () {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify site title and live status
+      expect(find.text('Lumen Coffee'), findsWidgets);
+      expect(find.text('Live · Published recently'), findsOneWidget);
+
+      // Verify live domain and globe icon
+      expect(find.text('www.ai-landing-page.xyz/sites/lumen-coffee'), findsOneWidget);
+      expect(find.byIcon(LucideIcons.globe), findsOneWidget);
+
+      // Tap on the copy link and drain snackbar timer
+      await tester.tap(find.text('www.ai-landing-page.xyz/sites/lumen-coffee'));
       await tester.pump(const Duration(seconds: 4));
     });
   });
