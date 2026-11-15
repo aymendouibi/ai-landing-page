@@ -18,13 +18,26 @@ use Illuminate\Support\Facades\Route;
 
 // Root homepage / Editor canvas
 Route::get('/', function () {
+    if (request()->has('editor') || request()->is('canvas*')) {
+        $editorHtml = public_path('index.html');
+        if (file_exists($editorHtml)) {
+            return response()->file($editorHtml, [
+                'Content-Type' => 'text/html; charset=UTF-8',
+            ]);
+        }
+    }
+    return view('landing');
+});
+
+// Dedicated editor canvas route (always serves React WebView renderer)
+Route::get('/canvas', function () {
     $editorHtml = public_path('index.html');
     if (file_exists($editorHtml)) {
         return response()->file($editorHtml, [
             'Content-Type' => 'text/html; charset=UTF-8',
         ]);
     }
-    return view('welcome');
+    abort(404, 'Editor canvas not found');
 });
 
 // Admin Guest Routes (Login, Dev Quick-Login)
