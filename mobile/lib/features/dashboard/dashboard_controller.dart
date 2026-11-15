@@ -235,8 +235,10 @@ class DashboardController extends GetxController {
   void _generatePreviewItems() {
     final list = <WebsitePreviewItem>[];
 
-    // 1. Prioritize Studio Marlow and Kite Yoga showcase cards unless deleted
-    if (!deletedWebsiteIds.contains('showcase_studio_marlow') &&
+    // 1. Prioritize Studio Marlow and Kite Yoga showcase cards unless user has real website or deleted them
+    final hasRealMarlow = websites.any((w) => w.slug == 'studio-marlow' || w.id == 'showcase_studio_marlow');
+    if (!hasRealMarlow &&
+        !deletedWebsiteIds.contains('showcase_studio_marlow') &&
         !deletedWebsiteIds.contains('studio-marlow')) {
       list.add(
         const WebsitePreviewItem(
@@ -258,7 +260,9 @@ class DashboardController extends GetxController {
       );
     }
 
-    if (!deletedWebsiteIds.contains('showcase_kite_yoga') &&
+    final hasRealKite = websites.any((w) => w.slug == 'kite-yoga' || w.id == 'showcase_kite_yoga');
+    if (!hasRealKite &&
+        !deletedWebsiteIds.contains('showcase_kite_yoga') &&
         !deletedWebsiteIds.contains('kite-yoga')) {
       list.add(
         const WebsitePreviewItem(
@@ -280,10 +284,9 @@ class DashboardController extends GetxController {
       );
     }
 
-    // 2. Map other user websites from backend
+    // 2. Map all user websites from backend
     for (final site in websites) {
       if (deletedWebsiteIds.contains(site.id) || deletedWebsiteIds.contains(site.slug)) continue;
-      if (site.slug == 'studio-marlow' || site.slug == 'kite-yoga') continue;
 
       String headline = 'Crafted for Modern Growth';
       String body = 'Clean architecture, custom layout, and optimized speed for high conversion.';

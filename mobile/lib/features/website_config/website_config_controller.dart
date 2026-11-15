@@ -411,6 +411,10 @@ class WebsiteConfigController extends GetxController {
       );
       final updatedSite = res['website'] as Map<String, dynamic>?;
       if (updatedSite != null) {
+        if (updatedSite['id'] != null) {
+          websiteId.value = updatedSite['id'].toString();
+          currentWebsite.value = Website.fromJson(updatedSite);
+        }
         websiteName.value = updatedSite['name']?.toString() ?? targetName;
         subdomain.value = updatedSite['subdomain']?.toString() ?? targetSub;
         liveUrl.value = 'https://www.ai-landing-page.xyz/sites/${subdomain.value}';
@@ -449,8 +453,13 @@ class WebsiteConfigController extends GetxController {
       );
       return true;
     } catch (e) {
+      String message = e.toString().replaceFirst('Exception: ', '');
+      if (message.contains('No query results for model') ||
+          message.contains('ModelNotFoundException')) {
+        message = 'Website could not be found or has not been initialized.';
+      }
       AppSnackbar.error(
-        e.toString().replaceFirst('Exception: ', ''),
+        message,
         title: 'common_error'.tr,
       );
       return false;

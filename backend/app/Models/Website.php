@@ -146,6 +146,38 @@ class Website extends Model
             return $website;
         }
 
+        // 4. Lazy creation/restoration for authenticated user modifying/accessing a showcase site
+        if (str_starts_with($value, 'showcase_') || in_array($cleanSlug, ['studio-marlow', 'kite-yoga'])) {
+            $user = request()->user();
+            if ($user) {
+                $project = $user->projects()->first() ?? $user->projects()->create(['name' => 'My Projects']);
+
+                // Check if already exists for this project (including trashed)
+                $existing = $this->withTrashed()->where('project_id', $project->id)->where('slug', $cleanSlug)->first();
+                if ($existing) {
+                    if ($existing->trashed()) {
+                        $existing->restore();
+                    }
+                    return $existing;
+                }
+
+                $template = \App\Models\Template::where('slug', $cleanSlug)->first();
+                $name = $template?->name ?? ($cleanSlug === 'kite-yoga' ? 'Kite Yoga' : 'Studio Marlow');
+                $doc = $template?->document ?? \App\Services\Documents\DefaultDocumentFactory::createDefault($name);
+                $subdomain = str_replace('-', '', $cleanSlug) . '-' . strtolower(\Illuminate\Support\Str::random(5));
+
+                return $this->create([
+                    'project_id' => $project->id,
+                    'name' => $name,
+                    'slug' => $cleanSlug,
+                    'subdomain' => $subdomain,
+                    'status' => WebsiteStatus::Published,
+                    'revision_number' => 1,
+                    'document' => $doc,
+                ]);
+            }
+        }
+
         return null;
     }
 }

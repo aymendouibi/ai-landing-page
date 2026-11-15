@@ -378,5 +378,26 @@ class WebsiteTest extends TestCase
             'id' => $website->id,
         ]);
     }
+
+    public function test_user_can_update_showcase_website_by_showcase_id(): void
+    {
+        // Don't create Website in DB beforehand; it should auto-create from showcase ID
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson("/api/v1/websites/showcase_studio_marlow", [
+                'name' => 'Studio Marlow Architecture',
+                'subdomain' => 'marlow-arch',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('message', 'Website updated successfully.')
+            ->assertJsonPath('website.name', 'Studio Marlow Architecture')
+            ->assertJsonPath('website.subdomain', 'marlow-arch');
+
+        $this->assertDatabaseHas('websites', [
+            'slug' => 'studio-marlow',
+            'name' => 'Studio Marlow Architecture',
+            'subdomain' => 'marlow-arch',
+        ]);
+    }
 }
 
