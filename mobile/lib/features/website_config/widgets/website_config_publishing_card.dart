@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../website_config_controller.dart';
 
 class WebsiteConfigPublishingCard extends StatelessWidget {
@@ -185,6 +187,92 @@ class WebsiteConfigPublishingCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 12.5,
                 color: Color(0xFF94A3B8),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Live URL card with 1-click Copy
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF161922),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isLive
+                      ? const Color(0xFF10B981).withValues(alpha: 0.35)
+                      : Colors.white.withValues(alpha: 0.08),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    LucideIcons.globe,
+                    size: 16,
+                    color: isLive ? const Color(0xFF34D399) : const Color(0xFF94A3B8),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      controller.liveUrl.value.isNotEmpty
+                          ? controller.liveUrl.value
+                          : 'https://www.ai-landing-page.xyz/sites/${controller.subdomain.value}',
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      final url = controller.liveUrl.value.isNotEmpty
+                          ? controller.liveUrl.value
+                          : 'https://www.ai-landing-page.xyz/sites/${controller.subdomain.value}';
+                      Clipboard.setData(ClipboardData(text: url));
+                      Get.snackbar(
+                        'Copied!',
+                        'Website link copied to clipboard',
+                        snackPosition: SnackPosition.BOTTOM,
+                        duration: const Duration(seconds: 2),
+                        backgroundColor: const Color(0xFF0F172A),
+                        colorText: Colors.white,
+                        margin: const EdgeInsets.all(16),
+                        borderRadius: 12,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: isLive
+                            ? const Color(0xFF10B981).withValues(alpha: 0.20)
+                            : Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            LucideIcons.copy,
+                            size: 12,
+                            color: isLive ? const Color(0xFF34D399) : Colors.white70,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Copy',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.bold,
+                              color: isLive ? const Color(0xFF34D399) : Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

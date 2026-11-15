@@ -435,7 +435,7 @@ class EditorController extends GetxController {
       final host = Platform.isAndroid ? '10.0.2.2' : '127.0.0.1';
       return 'http://$host:3000/?editor=true';
     }
-    return 'https://ai-landing-page.xyz/?editor=true';
+    return 'https://www.ai-landing-page.xyz/?editor=true';
   }
 
   void _initWebView() {
@@ -3001,18 +3001,44 @@ class EditorController extends GetxController {
               const SizedBox(height: 14),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: SelectableText(
-                  liveUrl,
-                  style: const TextStyle(
-                    color: Color(0xFF0F172A),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SelectableText(
+                        liveUrl,
+                        style: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    IconButton(
+                      icon: const Icon(LucideIcons.copy, size: 16, color: Color(0xFF475569)),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: liveUrl));
+                        Get.snackbar(
+                          'Copied!',
+                          'Website link copied to clipboard',
+                          snackPosition: SnackPosition.BOTTOM,
+                          duration: const Duration(seconds: 2),
+                          backgroundColor: const Color(0xFF0F172A),
+                          colorText: Colors.white,
+                          margin: const EdgeInsets.all(16),
+                          borderRadius: 12,
+                        );
+                      },
+                      tooltip: 'Copy link',
+                    ),
+                  ],
                 ),
               ),
             ],

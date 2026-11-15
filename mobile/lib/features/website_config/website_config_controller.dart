@@ -242,7 +242,7 @@ class WebsiteConfigController extends GetxController {
     subdomainController.text = site.subdomain ?? site.slug;
     status.value = site.status;
     final sub = site.subdomain ?? site.slug;
-    liveUrl.value = 'https://$sub.sites.aibuilder.app';
+    liveUrl.value = 'https://www.ai-landing-page.xyz/sites/$sub';
     final baseSlug = site.slug.isNotEmpty
         ? site.slug
         : (site.subdomain ?? 'portfolio');
@@ -406,7 +406,7 @@ class WebsiteConfigController extends GetxController {
       if (updatedSite != null) {
         websiteName.value = updatedSite['name']?.toString() ?? targetName;
         subdomain.value = updatedSite['subdomain']?.toString() ?? targetSub;
-        liveUrl.value = 'https://${subdomain.value}.sites.aibuilder.app';
+        liveUrl.value = 'https://www.ai-landing-page.xyz/sites/${subdomain.value}';
       }
       if (Get.isRegistered<DashboardController>()) {
         Get.find<DashboardController>().loadData();

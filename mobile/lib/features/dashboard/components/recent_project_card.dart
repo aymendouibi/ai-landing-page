@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
@@ -96,15 +97,20 @@ class RecentProjectCard extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              item.title,
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: item.isSerif ? 'serif' : null,
-                                color: const Color(0xFF1E1E24),
+                            Expanded(
+                              child: Text(
+                                item.title,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: item.isSerif ? 'serif' : null,
+                                  color: const Color(0xFF1E1E24),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            const SizedBox(width: 8),
                             // Clean 2-bar modern mobile menu icon
                             Column(
                               mainAxisSize: MainAxisSize.min,
@@ -279,14 +285,45 @@ class RecentProjectCard extends StatelessWidget {
                   if (item.domain != null && item.domain!.isNotEmpty) ...[
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        item.domain!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.inkMutedOf(context),
+                      child: GestureDetector(
+                        onTap: () {
+                          final fullUrl = item.domain!.startsWith('http')
+                              ? item.domain!
+                              : 'https://${item.domain}';
+                          Clipboard.setData(ClipboardData(text: fullUrl));
+                          Get.snackbar(
+                            'Copied!',
+                            'Website link copied to clipboard',
+                            snackPosition: SnackPosition.BOTTOM,
+                            duration: const Duration(seconds: 2),
+                            backgroundColor: const Color(0xFF0F172A),
+                            colorText: Colors.white,
+                            margin: const EdgeInsets.all(16),
+                            borderRadius: 12,
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                item.domain!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.inkMutedOf(context),
+                                  decoration: TextDecoration.underline,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              LucideIcons.copy,
+                              size: 11,
+                              color: AppColors.inkMutedOf(context),
+                            ),
+                          ],
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

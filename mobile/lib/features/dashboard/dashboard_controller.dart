@@ -358,7 +358,9 @@ class DashboardController extends GetxController {
           isSerif: isSerif,
           bgCanvasColor: bgCanvasColor,
           isLive: isLive,
-          domain: isLive ? (site.subdomain != null ? '${site.subdomain}.com' : '${site.slug}.com') : null,
+          domain: isLive
+              ? 'www.ai-landing-page.xyz/sites/${site.subdomain ?? site.slug}'
+              : null,
           timeAgo: isLive ? null : 'Draft · Edited recently',
         ),
       );
