@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Enums\WebsiteStatus;
+use App\Models\Template;
 use App\Models\Website;
+use App\Services\Compiler\WebsiteCompilerService;
 use App\Services\Hosting\CloudflareHostingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -13,7 +15,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class PublicSiteController extends Controller
 {
     /**
-     * Serve a published website's static files.
+     * Serve a website's static files.
      *
      * Supports both path-based routing (/sites/{subdomain} or /{subdomain})
      * and subdomain routing ({subdomain}.our-domain.com).
@@ -25,14 +27,38 @@ class PublicSiteController extends Controller
             abort(404);
         }
 
-        // 2. Find published website by subdomain or slug
+        // 2. Find website by subdomain or slug
         $website = Website::where(function ($query) use ($subdomain) {
             $query->where('subdomain', $subdomain)
                   ->orWhere('slug', $subdomain);
-        })->where('status', WebsiteStatus::Published)->first();
+        })->first();
+
+        // 3. Fallback: Check for showcase sites (e.g. studiomarlow, kiteyoga, studio-marlow, kite-yoga)
+        if (!$website) {
+            $cleanSlug = str_replace('_', '-', preg_replace('/^(showcase_|demo_)/', '', strtolower($subdomain)));
+            if (in_array($cleanSlug, ['studio-marlow', 'kite-yoga', 'studiomarlow', 'kiteyoga'])) {
+                $templateSlug = str_contains($cleanSlug, 'marlow') ? 'studio-marlow' : 'kite-yoga';
+                $template = Template::where('slug', $templateSlug)->first();
+                if ($template) {
+                    $defaultUser = \App\Models\User::first();
+                    $project = $defaultUser?->projects()->first();
+                    if ($project) {
+                        $website = Website::create([
+                            'project_id' => $project->id,
+                            'name' => $template->name,
+                            'slug' => $templateSlug,
+                            'subdomain' => str_replace('-', '', $templateSlug),
+                            'status' => WebsiteStatus::Published,
+                            'revision_number' => 1,
+                            'document' => $template->document,
+                        ]);
+                    }
+                }
+            }
+        }
 
         if (!$website) {
-            abort(404, 'Website not found or unpublished.');
+            abort(404, 'Website not found.');
         }
 
         $disk = Storage::disk('hosting');
@@ -41,6 +67,25 @@ class PublicSiteController extends Controller
         // Determine target file inside the site's live directory
         $targetFile = empty($path) ? 'index.html' : ltrim($path, '/');
         $storagePath = "{$liveBasePath}/{$targetFile}";
+
+        // If file not compiled yet, or if it was marked unavailable, auto-compile on demand
+        $needsCompilation = !$disk->exists($storagePath) ||
+            ($targetFile === 'index.html' && str_contains($disk->get($storagePath) ?? '', 'Website Unavailable'));
+
+        if ($needsCompilation && $website->document) {
+            try {
+                $compiler = app(WebsiteCompilerService::class);
+                $compiledBundle = $compiler->compile($website);
+                foreach ($compiledBundle as $bundlePath => $bundleContent) {
+                    $disk->put("{$liveBasePath}/{$bundlePath}", $bundleContent);
+                }
+                if ($website->status !== WebsiteStatus::Published) {
+                    $website->update(['status' => WebsiteStatus::Published, 'published_at' => now()]);
+                }
+            } catch (\Throwable $e) {
+                // If compiler fails, proceed to normal disk check
+            }
+        }
 
         // If file not found, try serving 404.html from the compiled bundle
         if (!$disk->exists($storagePath)) {

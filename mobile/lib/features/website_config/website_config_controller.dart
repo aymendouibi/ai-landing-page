@@ -455,7 +455,31 @@ class WebsiteConfigController extends GetxController {
     } catch (e) {
       String message = e.toString().replaceFirst('Exception: ', '');
       if (message.contains('No query results for model') ||
-          message.contains('ModelNotFoundException')) {
+          message.contains('ModelNotFoundException') ||
+          websiteId.value.startsWith('showcase_')) {
+        try {
+          // Auto-promote showcase to a real website record
+          final projects = await ApiClient.getProjects();
+          final projId = projects.isNotEmpty ? projects.first.id : 'default';
+          final newSite = await ApiClient.createWebsite(
+            targetName,
+            projId,
+            document: currentWebsite.value?.document,
+          );
+          websiteId.value = newSite.id;
+          currentWebsite.value = newSite;
+          websiteName.value = newSite.name;
+          subdomain.value = newSite.subdomain ?? newSite.slug;
+          liveUrl.value = 'https://www.ai-landing-page.xyz/sites/${subdomain.value}';
+          if (Get.isRegistered<DashboardController>()) {
+            Get.find<DashboardController>().loadData();
+          }
+          AppSnackbar.success(
+            'site_settings_saved_success'.tr,
+            title: 'site_settings_saved_title'.tr,
+          );
+          return true;
+        } catch (_) {}
         message = 'Website could not be found or has not been initialized.';
       }
       AppSnackbar.error(
@@ -495,7 +519,11 @@ class WebsiteConfigController extends GetxController {
       final targetSlug = currentWebsite.value?.slug;
 
       // 1. Delete on backend (resolves by UUID, slug, or showcase ID, and treats 404 gracefully)
-      await ApiClient.deleteWebsite(targetId);
+      try {
+        await ApiClient.deleteWebsite(targetId);
+      } catch (_) {
+        // Backend record might already be deleted or is a local showcase demo; continue cleanly
+      }
 
       // 2. Persist deleted ID locally so showcase cards never reappear on dashboard
       await SessionManager.markWebsiteDeleted(targetId);
