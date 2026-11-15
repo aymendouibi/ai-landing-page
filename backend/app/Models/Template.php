@@ -16,11 +16,16 @@ class Template extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $fillable = [
+        'user_id',
         'category_id',
         'name',
         'slug',
         'description',
         'industry',
+        'badge',
+        'is_featured',
+        'is_public',
+        'source_website_id',
         'preview_images',
         'status',
         'license_type',
@@ -35,8 +40,30 @@ class Template extends Model
             'status' => TemplateStatus::class,
             'preview_images' => 'array',
             'is_premium' => 'boolean',
+            'is_featured' => 'boolean',
+            'is_public' => 'boolean',
             'use_count' => 'integer',
         ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function sourceWebsite(): BelongsTo
+    {
+        return $this->belongsTo(Website::class, 'source_website_id');
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->where('is_featured', true);
+    }
+
+    public function scopeCommunity($query)
+    {
+        return $query->whereNotNull('user_id');
     }
 
     public function category(): BelongsTo

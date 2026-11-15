@@ -17,7 +17,8 @@ class OpenRouterClient
      * @var array<string>
      */
     public const DEFAULT_FALLBACK_MODELS = [
-        'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'google/gemini-2.5-flash',
+        'google/gemini-2.5-flash-lite',
         'nvidia/nemotron-3.5-lightning:free',
     ];
 
@@ -52,7 +53,17 @@ class OpenRouterClient
         if ($preferredModel) {
             $modelsToTry[] = $preferredModel;
         }
-        foreach (self::DEFAULT_FALLBACK_MODELS as $fallback) {
+
+        $configuredFallbacks = config('services.openrouter.fallback_models');
+        if (!empty($configuredFallbacks)) {
+            $fallbackList = is_array($configuredFallbacks)
+                ? $configuredFallbacks
+                : array_filter(array_map('trim', explode(',', (string) $configuredFallbacks)));
+        } else {
+            $fallbackList = self::DEFAULT_FALLBACK_MODELS;
+        }
+
+        foreach ($fallbackList as $fallback) {
             if (!in_array($fallback, $modelsToTry, true)) {
                 $modelsToTry[] = $fallback;
             }
@@ -93,7 +104,7 @@ class OpenRouterClient
             'model' => $model,
             'messages' => $messages,
             'temperature' => 0.7,
-            'max_tokens' => 8000,
+            'max_tokens' => 2500,
         ], $parameters);
 
         if ($jsonMode) {

@@ -12,6 +12,7 @@ import { Footer } from './Footer';
 import { Products } from './Products';
 import { Gallery } from './Gallery';
 import { TextSection } from './TextSection';
+import { ImageSection } from './ImageSection';
 
 export const COMPONENT_MAP: Record<string, React.FC<any>> = {
   hero: Hero,
@@ -31,6 +32,7 @@ export const COMPONENT_MAP: Record<string, React.FC<any>> = {
   visit: Contact,
   forms: Contact,
   footer: Footer,
+  image: ImageSection,
 };
 
 export const renderComponent = (section: SectionConfig): React.ReactNode => {

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/designsystem/colors.dart';
-import '../../core/designsystem/typography.dart';
+import '../dashboard/dashboard_controller.dart';
+import '../profile/components/subscription_plan_sheet.dart';
 import 'ai_creation_controller.dart';
 
 class AiCreationScreen extends StatelessWidget {
@@ -11,19 +12,20 @@ class AiCreationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AiCreationController());
+    final isDark = AppColors.isDark(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundOf(context),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.ink),
+          icon: Icon(LucideIcons.arrowLeft, color: AppColors.inkOf(context)),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'AI Website Creator',
-          style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold),
+        title: Text(
+          'ai_creator_title'.tr,
+          style: TextStyle(color: AppColors.inkOf(context), fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(
@@ -35,9 +37,9 @@ class AiCreationScreen extends StatelessWidget {
               // Staged AI Info Banner
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.borderSubtle),
+                  border: Border.all(color: AppColors.borderSubtleOf(context)),
                 ),
                 padding: const EdgeInsets.all(18),
                 child: Row(
@@ -52,24 +54,24 @@ class AiCreationScreen extends StatelessWidget {
                       child: const Icon(LucideIcons.sparkles, color: AppColors.atmosphereViolet),
                     ),
                     const SizedBox(width: 14),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Staged AI Generator',
+                            'ai_creator_badge'.tr,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.ink,
+                              color: AppColors.inkOf(context),
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            'Tell AI about your business. It extracts brand identity, design tokens, plans sections, and writes conversion copy.',
+                            'ai_creator_desc'.tr,
                             style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.inkMuted,
+                              color: AppColors.inkMutedOf(context),
                               height: 1.35,
                             ),
                           ),
@@ -80,7 +82,141 @@ class AiCreationScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
+
+              // Generation Credits Card
+              if (Get.isRegistered<DashboardController>()) ...[
+                Builder(builder: (context) {
+                  final dc = Get.find<DashboardController>();
+                  return Obx(() {
+                    final isPro = dc.isPremium;
+                    final used = dc.aiGenerationsUsed.value;
+                    final max = dc.aiGenerationsMonthly.value;
+                    final remaining = (max - used).clamp(0, max);
+                    final isExhausted = max > 0 && used >= max;
+
+                    final cardBg = isExhausted
+                        ? (isDark ? const Color(0xFF450A0A) : Colors.red.shade50)
+                        : (isPro
+                            ? const Color(0xFF7C5CFF).withValues(alpha: isDark ? 0.2 : 0.08)
+                            : AppColors.surfaceOf(context));
+                    final cardBorder = isExhausted
+                        ? (isDark ? const Color(0xFF991B1B) : Colors.red.shade200)
+                        : (isPro
+                            ? const Color(0xFF7C5CFF).withValues(alpha: 0.3)
+                            : AppColors.borderSubtleOf(context));
+                    final iconBg = isExhausted
+                        ? (isDark ? const Color(0xFF7F1D1D) : Colors.red.shade100)
+                        : (isPro
+                            ? const Color(0xFF7C5CFF).withValues(alpha: 0.15)
+                            : AppColors.surfaceMutedOf(context));
+                    final iconColor = isExhausted
+                        ? (isDark ? const Color(0xFFFCA5A5) : Colors.red.shade700)
+                        : (isPro ? const Color(0xFF7C5CFF) : AppColors.inkSecondaryOf(context));
+                    final titleColor = isExhausted
+                        ? (isDark ? const Color(0xFFFCA5A5) : Colors.red.shade900)
+                        : AppColors.inkOf(context);
+                    final badgeBg = isPro ? const Color(0xFF7C5CFF) : AppColors.surfaceMutedOf(context);
+                    final badgeTextColor = isPro ? Colors.white : AppColors.inkMutedOf(context);
+                    final subtitleColor = isExhausted
+                        ? (isDark ? const Color(0xFFF87171) : Colors.red.shade700)
+                        : AppColors.inkMutedOf(context);
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 18),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: cardBorder),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: iconBg,
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Icon(
+                              isExhausted ? LucideIcons.circleAlert : LucideIcons.zap,
+                              size: 18,
+                              color: iconColor,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      isPro ? 'Premium AI Pipeline' : 'Free Tier Credits',
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: titleColor,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                      decoration: BoxDecoration(
+                                        color: badgeBg,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        isPro ? '90 GENS' : '4 GENS',
+                                        style: TextStyle(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w800,
+                                          color: badgeTextColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  isExhausted
+                                      ? 'Monthly limit reached. Upgrade to Premium for 90 generations!'
+                                      : '$used / $max used ($remaining remaining this month)',
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    color: subtitleColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (!isPro)
+                            GestureDetector(
+                              onTap: () => SubscriptionPlanSheet.show(context),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF7C5CFF),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'common_upgrade'.tr,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  });
+                }),
+              ],
 
               // Error display
               Obx(() {
@@ -90,18 +226,25 @@ class AiCreationScreen extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 18),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
+                    color: isDark ? const Color(0xFF450A0A) : Colors.red.shade50,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.red.shade200),
+                    border: Border.all(color: isDark ? const Color(0xFF991B1B) : Colors.red.shade200),
                   ),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.circleAlert, color: Colors.red.shade700, size: 20),
+                      Icon(
+                        LucideIcons.circleAlert,
+                        color: isDark ? const Color(0xFFFCA5A5) : Colors.red.shade700,
+                        size: 20,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           error,
-                          style: TextStyle(color: Colors.red.shade800, fontSize: 13),
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFFFCA5A5) : Colors.red.shade800,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],
@@ -110,25 +253,35 @@ class AiCreationScreen extends StatelessWidget {
               }),
 
               // Input Prompt
-              const Text(
-                'Describe your business or website idea',
-                style: AppTypography.itemTitle,
+              Text(
+                'ai_creator_prompt_hint'.tr,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.inkOf(context),
+                ),
               ),
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderSubtle),
+                  border: Border.all(color: AppColors.borderSubtleOf(context)),
                 ),
                 child: TextField(
                   controller: controller.promptController,
                   maxLines: 5,
-                  decoration: const InputDecoration(
-                    hintText:
-                        'e.g. Create a sleek portfolio website for a modern architecture and urban design studio named Apex Form Studio with high-converting sections and clean minimalist typography.',
-                    hintStyle: TextStyle(color: Color(0xFF9E9EA7), fontSize: 14),
-                    contentPadding: EdgeInsets.all(16),
+                  style: TextStyle(
+                    color: AppColors.inkOf(context),
+                    fontSize: 14,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'ai_creator_prompt_placeholder'.tr,
+                    hintStyle: TextStyle(
+                      color: AppColors.inkMutedOf(context),
+                      fontSize: 14,
+                    ),
+                    contentPadding: const EdgeInsets.all(16),
                     border: InputBorder.none,
                   ),
                 ),
@@ -137,7 +290,14 @@ class AiCreationScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Industry Selector Chips
-              const Text('Select Industry', style: AppTypography.itemTitle),
+              Text(
+                'select_industry'.tr,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.inkOf(context),
+                ),
+              ),
               const SizedBox(height: 10),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -153,17 +313,19 @@ class AiCreationScreen extends StatelessWidget {
                           onSelected: (selected) {
                             if (selected) controller.setIndustry(ind);
                           },
-                          selectedColor: AppColors.ink,
-                          backgroundColor: AppColors.surface,
+                          selectedColor: isDark ? Colors.white : AppColors.ink,
+                          backgroundColor: AppColors.surfaceOf(context),
                           labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : AppColors.ink,
+                            color: isSelected
+                                ? (isDark ? const Color(0xFF0F172A) : Colors.white)
+                                : AppColors.inkOf(context),
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                             fontSize: 13,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(999),
                             side: BorderSide(
-                              color: isSelected ? Colors.transparent : AppColors.borderSubtle,
+                              color: isSelected ? Colors.transparent : AppColors.borderSubtleOf(context),
                             ),
                           ),
                           showCheckmark: false,
@@ -226,14 +388,14 @@ class AiCreationScreen extends StatelessWidget {
                             height: 24,
                             child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                           )
-                        : const Row(
+                        : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(LucideIcons.sparkles, size: 20),
-                              SizedBox(width: 8),
+                              const Icon(LucideIcons.sparkles, size: 20),
+                              const SizedBox(width: 8),
                               Text(
-                                'Generate Website with AI',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                'generate_website_btn'.tr,
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),

@@ -31,8 +31,9 @@ export const About: React.FC<AboutProps> = ({ props, styles = {} }) => {
           {props.image && (
             <div>
               <img
-                src={props.image.src}
-                alt={props.image.alt || props.headline}
+                src={typeof props.image === 'string' ? props.image : (props.image.src || (props.image as any).url || '')}
+                alt={typeof props.image === 'string' ? props.headline : (props.image.alt || props.headline)}
+                key={typeof props.image === 'string' ? props.image : (props.image.src || (props.image as any).url)}
                 style={{
                   width: '100%',
                   borderRadius: 'var(--radius-lg)',

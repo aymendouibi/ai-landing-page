@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  // Light mode colors
   static const background = Color(0xFFF4F5FA);
   static const surface = Color(0xFFFFFFFF);
   static const surfaceMuted = Color(0xFFECEEF4);
@@ -20,5 +21,34 @@ class AppColors {
 
   static const aiCardWashStart = Color(0xFFF6F4FF);
   static const aiCardWashEnd = Color(0xFFEFF8FF);
+
+  // Dark mode colors
+  static const darkBackground = Color(0xFF0B0F17);
+  static const darkSurface = Color(0xFF161E2E);
+  static const darkSurfaceMuted = Color(0xFF1E293B);
+  static const darkSurfaceNeutral = Color(0xFF243046);
+
+  static const darkInk = Color(0xFFF8FAFC);
+  static const darkInkSecondary = Color(0xFFCBD5E1);
+  static const darkInkMuted = Color(0xFF94A3B8);
+
+  static const darkBorderSubtle = Color(0x1AFFFFFF);
+  static const darkBorderStrong = Color(0x33FFFFFF);
+
+  static const darkAiCardWashStart = Color(0xFF1E1B4B);
+  static const darkAiCardWashEnd = Color(0xFF0F172A);
+
+  // Dynamic context-aware helpers
+  static bool isDark(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+
+  static Color backgroundOf(BuildContext context) => isDark(context) ? darkBackground : background;
+  static Color surfaceOf(BuildContext context) => isDark(context) ? darkSurface : surface;
+  static Color surfaceMutedOf(BuildContext context) => isDark(context) ? darkSurfaceMuted : surfaceMuted;
+  static Color surfaceNeutralOf(BuildContext context) => isDark(context) ? darkSurfaceNeutral : surfaceNeutral;
+  static Color inkOf(BuildContext context) => isDark(context) ? darkInk : ink;
+  static Color inkSecondaryOf(BuildContext context) => isDark(context) ? darkInkSecondary : inkSecondary;
+  static Color inkMutedOf(BuildContext context) => isDark(context) ? darkInkMuted : inkMuted;
+  static Color borderSubtleOf(BuildContext context) => isDark(context) ? darkBorderSubtle : borderSubtle;
+  static Color borderStrongOf(BuildContext context) => isDark(context) ? darkBorderStrong : borderStrong;
 }
 

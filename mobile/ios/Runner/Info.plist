@@ -52,5 +52,22 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library so you can upload images to your website.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera so you can take photos to upload to your website.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>Payment return</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ai-landing-page</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

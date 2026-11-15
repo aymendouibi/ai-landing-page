@@ -282,5 +282,101 @@ class WebsiteTest extends TestCase
             ]);
         $resUpdate->assertStatus(403);
     }
+
+    public function test_user_can_create_blank_website_with_custom_document(): void
+    {
+        $blankDoc = [
+            'schema_version' => 1,
+            'site' => [
+                'name' => 'Blank Site',
+                'theme' => [
+                    'colors' => ['primary' => '#000000', 'background' => '#FFFFFF'],
+                    'typography' => ['headingFamily' => 'Inter', 'bodyFamily' => 'Inter'],
+                ],
+                'settings' => ['language' => 'en'],
+            ],
+            'navigation' => ['logo' => ['text' => 'Blank Site'], 'items' => []],
+            'pages' => [
+                ['id' => 'page_home', 'slug' => '/', 'title' => 'Home', 'sections' => []],
+            ],
+        ];
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/v1/websites', [
+                'project_id' => $this->project->id,
+                'name' => 'Blank Site',
+                'document' => $blankDoc,
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('website.name', 'Blank Site')
+            ->assertJsonPath('website.document.schema_version', 1);
+    }
+
+    public function test_user_can_delete_website_by_uuid(): void
+    {
+        $website = Website::create([
+            'project_id' => $this->project->id,
+            'name' => 'To Be Deleted',
+            'slug' => 'to-be-deleted',
+            'status' => 'draft',
+            'document' => DefaultDocumentFactory::createDefault('To Be Deleted'),
+            'revision_number' => 1,
+        ]);
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->deleteJson("/api/v1/websites/{$website->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('message', 'Website deleted successfully.');
+
+        $this->assertSoftDeleted('websites', [
+            'id' => $website->id,
+        ]);
+    }
+
+    public function test_user_can_delete_website_by_slug(): void
+    {
+        $website = Website::create([
+            'project_id' => $this->project->id,
+            'name' => 'Slug Deletion Test',
+            'slug' => 'slug-deletion-test',
+            'status' => 'draft',
+            'document' => DefaultDocumentFactory::createDefault('Slug Deletion Test'),
+            'revision_number' => 1,
+        ]);
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->deleteJson("/api/v1/websites/{$website->slug}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('message', 'Website deleted successfully.');
+
+        $this->assertSoftDeleted('websites', [
+            'id' => $website->id,
+        ]);
+    }
+
+    public function test_user_can_delete_showcase_website_by_showcase_id(): void
+    {
+        $website = Website::create([
+            'project_id' => $this->project->id,
+            'name' => 'Studio Marlow',
+            'slug' => 'studio-marlow',
+            'status' => 'published',
+            'document' => DefaultDocumentFactory::createDefault('Studio Marlow'),
+            'revision_number' => 1,
+        ]);
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->deleteJson("/api/v1/websites/showcase_studio_marlow");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('message', 'Website deleted successfully.');
+
+        $this->assertSoftDeleted('websites', [
+            'id' => $website->id,
+        ]);
+    }
 }
 

@@ -1,11 +1,14 @@
+import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
 import '../../../core/designsystem/gradients.dart';
 import '../../../core/designsystem/typography.dart';
+import '../../../core/widgets/app_showcase.dart';
 
-class NewWebsiteBottomSheet extends StatelessWidget {
+class NewWebsiteBottomSheet extends StatefulWidget {
   final VoidCallback onDescribeToAi;
   final VoidCallback onStartFromTemplate;
   final VoidCallback onBlankWebsite;
@@ -25,7 +28,7 @@ class NewWebsiteBottomSheet extends StatelessWidget {
   }) {
     return showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.surfaceOf(context),
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -48,7 +51,21 @@ class NewWebsiteBottomSheet extends StatelessWidget {
   }
 
   @override
+  State<NewWebsiteBottomSheet> createState() => _NewWebsiteBottomSheetState();
+}
+
+class _NewWebsiteBottomSheetState extends State<NewWebsiteBottomSheet> {
+  final _aiLandingKey = GlobalKey();
+  final _blankKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!Platform.environment.containsKey('FLUTTER_TEST') && !Get.testMode) {
+        AppShowcase.start(context, [_aiLandingKey, _blankKey]);
+      }
+    });
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -63,7 +80,7 @@ class NewWebsiteBottomSheet extends StatelessWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceMuted,
+                  color: AppColors.surfaceMutedOf(context),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -75,12 +92,12 @@ class NewWebsiteBottomSheet extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'New website',
+                  Text(
+                    'new_website'.tr,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.ink,
+                      color: AppColors.inkOf(context),
                     ),
                   ),
 
@@ -90,14 +107,14 @@ class NewWebsiteBottomSheet extends StatelessWidget {
                     child: Container(
                       width: 36,
                       height: 36,
-                      decoration: const BoxDecoration(
-                        color: AppColors.surfaceNeutral,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceNeutralOf(context),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         LucideIcons.x,
                         size: 18,
-                        color: AppColors.ink,
+                        color: AppColors.inkOf(context),
                       ),
                     ),
                   ),
@@ -107,41 +124,55 @@ class NewWebsiteBottomSheet extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // Option 1: "Describe it to AI"
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onDescribeToAi,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: AppGradients.aiCardGradient,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.borderSubtle, width: 1.0),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                child: Row(
-                  children: [
-                    // 3D Luminous AI Orb
-                    const _LuminousAiOrb(size: 52),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Describe it to AI', style: AppTypography.itemTitle),
-                          SizedBox(height: 3),
-                          Text(
-                            'Get a full first draft from one sentence',
-                            style: AppTypography.helper,
-                          ),
-                        ],
+            // Option 1: "Describe it to AI" (Showcased)
+            AppShowcase.item(
+              key: _aiLandingKey,
+              title: 'showcase_step1_title'.tr,
+              description: 'showcase_step1_desc'.tr,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: widget.onDescribeToAi,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: AppGradients.aiCardGradientOf(context),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: AppColors.borderSubtleOf(context),
+                      width: 1.0,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 18,
+                  ),
+                  child: Row(
+                    children: [
+                      // 3D Luminous AI Orb
+                      const _LuminousAiOrb(size: 52),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'describe_to_ai'.tr,
+                              style: AppTypography.itemTitleOf(context),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'describe_to_ai_desc'.tr,
+                              style: AppTypography.helperOf(context),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const Icon(
-                      LucideIcons.chevronRight,
-                      size: 18,
-                      color: AppColors.inkMuted,
-                    ),
-                  ],
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 18,
+                        color: AppColors.inkMutedOf(context),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -151,14 +182,20 @@ class NewWebsiteBottomSheet extends StatelessWidget {
             // Option 2: "Start from a template"
             GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: onStartFromTemplate,
+              onTap: widget.onStartFromTemplate,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.borderSubtle, width: 1.0),
+                  border: Border.all(
+                    color: AppColors.borderSubtleOf(context),
+                    width: 1.0,
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 18,
+                ),
                 child: Row(
                   children: [
                     // Template Stack Thumbnail
@@ -167,20 +204,23 @@ class NewWebsiteBottomSheet extends StatelessWidget {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Start from a template', style: AppTypography.itemTitle),
-                          SizedBox(height: 3),
+                        children: [
                           Text(
-                            'Browse designs by category',
-                            style: AppTypography.helper,
+                            'start_from_template'.tr,
+                            style: AppTypography.itemTitleOf(context),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'start_from_template_desc'.tr,
+                            style: AppTypography.helperOf(context),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       LucideIcons.chevronRight,
                       size: 18,
-                      color: AppColors.inkMuted,
+                      color: AppColors.inkMutedOf(context),
                     ),
                   ],
                 ),
@@ -189,46 +229,60 @@ class NewWebsiteBottomSheet extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // Option 3: "Blank website"
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onBlankWebsite,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.borderSubtle, width: 1.0),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                child: Row(
-                  children: [
-                    // Dashed Box with '+'
-                    const _DashedPlusBox(size: 52),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Blank website', style: AppTypography.itemTitle),
-                          SizedBox(height: 3),
-                          Text(
-                            'Build it section by section',
-                            style: AppTypography.helper,
-                          ),
-                        ],
+            // Option 3: "Blank website" (Showcased)
+            AppShowcase.item(
+              key: _blankKey,
+              title: 'showcase_step2_title'.tr,
+              description: 'showcase_step2_desc'.tr,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: widget.onBlankWebsite,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceOf(context),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: AppColors.borderSubtleOf(context),
+                      width: 1.0,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 18,
+                  ),
+                  child: Row(
+                    children: [
+                      // Dashed Box with '+'
+                      const _DashedPlusBox(size: 52),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'blank_website'.tr,
+                              style: AppTypography.itemTitleOf(context),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'blank_website_desc'.tr,
+                              style: AppTypography.helperOf(context),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const Icon(
-                      LucideIcons.chevronRight,
-                      size: 18,
-                      color: AppColors.inkMuted,
-                    ),
-                  ],
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 18,
+                        color: AppColors.inkMutedOf(context),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -245,9 +299,7 @@ class _LuminousAiOrb extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _AiOrbPainter(),
-      ),
+      child: CustomPaint(painter: _AiOrbPainter()),
     );
   }
 }
@@ -286,13 +338,16 @@ class _AiOrbPainter extends CustomPainter {
     // 3. Specular Highlight Reflection
     final highlightCenter = Offset(size.width * 0.34, size.height * 0.30);
     final highlightPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          Colors.white.withValues(alpha: 0.95),
-          Colors.white.withValues(alpha: 0.25),
-          Colors.transparent,
-        ],
-      ).createShader(Rect.fromCircle(center: highlightCenter, radius: radius * 0.45));
+      ..shader =
+          RadialGradient(
+            colors: [
+              Colors.white.withValues(alpha: 0.95),
+              Colors.white.withValues(alpha: 0.25),
+              Colors.transparent,
+            ],
+          ).createShader(
+            Rect.fromCircle(center: highlightCenter, radius: radius * 0.45),
+          );
     canvas.drawCircle(highlightCenter, radius * 0.45, highlightPaint);
   }
 
@@ -320,9 +375,16 @@ class _TemplateStackThumbnail extends StatelessWidget {
               width: 32,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFFE2E8F0),
+                color: AppColors.isDark(context)
+                    ? const Color(0xFF334155)
+                    : const Color(0xFFE2E8F0),
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: const Color(0xFFCBD5E1), width: 0.5),
+                border: Border.all(
+                  color: AppColors.isDark(context)
+                      ? const Color(0xFF475569)
+                      : const Color(0xFFCBD5E1),
+                  width: 0.5,
+                ),
               ),
             ),
           ),
@@ -335,9 +397,14 @@ class _TemplateStackThumbnail extends StatelessWidget {
               width: 34,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surfaceOf(context),
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: const Color(0xFF475569), width: 0.8),
+                border: Border.all(
+                  color: AppColors.isDark(context)
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF475569),
+                  width: 0.8,
+                ),
               ),
               padding: const EdgeInsets.all(2.5),
               child: Column(
@@ -347,7 +414,9 @@ class _TemplateStackThumbnail extends StatelessWidget {
                     height: 2.5,
                     width: 18,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFCBD5E1),
+                      color: AppColors.isDark(context)
+                          ? const Color(0xFF475569)
+                          : const Color(0xFFCBD5E1),
                       borderRadius: BorderRadius.circular(1),
                     ),
                   ),
@@ -355,7 +424,7 @@ class _TemplateStackThumbnail extends StatelessWidget {
                     height: 3.5,
                     width: 26,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: AppColors.inkOf(context),
                       borderRadius: BorderRadius.circular(1),
                     ),
                   ),
@@ -391,12 +460,16 @@ class _DashedPlusBox extends StatelessWidget {
         children: [
           CustomPaint(
             size: Size(size, size),
-            painter: _DashedBorderPainter(),
+            painter: _DashedBorderPainter(
+              color: AppColors.isDark(context)
+                  ? const Color(0xFF475569)
+                  : const Color(0xFFCBD0DE),
+            ),
           ),
-          const Icon(
+          Icon(
             LucideIcons.plus,
             size: 20,
-            color: AppColors.inkSecondary,
+            color: AppColors.inkSecondaryOf(context),
           ),
         ],
       ),
@@ -405,10 +478,13 @@ class _DashedPlusBox extends StatelessWidget {
 }
 
 class _DashedBorderPainter extends CustomPainter {
+  final Color color;
+  const _DashedBorderPainter({this.color = const Color(0xFFCBD0DE)});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFCBD0DE)
+      ..color = color
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 

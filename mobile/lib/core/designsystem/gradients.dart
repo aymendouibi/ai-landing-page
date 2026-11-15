@@ -30,5 +30,17 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  static const darkAiCardGradient = LinearGradient(
+    colors: [
+      AppColors.darkAiCardWashStart,
+      AppColors.darkAiCardWashEnd,
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static LinearGradient aiCardGradientOf(BuildContext context) =>
+      AppColors.isDark(context) ? darkAiCardGradient : aiCardGradient;
 }
 

@@ -34,13 +34,18 @@ class PublishingController extends Controller
         try {
             $deployment = $this->hostingService->publish($website);
 
-            $platformDomain = config('app.platform_domain', 'yourplatform.com');
-            $primaryUrl = "https://{$website->subdomain}.{$platformDomain}";
+            $platformDomain = config('app.platform_domain');
+            $appUrl = rtrim(config('app.url', 'http://localhost:8000'), '/');
+            $primaryUrl = $platformDomain
+                ? "https://{$website->subdomain}.{$platformDomain}"
+                : "{$appUrl}/{$website->subdomain}";
+            $pathUrl = "{$appUrl}/{$website->subdomain}";
 
             return response()->json([
                 'message' => 'Website successfully published to global CDN.',
                 'deployment' => $deployment,
                 'live_url' => $primaryUrl,
+                'path_url' => $pathUrl,
                 'website' => $website->fresh(),
             ]);
         } catch (Exception $e) {

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Template;
 use App\Models\TemplateCategory;
+use App\Models\TemplateVersion;
 use App\Models\Website;
 use App\Models\WebsiteRevision;
 use App\Enums\WebsiteStatus;
@@ -16,24 +17,74 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use App\Services\Billing\SubscriptionEntitlementService;
 
 class TemplateController extends Controller
 {
+    public function __construct(
+        protected SubscriptionEntitlementService $entitlementService
+    ) {}
     /**
      * Browse published templates with filters.
      */
     public function index(Request $request): JsonResponse
     {
-        $templates = Template::where('status', TemplateStatus::Published)
-            ->when($request->query('category_id'), fn ($q, $cat) => $q->where('category_id', $cat))
-            ->when($request->query('industry'), fn ($q, $ind) => $q->where('industry', $ind))
-            ->when($request->query('search'), function ($q, $search) {
-                $q->where(function ($sub) use ($search) {
-                    $sub->where('name', 'ilike', "%{$search}%")
-                        ->orWhere('description', 'ilike', "%{$search}%");
-                });
-            })
-            ->with(['category:id,name,slug', 'activeVersion:id,template_id,version,design_tokens,fonts'])
+        $tab = $request->query('tab', 'for_you');
+        $search = $request->query('search');
+
+        $query = Template::where('status', TemplateStatus::Published)
+            ->where('is_public', true);
+
+        // Tab category filtering
+        if ($tab === 'business') {
+            $query->where(function ($q) {
+                $q->whereIn('industry', ['SaaS', 'Food & drink', 'Restaurant', 'Portfolio · Architecture', 'Real Estate', 'Local Businesses', 'Agencies'])
+                  ->orWhereHas('category', fn ($c) => $c->whereIn('slug', ['saas', 'restaurants', 'real-estate', 'local-business', 'agencies']));
+            });
+        } elseif ($tab === 'creative') {
+            $query->where(function ($q) {
+                $q->whereIn('industry', ['Portfolio · Architecture', 'Portfolios', 'Photography', 'Art', 'Weddings', 'Creative'])
+                  ->orWhereHas('category', fn ($c) => $c->whereIn('slug', ['portfolios', 'photography', 'events']));
+            });
+        } elseif ($tab === 'personal') {
+            $query->where(function ($q) {
+                $q->whereIn('industry', ['Wellness', 'Weddings', 'Personal', 'Health & Fitness', 'Education', 'Food & drink'])
+                  ->orWhereHas('category', fn ($c) => $c->whereIn('slug', ['fitness', 'events', 'education']));
+            });
+        } elseif ($tab === 'community') {
+            $query->whereNotNull('user_id');
+        } elseif ($tab === 'my_templates' && $request->user()) {
+            // Include user's own templates even if unpublished
+            $query = Template::where('user_id', $request->user()->id);
+        }
+
+        if ($request->boolean('featured_only')) {
+            $query->where('is_featured', true);
+        }
+
+        if ($request->query('category_id')) {
+            $query->where('category_id', $request->query('category_id'));
+        }
+
+        if ($request->query('industry')) {
+            $query->where('industry', $request->query('industry'));
+        }
+
+        if (!empty($search)) {
+            $query->where(function ($sub) use ($search) {
+                $sub->where('name', 'ilike', "%{$search}%")
+                    ->orWhere('description', 'ilike', "%{$search}%")
+                    ->orWhere('industry', 'ilike', "%{$search}%")
+                    ->orWhere('badge', 'ilike', "%{$search}%");
+            });
+        }
+
+        $templates = $query->with([
+                'category:id,name,slug',
+                'user:id,name',
+                'activeVersion:id,template_id,version,document,design_tokens,fonts',
+            ])
+            ->orderByDesc('is_featured')
             ->orderByDesc('use_count')
             ->paginate($request->integer('per_page', 20));
 
@@ -83,6 +134,10 @@ class TemplateController extends Controller
         $project = Project::findOrFail($validated['project_id']);
         Gate::authorize('update', $project);
 
+        if ($template->is_premium || $template->badge === 'PRO') {
+            $this->entitlementService->assertCan($request->user(), 'premium_template');
+        }
+
         $version = $template->activeVersion;
         if (!$version) {
             return response()->json(['message' => 'This template does not have an active version.'], 422);
@@ -124,6 +179,89 @@ class TemplateController extends Controller
         return response()->json([
             'message' => 'Website created successfully from template.',
             'website' => $website->fresh(['project', 'currentRevision']),
+        ], 201);
+    }
+
+    /**
+     * Share a user website as a public or community template.
+     */
+    public function share(Request $request, Website $website): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'industry' => ['nullable', 'string', 'max:100'],
+            'badge' => ['nullable', 'string', 'max:50'],
+            'category_id' => ['nullable', 'uuid', 'exists:template_categories,id'],
+            'is_public' => ['nullable', 'boolean'],
+        ]);
+
+        $project = $website->project;
+        if ($project && $project->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
+            abort(403, 'Unauthorized to share this website as template.');
+        }
+
+        $document = $website->document;
+        if (empty($document)) {
+            return response()->json(['message' => 'Website has no document content to create template.'], 422);
+        }
+
+        // Extract hero image for preview thumbnail
+        $previewImages = [];
+        $pages = $document['pages'] ?? [];
+        if (!empty($pages)) {
+            $sections = $pages[0]['sections'] ?? [];
+            foreach ($sections as $sec) {
+                $img = $sec['props']['image'] ?? $sec['props']['imageUrl'] ?? $sec['props']['url'] ?? null;
+                if (is_array($img) && !empty($img['src'])) {
+                    $previewImages[] = $img['src'];
+                    break;
+                } elseif (is_string($img) && str_starts_with($img, 'http')) {
+                    $previewImages[] = $img;
+                    break;
+                }
+            }
+        }
+        if (empty($previewImages)) {
+            $previewImages = ['https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80'];
+        }
+
+        $slug = Str::slug($validated['name']) . '-' . strtolower(Str::random(5));
+
+        $template = DB::transaction(function () use ($request, $website, $validated, $slug, $previewImages, $document) {
+            $tpl = Template::create([
+                'user_id' => $request->user()->id,
+                'category_id' => $validated['category_id'] ?? null,
+                'name' => $validated['name'],
+                'slug' => $slug,
+                'description' => $validated['description'] ?? 'Shared community template created by ' . $request->user()->name,
+                'industry' => $validated['industry'] ?? 'Community',
+                'badge' => $validated['badge'] ?? 'COMMUNITY',
+                'is_featured' => false,
+                'is_public' => $validated['is_public'] ?? true,
+                'source_website_id' => $website->id,
+                'preview_images' => $previewImages,
+                'status' => TemplateStatus::Published,
+                'author' => $request->user()->name,
+                'license_type' => 'community',
+                'use_count' => 0,
+            ]);
+
+            TemplateVersion::create([
+                'template_id' => $tpl->id,
+                'version' => 1,
+                'document' => $document,
+                'design_tokens' => $document['site']['theme'] ?? null,
+                'fonts' => $document['site']['settings']['googleFonts'] ?? ['Inter'],
+                'is_active' => true,
+            ]);
+
+            return $tpl;
+        });
+
+        return response()->json([
+            'message' => 'Website successfully shared as a template.',
+            'template' => $template->load(['category', 'activeVersion', 'user:id,name']),
         ], 201);
     }
 }

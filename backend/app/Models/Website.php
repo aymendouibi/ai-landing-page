@@ -119,5 +119,34 @@ class Website extends Model
     {
         return $this->status === WebsiteStatus::Published;
     }
+
+    /**
+     * Resolve route binding by UUID, slug, or normalized showcase slug.
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        // 1. Direct ID match (only query if value is a valid UUID to avoid PostgreSQL 22P02 error)
+        if (\Illuminate\Support\Str::isUuid($value)) {
+            $website = $this->where('id', $value)->first();
+            if ($website) {
+                return $website;
+            }
+        }
+
+        // 2. Direct slug match (e.g. 'studio-marlow', 'kite-yoga')
+        $website = $this->where('slug', $value)->first();
+        if ($website) {
+            return $website;
+        }
+
+        // 3. Normalized showcase or demo slug (e.g. 'showcase_studio_marlow' -> 'studio-marlow')
+        $cleanSlug = str_replace('_', '-', preg_replace('/^(showcase_|demo_)/', '', $value));
+        $website = $this->where('slug', $cleanSlug)->first();
+        if ($website) {
+            return $website;
+        }
+
+        return null;
+    }
 }
 

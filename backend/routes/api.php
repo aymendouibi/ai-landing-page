@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\BillingController;
 use App\Http\Controllers\Api\V1\BillingWebhookController;
 use App\Http\Controllers\Api\V1\DomainController;
 use App\Http\Controllers\Api\V1\FormController;
+use App\Http\Controllers\Api\V1\MediaAssetController;
 use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\PublishingController;
 use App\Http\Controllers\Api\V1\TemplateController;
@@ -32,6 +33,9 @@ Route::prefix('v1')->group(function () {
     // Public Website Form Submission
     Route::post('/forms/{form}/submit', [FormController::class, 'submit'])->middleware('throttle:30,1');
 
+    // AI Editing (open with optional Sanctum auth)
+    Route::post('/ai/edit', [AiController::class, 'edit']);
+
     // Public Billing Webhooks
     Route::post('/billing/webhook/stripe', [BillingWebhookController::class, 'stripe']);
 
@@ -48,6 +52,9 @@ Route::prefix('v1')->group(function () {
 
         // Projects
         Route::apiResource('projects', ProjectController::class);
+
+        // Media Assets
+        Route::apiResource('assets', MediaAssetController::class);
 
         // Websites
         Route::apiResource('websites', WebsiteController::class);
@@ -71,6 +78,21 @@ Route::prefix('v1')->group(function () {
             Route::post('/domains', [DomainController::class, 'store']);
             Route::post('/domains/{domain}/verify', [DomainController::class, 'verify']);
             Route::delete('/domains/{domain}', [DomainController::class, 'destroy']);
+
+            // Share Website as Template
+            Route::post('/share-template', [TemplateController::class, 'share']);
+
+            // Export Project ZIP (Premium Feature)
+            Route::get('/export', [WebsiteController::class, 'exportZip']);
+        });
+
+        // Admin Template Management
+        Route::prefix('admin/templates')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminTemplateController::class, 'apiIndex']);
+            Route::post('/', [\App\Http\Controllers\Admin\AdminTemplateController::class, 'apiStore']);
+            Route::patch('/{template}', [\App\Http\Controllers\Admin\AdminTemplateController::class, 'apiUpdate']);
+            Route::post('/{template}/toggle-feature', [\App\Http\Controllers\Admin\AdminTemplateController::class, 'apiToggleFeature']);
+            Route::delete('/{template}', [\App\Http\Controllers\Admin\AdminTemplateController::class, 'apiDestroy']);
         });
 
         // Template usage and ingestion
@@ -86,7 +108,6 @@ Route::prefix('v1')->group(function () {
             Route::post('/plan', [AiController::class, 'plan']);
             Route::post('/generate', [AiController::class, 'generate']);
             Route::post('/remix', [AiController::class, 'remix']);
-            Route::post('/edit', [AiController::class, 'edit']);
             Route::get('/jobs/{job}', [AiController::class, 'getJob']);
         });
 
@@ -94,7 +115,10 @@ Route::prefix('v1')->group(function () {
         Route::prefix('billing')->group(function () {
             Route::get('/plans', [BillingController::class, 'plans']);
             Route::get('/subscription', [BillingController::class, 'subscription']);
+            Route::get('/history', [BillingController::class, 'history']);
             Route::post('/checkout', [BillingController::class, 'checkout']);
+            Route::post('/payment-intent', [BillingController::class, 'paymentIntent']);
+            Route::post('/subscribe', [BillingController::class, 'subscribe']);
             Route::post('/portal', [BillingController::class, 'portal']);
             Route::post('/google-play/verify', [BillingController::class, 'verifyGooglePlay']);
         });

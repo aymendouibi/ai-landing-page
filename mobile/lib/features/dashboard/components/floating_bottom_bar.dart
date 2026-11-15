@@ -1,19 +1,23 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
 import '../../../core/designsystem/gradients.dart';
+import '../../../core/widgets/app_showcase.dart';
 
 class FloatingBottomBar extends StatelessWidget {
   final String activeTab;
   final ValueChanged<String> onTabSelected;
   final VoidCallback onAddClick;
+  final GlobalKey? addShowcaseKey;
 
   const FloatingBottomBar({
     super.key,
     required this.activeTab,
     required this.onTabSelected,
     required this.onAddClick,
+    this.addShowcaseKey,
   });
 
   @override
@@ -56,127 +60,158 @@ class FloatingBottomBar extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white.withValues(alpha: 0.55),
-                          Colors.white.withValues(alpha: 0.30),
-                        ],
+                        colors: AppColors.isDark(context)
+                            ? [
+                                const Color(0xFF1E293B).withValues(alpha: 0.85),
+                                const Color(0xFF0F172A).withValues(alpha: 0.90),
+                              ]
+                            : [
+                                Colors.white.withValues(alpha: 0.55),
+                                Colors.white.withValues(alpha: 0.30),
+                              ],
                       ),
                       borderRadius: BorderRadius.circular(33),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: AppColors.isDark(context)
+                            ? Colors.white.withValues(alpha: 0.15)
+                            : Colors.white.withValues(alpha: 0.85),
                         width: 1.2,
                       ),
                     ),
                     child: Row(
-                    children: [
-                      // Left 2 items (Projects & Templates)
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _NavTabItem(
-                              label: 'Projects',
-                              iconPath: 'assets/icons/ic_nav_projects.png',
-                              isSelected: activeTab == 'Projects',
-                              onTap: () => onTabSelected('Projects'),
-                            ),
-                            _NavTabItem(
-                              label: 'Templates',
-                              iconPath: 'assets/icons/ic_nav_templates.png',
-                              isSelected: activeTab == 'Templates',
-                              onTap: () => onTabSelected('Templates'),
-                            ),
-                          ],
+                      children: [
+                        // Left 2 items (Projects & Templates)
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: _NavTabItem(
+                                  label: 'nav_projects'.tr,
+                                  iconPath: 'assets/icons/ic_nav_projects.png',
+                                  isSelected: activeTab == 'Projects',
+                                  onTap: () => onTabSelected('Projects'),
+                                ),
+                              ),
+                              Expanded(
+                                child: _NavTabItem(
+                                  label: 'nav_templates'.tr,
+                                  iconPath: 'assets/icons/ic_nav_templates.png',
+                                  isSelected: activeTab == 'Templates',
+                                  onTap: () => onTabSelected('Templates'),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
 
-                      // Gap in center for clipping Plus button
-                      const SizedBox(width: 68),
+                        // Gap in center for clipping Plus button
+                        const SizedBox(width: 68),
 
-                      // Right 2 items (Assets & Profile)
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _NavTabItem(
-                              label: 'Assets',
-                              iconPath: 'assets/icons/ic_nav_assets.png',
-                              isSelected: activeTab == 'Assets',
-                              onTap: () => onTabSelected('Assets'),
-                            ),
-                            _NavTabItem(
-                              label: 'Profile',
-                              iconPath: 'assets/icons/ic_nav_profile.png',
-                              isSelected: activeTab == 'Profile',
-                              onTap: () => onTabSelected('Profile'),
-                            ),
-                          ],
+                        // Right 2 items (Assets & Profile)
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: _NavTabItem(
+                                  label: 'nav_assets'.tr,
+                                  iconPath: 'assets/icons/ic_nav_assets.png',
+                                  isSelected: activeTab == 'Assets',
+                                  onTap: () => onTabSelected('Assets'),
+                                ),
+                              ),
+                              Expanded(
+                                child: _NavTabItem(
+                                  label: 'nav_profile'.tr,
+                                  iconPath: 'assets/icons/ic_nav_profile.png',
+                                  isSelected: activeTab == 'Profile',
+                                  onTap: () => onTabSelected('Profile'),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
 
           // 2. The Plus Button clipping / protruding from the top
           Positioned(
             top: 2,
-            child: GestureDetector(
-              onTap: onAddClick,
-              child: SizedBox(
-                width: 66,
-                height: 66,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Outer Radiant Luminous Aura Glow Ring
-                    Container(
-                      width: 66,
-                      height: 66,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            Color(0x997C5CFF),
-                            Color(0x66E46BFF),
-                            Color(0x332BC8E8),
-                            Colors.transparent,
-                          ],
-                          radius: 0.95,
-                        ),
-                      ),
-                    ),
+            child: addShowcaseKey != null
+                ? AppShowcase.item(
+                    key: addShowcaseKey!,
+                    title: 'showcase_create_landing_page_title'.tr,
+                    description: 'showcase_add_btn_desc'.tr,
+                    targetShapeBorder: const CircleBorder(),
+                    child: _buildPlusButton(context),
+                  )
+                : _buildPlusButton(context),
+          ),
+        ],
+      ),
+    );
+  }
 
-                    // Outer Sweep Gradient Rim
-                    Container(
-                      width: 58,
-                      height: 58,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: AppGradients.fabAuraSweep,
-                      ),
-                      padding: const EdgeInsets.all(2.5),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.ink,
-                        ),
-                        child: const Icon(
-                          LucideIcons.plus,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                      ),
-                    ),
+  Widget _buildPlusButton(BuildContext context) {
+    return GestureDetector(
+      onTap: onAddClick,
+      child: SizedBox(
+        width: 66,
+        height: 66,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Outer Radiant Luminous Aura Glow Ring
+            Container(
+              width: 66,
+              height: 66,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0x997C5CFF),
+                    Color(0x66E46BFF),
+                    Color(0x332BC8E8),
+                    Colors.transparent,
                   ],
+                  radius: 0.95,
                 ),
               ),
             ),
-          ),
-        ],
+
+            // Outer Sweep Gradient Rim
+            Container(
+              width: 58,
+              height: 58,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: AppGradients.fabAuraSweep,
+              ),
+              padding: const EdgeInsets.all(2.5),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.isDark(context)
+                      ? const Color(0xFF38BDF8)
+                      : AppColors.ink,
+                ),
+                child: Icon(
+                  LucideIcons.plus,
+                  color: AppColors.isDark(context)
+                      ? const Color(0xFF0F172A)
+                      : Colors.white,
+                  size: 26,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -197,7 +232,10 @@ class _NavTabItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isSelected ? AppColors.ink : const Color(0xFF71717A);
+    final isDark = AppColors.isDark(context);
+    final color = isSelected
+        ? (isDark ? Colors.white : AppColors.ink)
+        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF71717A));
 
     return GestureDetector(
       onTap: onTap,
@@ -207,15 +245,12 @@ class _NavTabItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              iconPath,
-              width: 24,
-              height: 24,
-              color: color,
-            ),
+            Image.asset(iconPath, width: 24, height: 24, color: color),
             const SizedBox(height: 3),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -228,4 +263,3 @@ class _NavTabItem extends StatelessWidget {
     );
   }
 }
-

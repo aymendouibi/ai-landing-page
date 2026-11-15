@@ -51,6 +51,8 @@ return [
     'openrouter' => [
         'api_key' => env('OPENROUTER_API_KEY'),
         'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
+        'edit_model' => env('OPENROUTER_EDIT_MODEL'),
+        'fallback_models' => env('OPENROUTER_FALLBACK_MODELS'),
     ],
 
     'stripe' => [

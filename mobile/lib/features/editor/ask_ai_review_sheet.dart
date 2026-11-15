@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/designsystem/colors.dart';
 import 'editor_controller.dart';
 
 class AskAiReviewSheet extends StatelessWidget {
@@ -13,15 +14,17 @@ class AskAiReviewSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Color(0x26000000),
+            color: isDark ? Colors.black.withValues(alpha: 0.5) : const Color(0x26000000),
             blurRadius: 24,
-            offset: Offset(0, -4),
+            offset: const Offset(0, -4),
           ),
         ],
       ),
@@ -42,7 +45,7 @@ class AskAiReviewSheet extends StatelessWidget {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD1D5DB),
+                    color: isDark ? const Color(0xFF475569) : const Color(0xFFD1D5DB),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -78,12 +81,12 @@ class AskAiReviewSheet extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    const Text(
-                      'Ask AI',
+                    Text(
+                      'editor_ask_ai'.tr,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
                         letterSpacing: -0.3,
                       ),
                     ),
@@ -100,15 +103,15 @@ class AskAiReviewSheet extends StatelessWidget {
                       child: Container(
                         width: 32,
                         height: 32,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF1F5F9),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
-                        child: const Icon(
+                        child: Icon(
                           LucideIcons.x,
                           size: 16,
-                          color: Color(0xFF0F172A),
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
                     ),
@@ -124,7 +127,7 @@ class AskAiReviewSheet extends StatelessWidget {
                     height: 40,
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -136,13 +139,13 @@ class AskAiReviewSheet extends StatelessWidget {
                               duration: const Duration(milliseconds: 150),
                               decoration: BoxDecoration(
                                 color: controller.aiReviewScope.value == 'No selection'
-                                    ? Colors.white
+                                    ? (isDark ? const Color(0xFF334155) : Colors.white)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(9),
                                 boxShadow: controller.aiReviewScope.value == 'No selection'
                                     ? [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.05),
+                                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                                           blurRadius: 4,
                                           offset: const Offset(0, 1),
                                         ),
@@ -151,15 +154,15 @@ class AskAiReviewSheet extends StatelessWidget {
                               ),
                               alignment: Alignment.center,
                               child: Text(
-                                'No selection',
+                                'editor_ai_no_selection'.tr,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: controller.aiReviewScope.value == 'No selection'
                                       ? FontWeight.w600
                                       : FontWeight.w500,
                                   color: controller.aiReviewScope.value == 'No selection'
-                                      ? const Color(0xFF0F172A)
-                                      : const Color(0xFF94A3B8),
+                                      ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                                      : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
                                 ),
                               ),
                             ),
@@ -172,13 +175,13 @@ class AskAiReviewSheet extends StatelessWidget {
                               duration: const Duration(milliseconds: 150),
                               decoration: BoxDecoration(
                                 color: controller.aiReviewScope.value == 'Entire website'
-                                    ? Colors.white
+                                    ? (isDark ? const Color(0xFF334155) : Colors.white)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(9),
                                 boxShadow: controller.aiReviewScope.value == 'Entire website'
                                     ? [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.05),
+                                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                                           blurRadius: 4,
                                           offset: const Offset(0, 1),
                                         ),
@@ -187,15 +190,15 @@ class AskAiReviewSheet extends StatelessWidget {
                               ),
                               alignment: Alignment.center,
                               child: Text(
-                                'Entire website',
+                                'editor_ai_entire_website'.tr,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: controller.aiReviewScope.value == 'Entire website'
                                       ? FontWeight.w600
                                       : FontWeight.w500,
                                   color: controller.aiReviewScope.value == 'Entire website'
-                                      ? const Color(0xFF0F172A)
-                                      : const Color(0xFF94A3B8),
+                                      ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                                      : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
                                 ),
                               ),
                             ),
@@ -224,6 +227,7 @@ class AskAiReviewSheet extends StatelessWidget {
 
   // --- STEP 1: Prompt Input & Suggestions (Image 3) ---
   Widget _buildPromptStep(BuildContext context) {
+    final isDark = AppColors.isDark(context);
     final suggestions = [
       'A neighborhood bakery with a menu and opening hours',
       'A portfolio for a ceramic artist',
@@ -236,12 +240,12 @@ class AskAiReviewSheet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'Describe your site',
+          Text(
+            'editor_ai_describe_site'.tr,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 8),
@@ -249,15 +253,15 @@ class AskAiReviewSheet extends StatelessWidget {
           // Purple tinted outline input field container
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF0F172A) : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFFC084FC).withValues(alpha: 0.7),
+                color: const Color(0xFFC084FC).withValues(alpha: isDark ? 0.8 : 0.7),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF8B5CF6).withValues(alpha: 0.08),
+                  color: const Color(0xFF8B5CF6).withValues(alpha: isDark ? 0.16 : 0.08),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -267,32 +271,32 @@ class AskAiReviewSheet extends StatelessWidget {
             child: TextField(
               controller: controller.aiCustomPromptController,
               maxLines: 3,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF0F172A),
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
               ),
-              decoration: const InputDecoration(
-                hintText: 'A bakery in Leeds with a menu and opening hours',
+              decoration: InputDecoration(
+                hintText: 'editor_ai_prompt_hint'.tr,
                 hintStyle: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                   fontSize: 14.5,
                   fontWeight: FontWeight.w400,
                 ),
                 border: InputBorder.none,
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 4),
+                contentPadding: const EdgeInsets.symmetric(vertical: 4),
               ),
             ),
           ),
 
           const SizedBox(height: 18),
-          const Text(
-            'Suggestions',
+          Text(
+            'editor_ai_suggestions'.tr,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 6),
@@ -313,24 +317,24 @@ class AskAiReviewSheet extends StatelessWidget {
                           Expanded(
                             child: Text(
                               s,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
-                                color: Color(0xFF0F172A),
+                                color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A),
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(
+                          Icon(
                             LucideIcons.arrowUpRight,
                             size: 17,
-                            color: Color(0xFF94A3B8),
+                            color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                  Divider(height: 1, color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
                 ],
               );
             }).toList(),
@@ -351,26 +355,26 @@ class AskAiReviewSheet extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color: controller.isAiEditing.value
-                      ? const Color(0xFFE2E8F0)
-                      : const Color(0xFF0F172A),
+                      ? (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0))
+                      : (isDark ? Colors.white : const Color(0xFF0F172A)),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 alignment: Alignment.center,
                 child: controller.isAiEditing.value
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Color(0xFF0F172A),
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       )
-                    : const Text(
-                        'Draft my site',
+                    : Text(
+                        'editor_ai_draft_button'.tr,
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: isDark ? const Color(0xFF0F172A) : Colors.white,
                         ),
                       ),
               ),
@@ -383,6 +387,8 @@ class AskAiReviewSheet extends StatelessWidget {
 
   // --- STEP 2: Before & After Review (Image 4) ---
   Widget _buildReviewStep(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
       child: Column(
@@ -392,12 +398,12 @@ class AskAiReviewSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Preview',
+              Text(
+                'editor_ai_preview'.tr,
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF0F172A),
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                 ),
               ),
               Obx(
@@ -405,7 +411,7 @@ class AskAiReviewSheet extends StatelessWidget {
                   height: 32,
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
+                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
@@ -415,11 +421,13 @@ class AskAiReviewSheet extends StatelessWidget {
                         label: 'Before',
                         isSelected: controller.aiReviewMode.value == 'Before',
                         onTap: () => controller.toggleAiReviewMode('Before'),
+                        isDark: isDark,
                       ),
                       _buildPillToggleItem(
                         label: 'After',
                         isSelected: controller.aiReviewMode.value == 'After',
                         onTap: () => controller.toggleAiReviewMode('After'),
+                        isDark: isDark,
                       ),
                     ],
                   ),
@@ -436,12 +444,12 @@ class AskAiReviewSheet extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Changes Section
-          const Text(
-            'Changes',
+          Text(
+            'editor_ai_changes'.tr,
             style: TextStyle(
               fontSize: 14.5,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 6),
@@ -461,10 +469,10 @@ class AskAiReviewSheet extends StatelessWidget {
                     children: [
                       Text(
                         diff['type'] ?? 'Change',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF64748B),
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -473,27 +481,27 @@ class AskAiReviewSheet extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: diff['old'] ?? '',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13.5,
                                 decoration: TextDecoration.lineThrough,
-                                color: Color(0xFF64748B),
+                                color: isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                            const TextSpan(
+                            TextSpan(
                               text: ' → ',
                               style: TextStyle(
                                 fontSize: 13.5,
-                                color: Color(0xFF94A3B8),
+                                color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             TextSpan(
                               text: diff['new'] ?? '',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF0F172A),
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
                               ),
                             ),
                           ],
@@ -514,20 +522,20 @@ class AskAiReviewSheet extends StatelessWidget {
           InkWell(
             onTap: controller.tryAnotherAiVersion,
             borderRadius: BorderRadius.circular(8),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     LucideIcons.rotateCw,
                     size: 15,
                     color: Color(0xFF6366F1),
                   ),
-                  SizedBox(width: 6),
+                  const SizedBox(width: 6),
                   Text(
-                    'Try another version',
-                    style: TextStyle(
+                    'editor_ai_try_another'.tr,
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF6366F1),
@@ -550,17 +558,19 @@ class AskAiReviewSheet extends StatelessWidget {
                   child: Container(
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF475569) : const Color(0xFFE2E8F0),
+                      ),
                     ),
                     alignment: Alignment.center,
-                    child: const Text(
-                      'Discard',
+                    child: Text(
+                      'editor_ai_discard'.tr,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF0F172A),
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
                       ),
                     ),
                   ),
@@ -574,16 +584,16 @@ class AskAiReviewSheet extends StatelessWidget {
                   child: Container(
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                       borderRadius: BorderRadius.circular(24),
                     ),
                     alignment: Alignment.center,
-                    child: const Text(
-                      'Apply change',
+                    child: Text(
+                      'editor_ai_apply_change'.tr,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF0F172A) : Colors.white,
                       ),
                     ),
                   ),
@@ -600,6 +610,7 @@ class AskAiReviewSheet extends StatelessWidget {
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
+    required bool isDark,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -607,12 +618,14 @@ class AskAiReviewSheet extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected
+              ? (isDark ? const Color(0xFF334155) : Colors.white)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(13),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.08),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),
@@ -625,7 +638,9 @@ class AskAiReviewSheet extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+            color: isSelected
+                ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                : (isDark ? const Color(0xFF64748B) : const Color(0xFF64748B)),
           ),
         ),
       ),
@@ -648,12 +663,67 @@ class AskAiReviewSheet extends StatelessWidget {
       }
     }
 
-    final isDark = paletteName == 'Espresso' || paletteName == 'Charcoal' || paletteName == 'Mono';
+    // Helper to parse hex colors
+    Color hexToColor(String? hex, Color fallback) {
+      if (hex == null || hex.isEmpty) return fallback;
+      final clean = hex.replaceAll('#', '').trim();
+      if (clean.length == 6) {
+        return Color(int.parse('FF$clean', radix: 16));
+      } else if (clean.length == 8) {
+        return Color(int.parse(clean, radix: 16));
+      }
+      return fallback;
+    }
 
-    final bgColor = isDark ? const Color(0xFF1C1917) : const Color(0xFFFAF6F0);
-    final textColor = isDark ? const Color(0xFFF5F5F4) : const Color(0xFF0F172A);
-    final subtextColor = isDark ? const Color(0xFFA8A29E) : const Color(0xFF78716C);
-    final accentColor = isDark ? const Color(0xFFEA580C) : const Color(0xFFB85028);
+    final site = targetDoc?['site'] as Map?;
+    final theme = site?['theme'] as Map?;
+    final themeColors = (theme?['colors'] as Map?) ?? {};
+    final textColors = (themeColors['text'] as Map?) ?? {};
+
+    // Match preset if possible
+    ColorPreset? matchedPreset;
+    for (final p in controller.colorPresets) {
+      if (p.name.toLowerCase() == paletteName.toLowerCase()) {
+        matchedPreset = p;
+        break;
+      }
+    }
+
+    Color bgColor;
+    Color textColor;
+    Color subtextColor;
+    Color accentColor;
+
+    if (matchedPreset != null) {
+      bgColor = matchedPreset.bg;
+      textColor = matchedPreset.aaColor;
+      subtextColor = hexToColor(
+        matchedPreset.themeColors['secondary'] as String?,
+        const Color(0xFF78716C),
+      );
+      accentColor = hexToColor(
+        matchedPreset.themeColors['accent'] as String?,
+        matchedPreset.dot1,
+      );
+    } else {
+      final isDark = paletteName == 'Espresso' || paletteName == 'Charcoal' || paletteName == 'Mono';
+      bgColor = hexToColor(
+        themeColors['background'] as String?,
+        isDark ? const Color(0xFF1C1917) : const Color(0xFFFAF6F0),
+      );
+      textColor = hexToColor(
+        textColors['primary'] as String?,
+        isDark ? const Color(0xFFF5F5F4) : const Color(0xFF0F172A),
+      );
+      subtextColor = hexToColor(
+        textColors['secondary'] as String?,
+        isDark ? const Color(0xFFA8A29E) : const Color(0xFF78716C),
+      );
+      accentColor = hexToColor(
+        themeColors['accent'] as String?,
+        const Color(0xFFEA580C),
+      );
+    }
 
     final siteName = targetDoc?['site']?['name'] as String? ?? 'Lumen Coffee';
 

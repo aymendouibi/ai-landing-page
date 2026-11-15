@@ -52,5 +52,27 @@ class AppTypography {
     height: 1.3,
     color: AppColors.ink,
   );
+
+  // Dynamic context-aware typography
+  static TextStyle largePageTitleOf(BuildContext context) =>
+      largePageTitle.copyWith(color: AppColors.inkOf(context));
+
+  static TextStyle sectionHeadingOf(BuildContext context) =>
+      sectionHeading.copyWith(color: AppColors.inkOf(context));
+
+  static TextStyle heroCardTitleOf(BuildContext context) =>
+      heroCardTitle.copyWith(color: AppColors.inkOf(context));
+
+  static TextStyle itemTitleOf(BuildContext context) =>
+      itemTitle.copyWith(color: AppColors.inkOf(context));
+
+  static TextStyle bodyOf(BuildContext context) =>
+      body.copyWith(color: AppColors.inkSecondaryOf(context));
+
+  static TextStyle helperOf(BuildContext context) =>
+      helper.copyWith(color: AppColors.inkMutedOf(context));
+
+  static TextStyle microOf(BuildContext context) =>
+      micro.copyWith(color: AppColors.inkOf(context));
 }
 

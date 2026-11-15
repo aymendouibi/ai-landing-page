@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:aibuilder/core/localization/app_translations.dart';
 import 'package:aibuilder/features/editor/editor_controller.dart';
 import 'package:aibuilder/features/editor/ask_ai_review_sheet.dart';
 
@@ -153,6 +154,8 @@ void main() {
 
       await tester.pumpWidget(
         GetMaterialApp(
+          translations: AppTranslations(),
+          locale: const Locale('en', 'US'),
           home: Scaffold(
             body: AskAiReviewSheet(controller: controller),
           ),

@@ -103,6 +103,24 @@ export const Hero: React.FC<HeroProps> = ({ variant = 'centered', props, styles 
             )}
           </div>
         )}
+        {props.image && (
+          <div style={{ marginTop: '2.5rem' }}>
+            <img
+              src={typeof props.image === 'string' ? props.image : (props.image.src || (props.image as any).url || 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=800&q=80')}
+              alt={typeof props.image === 'string' ? props.headline : (props.image.alt || props.headline)}
+              key={typeof props.image === 'string' ? props.image : (props.image.src || (props.image as any).url)}
+              style={{
+                width: '100%',
+                maxHeight: '440px',
+                objectFit: 'cover',
+                borderRadius: 'var(--radius-lg)',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                display: 'block',
+                margin: '0 auto',
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

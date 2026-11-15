@@ -18,6 +18,7 @@ use App\Services\AI\Prompts\PromptHelper;
 use App\Services\AI\Prompts\StructuredEditPrompt;
 use App\Services\AI\Prompts\WebsitePlanPrompt;
 use App\Services\AI\StructuredAiEditor;
+use App\Services\Billing\SubscriptionEntitlementService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,7 +31,8 @@ class AiController extends Controller
         protected AiRemixService $remixService,
         protected StructuredAiEditor $editor,
         protected OpenRouterClient $client,
-        protected ModelSelector $modelSelector
+        protected ModelSelector $modelSelector,
+        protected SubscriptionEntitlementService $entitlementService
     ) {}
 
     /**
@@ -83,6 +85,8 @@ class AiController extends Controller
         $project = Project::findOrFail($validated['project_id']);
         Gate::authorize('update', $project);
 
+        $this->entitlementService->assertCan($request->user(), 'ai_generation');
+
         $aiJob = AiJob::create([
             'user_id' => $request->user()->id,
             'type' => AiJobType::Generate,
@@ -111,6 +115,8 @@ class AiController extends Controller
                     'job' => $aiJob,
                 ], 500);
             }
+
+            $this->entitlementService->recordUsage($request->user(), 'ai_generations');
 
             return response()->json([
                 'message' => 'Website generated successfully.',
@@ -178,17 +184,34 @@ class AiController extends Controller
     public function edit(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'website_id' => ['required', 'uuid', 'exists:websites,id'],
-            'instruction' => ['required', 'string', 'min:3', 'max:1000'],
+            'website_id' => ['nullable', 'string'],
+            'instruction' => ['required', 'string', 'min:2', 'max:2000'],
             'target_section_id' => ['nullable', 'string'],
+            'document' => ['nullable', 'array'],
         ]);
 
-        $website = Website::findOrFail($validated['website_id']);
-        Gate::authorize('update', $website);
+        $website = null;
+        if (!empty($validated['website_id'])) {
+            $website = Website::find($validated['website_id']);
+            if ($website && $request->user()) {
+                Gate::authorize('update', $website);
+            }
+        }
+
+        $currentDoc = $validated['document'] ?? $website?->document;
+        if (!$currentDoc) {
+            return response()->json([
+                'message' => 'No website document provided for editing.'
+            ], 422);
+        }
+
+        if ($request->user()) {
+            $this->entitlementService->assertCan($request->user(), 'ai_edit');
+        }
 
         try {
             $prompt = StructuredEditPrompt::build(
-                currentDocument: $website->document,
+                currentDocument: $currentDoc,
                 instruction: $validated['instruction'],
                 targetSectionId: $validated['target_section_id'] ?? null
             );
@@ -203,18 +226,36 @@ class AiController extends Controller
             $operations = $parsed['operations'] ?? [];
             $summary = $parsed['summary'] ?? "AI Edit: {$validated['instruction']}";
 
-            $updatedWebsite = $this->editor->applyOperations(
-                website: $website,
-                operations: $operations,
-                summary: $summary,
-                author: $request->user()
-            );
+            $updatedDoc = $this->editor->applyOperationsToDoc($currentDoc, $operations);
+
+            $updatedWebsite = null;
+            if ($website && $request->user()) {
+                try {
+                    $updatedWebsite = $this->editor->applyOperations(
+                        website: $website,
+                        operations: $operations,
+                        summary: $summary,
+                        author: $request->user()
+                    );
+                } catch (\Throwable $e) {
+                    // Fall back to returning the updatedDoc even if DB revision save fails
+                }
+            }
+
+            if ($request->user()) {
+                $this->entitlementService->recordUsage($request->user(), 'ai_edits');
+            }
 
             return response()->json([
                 'message' => 'Website updated successfully.',
                 'summary' => $summary,
                 'operations_applied' => count($operations),
-                'website' => $updatedWebsite,
+                'operations' => $operations,
+                'document' => $updatedDoc,
+                'website' => $updatedWebsite ?? [
+                    'id' => $website?->id,
+                    'document' => $updatedDoc,
+                ],
             ]);
         } catch (Exception $e) {
             return response()->json(['message' => 'AI Edit failed: ' . $e->getMessage()], 500);

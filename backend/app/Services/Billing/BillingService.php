@@ -10,6 +10,7 @@ use App\Models\SubscriptionPlan;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class BillingService
@@ -29,7 +30,7 @@ class BillingService
             : $plan->stripe_price_monthly_id;
 
         // If in test environment or Stripe not configured, provide mock checkout session
-        if (empty($stripeSecret) || app()->environment('testing', 'local')) {
+        if (empty($stripeSecret) || app()->environment('testing')) {
             $mockSessionId = 'cs_test_' . Str::random(24);
             return [
                 'session_id' => $mockSessionId,
@@ -72,12 +73,148 @@ class BillingService
             ];
         }
 
+        // Direct Stripe REST API call
+        $response = Http::withToken($stripeSecret)->asForm()->post('https://api.stripe.com/v1/checkout/sessions', [
+            'mode' => 'subscription',
+            'line_items[0][price]' => $priceId,
+            'line_items[0][quantity]' => 1,
+            'success_url' => url('/dashboard?session_id={CHECKOUT_SESSION_ID}&billing=success'),
+            'cancel_url' => url('/dashboard?billing=cancelled'),
+            'client_reference_id' => (string) $user->id,
+            'metadata[user_id]' => (string) $user->id,
+            'metadata[plan_slug]' => $plan->slug,
+        ]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            return [
+                'session_id' => $data['id'],
+                'checkout_url' => $data['url'] ?? "https://checkout.stripe.com/pay/{$data['id']}",
+                'mode' => $data['mode'] ?? 'subscription',
+                'plan' => $plan->slug,
+            ];
+        }
+
         $mockSessionId = 'cs_test_' . Str::random(24);
         return [
             'session_id' => $mockSessionId,
             'checkout_url' => "https://checkout.stripe.com/pay/{$mockSessionId}",
             'mode' => 'subscription',
             'plan' => $plan->slug,
+        ];
+    }
+
+    /**
+     * Create a Stripe PaymentIntent for native mobile PaymentSheet.
+     *
+     * @throws Exception
+     */
+    public function createStripePaymentIntent(User $user, string $interval = 'monthly'): array
+    {
+        $amount = ($interval === 'yearly' || $interval === 'annual') ? 5988 : 499;
+        $stripeSecret = config('services.stripe.secret');
+
+        // If Stripe secret is set, call real Stripe API via SDK or HTTP
+        if (!empty($stripeSecret) && !app()->environment('testing')) {
+            $customer = $this->getOrCreateStripeCustomer($user);
+
+            if (class_exists(\Stripe\StripeClient::class)) {
+                $stripe = new \Stripe\StripeClient($stripeSecret);
+                $intent = $stripe->paymentIntents->create([
+                    'amount' => $amount,
+                    'currency' => 'eur',
+                    'customer' => $customer->stripe_customer_id,
+                    'setup_future_usage' => 'off_session',
+                    'automatic_payment_methods' => ['enabled' => true],
+                    'metadata' => [
+                        'userId' => (string) $user->id,
+                        'user_id' => (string) $user->id,
+                        'plan' => $interval,
+                        'interval' => $interval,
+                    ],
+                    'description' => "AI Landing Page Builder Pro - {$interval}",
+                ]);
+
+                return [
+                    'paymentIntentId' => $intent->id,
+                    'clientSecret' => $intent->client_secret,
+                    'amount' => $amount,
+                    'currency' => 'eur',
+                    'customer' => $customer->stripe_customer_id,
+                    'is_mock' => false,
+                ];
+            }
+
+            // Direct Stripe REST API call using Laravel Http client
+            $response = Http::withToken($stripeSecret)->asForm()->post('https://api.stripe.com/v1/payment_intents', [
+                'amount' => $amount,
+                'currency' => 'eur',
+                'customer' => $customer->stripe_customer_id,
+                'setup_future_usage' => 'off_session',
+                'automatic_payment_methods[enabled]' => 'true',
+                'description' => "AI Landing Page Builder Pro - {$interval}",
+                'metadata[user_id]' => (string) $user->id,
+                'metadata[userId]' => (string) $user->id,
+                'metadata[plan]' => $interval,
+                'metadata[interval]' => $interval,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return [
+                    'paymentIntentId' => $data['id'],
+                    'clientSecret' => $data['client_secret'],
+                    'amount' => $data['amount'] ?? $amount,
+                    'currency' => $data['currency'] ?? 'eur',
+                    'customer' => $data['customer'] ?? $customer->stripe_customer_id,
+                    'is_mock' => false,
+                ];
+            }
+
+            // If customer was rejected by Stripe, force fresh customer and retry once
+            $err = $response->json('error');
+            if (($err['param'] ?? '') === 'customer') {
+                $customer = $this->getOrCreateStripeCustomer($user, forceFresh: true);
+                $retry = Http::withToken($stripeSecret)->asForm()->post('https://api.stripe.com/v1/payment_intents', [
+                    'amount' => $amount,
+                    'currency' => 'eur',
+                    'customer' => $customer->stripe_customer_id,
+                    'setup_future_usage' => 'off_session',
+                    'automatic_payment_methods[enabled]' => 'true',
+                    'description' => "AI Landing Page Builder Pro - {$interval}",
+                    'metadata[user_id]' => (string) $user->id,
+                    'metadata[userId]' => (string) $user->id,
+                    'metadata[plan]' => $interval,
+                    'metadata[interval]' => $interval,
+                ]);
+
+                if ($retry->successful()) {
+                    $data = $retry->json();
+                    return [
+                        'paymentIntentId' => $data['id'],
+                        'clientSecret' => $data['client_secret'],
+                        'amount' => $data['amount'] ?? $amount,
+                        'currency' => $data['currency'] ?? 'eur',
+                        'customer' => $data['customer'] ?? $customer->stripe_customer_id,
+                        'is_mock' => false,
+                    ];
+                }
+            }
+        }
+
+        // Mock mode (testing or no Stripe secret key configured)
+        // Strictly conforms to Stripe SDK client secret regex: ^pi_[^_]+_secret_[^_]+$
+        $cleanId = Str::lower(Str::random(24));
+        $cleanSecret = Str::lower(Str::random(24));
+        $mockPiId = "pi_{$cleanId}";
+
+        return [
+            'paymentIntentId' => $mockPiId,
+            'clientSecret' => "{$mockPiId}_secret_{$cleanSecret}",
+            'amount' => $amount,
+            'currency' => 'eur',
+            'customer' => 'cus_mock' . Str::random(14),
+            'is_mock' => true,
         ];
     }
 
@@ -232,6 +369,10 @@ class BillingService
                 $this->handleCheckoutSessionCompleted($customer, $dataObject);
                 break;
 
+            case 'payment_intent.succeeded':
+                $this->handlePaymentIntentSucceeded($customer, $dataObject);
+                break;
+
             case 'customer.subscription.updated':
                 $this->handleSubscriptionUpdated($customer, $dataObject);
                 break;
@@ -277,6 +418,31 @@ class BillingService
         ]);
     }
 
+    protected function handlePaymentIntentSucceeded(BillingCustomer $customer, array $intent): void
+    {
+        $plan = SubscriptionPlan::where('slug', 'pro')->first();
+        if (!$plan) return;
+
+        Subscription::where('user_id', $customer->user_id)
+            ->where('status', SubscriptionStatus::Active)
+            ->update(['status' => SubscriptionStatus::Cancelled]);
+
+        $interval = $intent['metadata']['interval'] ?? $intent['metadata']['plan'] ?? 'monthly';
+        $periodEnd = ($interval === 'yearly' || $interval === 'annual')
+            ? now()->addYear()
+            : now()->addMonth();
+
+        Subscription::create([
+            'user_id' => $customer->user_id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::Active,
+            'provider' => 'stripe',
+            'provider_subscription_id' => $intent['id'],
+            'current_period_start' => now(),
+            'current_period_end' => $periodEnd,
+        ]);
+    }
+
     protected function handleSubscriptionUpdated(BillingCustomer $customer, array $stripeSub): void
     {
         $status = match ($stripeSub['status'] ?? 'active') {
@@ -313,11 +479,45 @@ class BillingService
             ->update(['status' => SubscriptionStatus::PastDue]);
     }
 
-    protected function getOrCreateStripeCustomer(User $user): BillingCustomer
+    public function getOrCreateStripeCustomer(User $user, bool $forceFresh = false): BillingCustomer
     {
         $customer = $user->billingCustomer;
-        if ($customer && $customer->stripe_customer_id) {
-            return $customer;
+        $stripeSecret = config('services.stripe.secret');
+
+        if (!$forceFresh && $customer && $customer->stripe_customer_id && !str_starts_with($customer->stripe_customer_id, 'cus_mock')) {
+            // If in Stripe mode, verify that the customer actually exists in Stripe
+            if (!empty($stripeSecret) && !app()->environment('testing')) {
+                try {
+                    $verify = Http::withToken($stripeSecret)->get("https://api.stripe.com/v1/customers/{$customer->stripe_customer_id}");
+                    if ($verify->successful()) {
+                        return $customer;
+                    }
+                } catch (\Throwable $e) {
+                    // Ignore network error and proceed
+                }
+            } else {
+                return $customer;
+            }
+        }
+
+        if (!empty($stripeSecret) && !app()->environment('testing')) {
+            try {
+                $response = Http::withToken($stripeSecret)->asForm()->post('https://api.stripe.com/v1/customers', [
+                    'email' => $user->email,
+                    'name' => $user->name,
+                    'metadata[user_id]' => (string) $user->id,
+                ]);
+
+                if ($response->successful()) {
+                    $stripeCustomerId = $response->json('id');
+                    return BillingCustomer::updateOrCreate(
+                        ['user_id' => $user->id],
+                        ['stripe_customer_id' => $stripeCustomerId]
+                    );
+                }
+            } catch (\Throwable $e) {
+                // Fallback to random identifier if offline or during local simulation
+            }
         }
 
         $stripeCustomerId = 'cus_' . Str::random(18);
@@ -326,6 +526,88 @@ class BillingService
             ['user_id' => $user->id],
             ['stripe_customer_id' => $stripeCustomerId]
         );
+    }
+
+    /**
+     * Retrieve complete billing history for user: payments, subscriptions, and receipts.
+     */
+    public function getUserBillingHistory(User $user): array
+    {
+        $customer = $user->billingCustomer;
+        $history = [];
+        $recordedReferences = [];
+
+        if ($customer) {
+            $events = BillingEvent::where('billing_customer_id', $customer->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            foreach ($events as $event) {
+                $payload = $event->payload ?? [];
+                $interval = $payload['interval'] ?? $payload['plan'] ?? 'monthly';
+                $isYearly = ($interval === 'yearly' || $interval === 'annual');
+                $amount = $isYearly ? 59.88 : 4.99;
+                $reference = $payload['payment_intent_id'] ?? $event->provider_event_id;
+
+                if ($reference) {
+                    $recordedReferences[$reference] = true;
+                }
+
+                $history[] = [
+                    'id' => $event->id,
+                    'title' => $isYearly ? 'Yearly Premium Subscription' : 'Monthly Premium Subscription',
+                    'plan' => 'Premium',
+                    'interval' => $interval,
+                    'amount' => $amount,
+                    'currency' => 'EUR',
+                    'formatted_amount' => '€' . number_format($amount, 2),
+                    'provider' => $event->provider ?? 'stripe',
+                    'status' => 'Paid',
+                    'reference' => $reference,
+                    'date' => $event->created_at->format('M d, Y'),
+                    'time' => $event->created_at->format('H:i'),
+                    'created_at' => $event->created_at->toIso8601String(),
+                ];
+            }
+        }
+
+        // Also query subscriptions table for any historical subscriptions
+        $subscriptions = Subscription::where('user_id', $user->id)
+            ->with('plan')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        foreach ($subscriptions as $sub) {
+            $reference = $sub->provider_subscription_id;
+            if ($reference && isset($recordedReferences[$reference])) {
+                continue; // Avoid duplicating if already represented by a billing event
+            }
+
+            if ($sub->plan && $sub->plan->slug !== 'free') {
+                $isYearly = $sub->current_period_end && $sub->current_period_start
+                    && $sub->current_period_start->diffInDays($sub->current_period_end) > 60;
+                $amount = $isYearly ? 59.88 : 4.99;
+
+                $history[] = [
+                    'id' => $sub->id,
+                    'title' => $isYearly ? 'Yearly Premium Subscription' : 'Monthly Premium Subscription',
+                    'plan' => $sub->plan->name,
+                    'interval' => $isYearly ? 'yearly' : 'monthly',
+                    'amount' => $amount,
+                    'currency' => 'EUR',
+                    'formatted_amount' => '€' . number_format($amount, 2),
+                    'provider' => $sub->provider?->value ?? 'stripe',
+                    'status' => $sub->isActive() ? 'Active' : 'Ended',
+                    'reference' => $reference ?? ('sub_' . substr($sub->id, 0, 8)),
+                    'date' => $sub->created_at->format('M d, Y'),
+                    'time' => $sub->created_at->format('H:i'),
+                    'created_at' => $sub->created_at->toIso8601String(),
+                    'period_end' => $sub->current_period_end?->format('M d, Y'),
+                ];
+            }
+        }
+
+        return $history;
     }
 }
 

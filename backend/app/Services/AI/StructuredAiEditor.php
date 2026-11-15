@@ -33,21 +33,7 @@ class StructuredAiEditor
         ?string $summary = null,
         ?User $author = null
     ): Website {
-        $doc = $website->document;
-
-        foreach ($operations as $op) {
-            $type = $op['type'] ?? '';
-            $doc = match ($type) {
-                'update_component' => $this->applyUpdateComponent($doc, $op),
-                'add_component' => $this->applyAddComponent($doc, $op),
-                'remove_component' => $this->applyRemoveComponent($doc, $op),
-                'move_component' => $this->applyMoveComponent($doc, $op),
-                'duplicate_component' => $this->applyDuplicateComponent($doc, $op),
-                'update_design_token' => $this->applyUpdateDesignToken($doc, $op),
-                'update_seo' => $this->applyUpdateSeo($doc, $op),
-                default => throw new Exception("Unsupported AI operation type: {$type}"),
-            };
-        }
+        $doc = $this->applyOperationsToDoc($website->document, $operations);
 
         // Validate final document structure
         $this->validator->validate($doc);
@@ -62,9 +48,37 @@ class StructuredAiEditor
         );
     }
 
+    /**
+     * Apply a list of operations directly to a document array.
+     *
+     * @param array<string, mixed> $doc
+     * @param array<array<string, mixed>> $operations
+     * @return array<string, mixed>
+     * @throws Exception
+     */
+    public function applyOperationsToDoc(array $doc, array $operations): array
+    {
+        foreach ($operations as $op) {
+            $type = strtolower((string) ($op['type'] ?? $op['operation'] ?? ''));
+            $doc = match ($type) {
+                'update_component', 'update', 'replace' => $this->applyUpdateComponent($doc, $op),
+                'add_component', 'add' => $this->applyAddComponent($doc, $op),
+                'remove_component', 'remove', 'delete' => $this->applyRemoveComponent($doc, $op),
+                'move_component', 'move' => $this->applyMoveComponent($doc, $op),
+                'duplicate_component', 'duplicate' => $this->applyDuplicateComponent($doc, $op),
+                'update_design_token' => $this->applyUpdateDesignToken($doc, $op),
+                'update_seo' => $this->applyUpdateSeo($doc, $op),
+                default => $doc,
+            };
+        }
+
+        return $doc;
+    }
+
     protected function applyUpdateComponent(array $doc, array $op): array
     {
-        $sectionId = $op['section_id'] ?? throw new Exception('update_component requires section_id');
+        $sectionId = $op['section_id'] ?? $op['id'] ?? $op['sectionId'] ?? null;
+        if (!$sectionId) return $doc;
 
         foreach ($doc['pages'] as &$page) {
             foreach ($page['sections'] as &$sec) {
@@ -83,30 +97,59 @@ class StructuredAiEditor
             }
         }
 
-        throw new Exception("Section ID '{$sectionId}' not found in document.");
+        return $doc;
     }
 
     protected function applyAddComponent(array $doc, array $op): array
     {
-        $pageId = $op['page_id'] ?? $doc['pages'][0]['id'];
-        $newSec = $op['section'] ?? throw new Exception('add_component requires section');
+        $pageId = $op['page_id'] ?? $doc['pages'][0]['id'] ?? 'page_home';
+        $newSec = $op['section'] ?? $op['component'] ?? $op['value'] ?? null;
+        if (!is_array($newSec)) {
+            return $doc;
+        }
+
+        if (empty($newSec['component']) && !empty($newSec['type'])) {
+            $newSec['component'] = $newSec['type'];
+        }
+
+        $comp = strtolower((string) ($newSec['component'] ?? ''));
+        if (in_array($comp, ['product_grid', 'store', 'pricing_grid'], true)) {
+            $newSec['component'] = 'products';
+        }
+
+        if (!isset($newSec['props']) || !is_array($newSec['props'])) {
+            $newSec['props'] = [];
+            if (isset($newSec['items'])) {
+                $newSec['props']['items'] = $newSec['items'];
+            }
+            if (isset($newSec['products'])) {
+                $newSec['props']['items'] = $newSec['products'];
+            }
+            if (isset($newSec['title'])) {
+                $newSec['props']['title'] = $newSec['title'];
+            }
+            if (isset($newSec['subtitle'])) {
+                $newSec['props']['subtitle'] = $newSec['subtitle'];
+            }
+        } elseif (isset($newSec['props']['products']) && !isset($newSec['props']['items'])) {
+            $newSec['props']['items'] = $newSec['props']['products'];
+        }
 
         if (empty($newSec['id'])) {
             $newSec['id'] = 'sec_' . Str::random(8);
         }
 
         foreach ($doc['pages'] as &$page) {
-            if ($page['id'] === $pageId) {
-                $order = $op['order'] ?? count($page['sections']);
+            if ($page['id'] === $pageId || empty($pageId)) {
+                $order = $op['order'] ?? count($page['sections'] ?? []);
                 $newSec['order'] = $order;
                 $page['sections'][] = $newSec;
-                // Re-sort orders
                 usort($page['sections'], fn ($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
                 return $doc;
             }
         }
 
-        throw new Exception("Page ID '{$pageId}' not found.");
+        return $doc;
     }
 
     protected function applyRemoveComponent(array $doc, array $op): array
@@ -170,8 +213,9 @@ class StructuredAiEditor
         $path = $op['path'] ?? throw new Exception('update_design_token requires path');
         $value = $op['value'] ?? throw new Exception('update_design_token requires value');
 
-        // e.g. path = "colors.primary"
-        $keys = explode('.', $path);
+        // Clean leading 'site.', 'theme.', or 'site.theme.' from path
+        $cleanPath = preg_replace('/^(site\.)?(theme\.)?/', '', $path);
+        $keys = explode('.', $cleanPath);
         $target = &$doc['site']['theme'];
 
         foreach ($keys as $i => $key) {

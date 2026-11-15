@@ -30,18 +30,18 @@ class AuthScreen extends StatelessWidget {
                   child: const Icon(LucideIcons.sparkles, color: Colors.white, size: 28),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'Welcome Back',
-                  style: TextStyle(
+                Text(
+                  'auth_welcome_back'.tr,
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: AppColors.ink,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'AI Website Builder Platform',
-                  style: TextStyle(fontSize: 14, color: AppColors.inkMuted),
+                Text(
+                  'auth_subtitle'.tr,
+                  style: const TextStyle(fontSize: 14, color: AppColors.inkMuted),
                 ),
                 const SizedBox(height: 32),
 
@@ -75,7 +75,7 @@ class AuthScreen extends StatelessWidget {
                   controller: controller.emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Email address',
+                    labelText: 'auth_email_label'.tr,
                     hintText: 'user@aibuilder.local',
                     filled: true,
                     fillColor: AppColors.surface,
@@ -98,7 +98,7 @@ class AuthScreen extends StatelessWidget {
                   controller: controller.passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: 'auth_password_label'.tr,
                     hintText: '••••••••',
                     filled: true,
                     fillColor: AppColors.surface,
@@ -137,9 +137,9 @@ class AuthScreen extends StatelessWidget {
                               height: 22,
                               child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                             )
-                          : const Text(
-                              'Sign In',
-                              style: TextStyle(
+                          : Text(
+                              'auth_sign_in_btn'.tr,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -149,9 +149,9 @@ class AuthScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Default credentials: user@aibuilder.local / UserSecret123!',
-                  style: TextStyle(fontSize: 12, color: AppColors.inkMuted),
+                Text(
+                  'auth_default_credentials'.tr,
+                  style: const TextStyle(fontSize: 12, color: AppColors.inkMuted),
                   textAlign: TextAlign.center,
                 ),
               ],

@@ -241,6 +241,17 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     };
   }, [currentSlug, selectedElement, selectedSectionId]);
 
+  // Synchronize CSS variables and body background to document root
+  useEffect(() => {
+    const vars = generateCssVariables(doc.site.theme);
+    Object.entries(vars).forEach(([k, v]) => {
+      document.documentElement.style.setProperty(k, v);
+    });
+    if (vars['--color-bg']) {
+      document.body.style.backgroundColor = vars['--color-bg'];
+    }
+  }, [doc.site.theme]);
+
   // Section level selection
   const handleSectionSelect = (sectionId: string) => {
     setSelectedSectionId(sectionId);
@@ -285,9 +296,10 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     const isHeading = ['H1', 'H2', 'H3', 'H4'].includes(target.tagName);
     const isParagraph = target.tagName === 'P';
     const isButton = target.tagName === 'A' || target.tagName === 'BUTTON' || target.classList.contains('btn');
+    const isImage = component === 'image' || target.tagName === 'IMG' || target.tagName === 'FIGURE';
 
-    // If clicked on section container itself (not specific text element), select section
-    if (target === sectionEl || (!isHeading && !isParagraph && !isButton && target.children.length > 2)) {
+    // If clicked on section container itself, an image, or non-text element, select section
+    if (isImage || target === sectionEl || (!isHeading && !isParagraph && !isButton && target.children.length > 2)) {
       handleSectionSelect(sectionId);
       return;
     }
@@ -435,7 +447,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'var(--color-bg, #FFFFFF)',
         paddingBottom: isEditorMode ? '140px' : '0px',
       }}
     >
@@ -469,7 +481,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
                 justifyContent: 'center',
                 textAlign: 'center',
                 padding: '2.5rem 1.5rem',
-                backgroundColor: '#FFFFFF',
+                backgroundColor: 'var(--color-bg, #FFFFFF)',
               }}
             >
               <h3

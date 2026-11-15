@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
 import '../../../core/designsystem/typography.dart';
 import '../../../core/models/website.dart';
+import '../../../core/routes/app_routes.dart';
 
 class ContinueEditingHeroCard extends StatelessWidget {
   final Website? website;
@@ -19,21 +21,23 @@ class ContinueEditingHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final siteName = website?.name ?? 'Lumen Coffee';
     final statusText = website?.status == 'published'
-        ? 'Live · Published recently'
-        : 'Draft · Edited 2 hours ago';
+        ? 'published_recently'.tr
+        : 'edited_recently'.tr;
 
     return GestureDetector(
       onTap: onOpenClick,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.borderSubtle, width: 1.0),
-          boxShadow: const [
+          border: Border.all(color: AppColors.borderSubtleOf(context), width: 1.0),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x181E1E50),
+              color: AppColors.isDark(context)
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : const Color(0x181E1E50),
               blurRadius: 18,
-              offset: Offset(0, 8),
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -71,22 +75,27 @@ class ContinueEditingHeroCard extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                siteName,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'serif',
-                                  color: Color(0xFF2C241E),
+                              Expanded(
+                                child: Text(
+                                  siteName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'serif',
+                                    color: Color(0xFF2C241E),
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 6),
                               Row(
                                 children: [
-                                  _miniText('Shop'),
+                                  _miniText('demo_shop'.tr),
                                   const SizedBox(width: 6),
-                                  _miniText('Subscriptions'),
+                                  _miniText('demo_subscriptions'.tr),
                                   const SizedBox(width: 6),
-                                  _miniText('Visit'),
+                                  _miniText('demo_visit'.tr),
                                   const SizedBox(width: 6),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
@@ -94,9 +103,9 @@ class ContinueEditingHeroCard extends StatelessWidget {
                                       color: const Color(0xFF9E4B28),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
-                                    child: const Text(
-                                      'Order',
-                                      style: TextStyle(fontSize: 6, color: Colors.white),
+                                    child: Text(
+                                      'demo_order'.tr,
+                                      style: const TextStyle(fontSize: 6, color: Colors.white),
                                     ),
                                   ),
                                 ],
@@ -150,9 +159,9 @@ class ContinueEditingHeroCard extends StatelessWidget {
                                         color: const Color(0xFF9E4B28),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: const Text(
-                                        'Order beans',
-                                        style: TextStyle(fontSize: 6.5, color: Colors.white),
+                                      child: Text(
+                                        'demo_order_beans'.tr,
+                                        style: const TextStyle(fontSize: 6.5, color: Colors.white),
                                       ),
                                     ),
                                   ],
@@ -249,9 +258,9 @@ class ContinueEditingHeroCard extends StatelessWidget {
                               color: const Color(0xFF9E4B28),
                               borderRadius: BorderRadius.circular(3),
                             ),
-                            child: const Text(
-                              'Order beans',
-                              style: TextStyle(fontSize: 5.5, color: Colors.white),
+                            child: Text(
+                              'demo_order_beans'.tr,
+                              style: const TextStyle(fontSize: 5.5, color: Colors.white),
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -288,31 +297,61 @@ class ContinueEditingHeroCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Continue editing',
-                          style: AppTypography.helper,
+                        Text(
+                          'continue_editing'.tr,
+                          style: AppTypography.helperOf(context),
                         ),
                         const SizedBox(height: 3),
                         Text(
                           siteName,
-                          style: AppTypography.heroCardTitle,
+                          style: AppTypography.heroCardTitleOf(context),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 3),
                         Text(
                           statusText,
-                          style: AppTypography.helper,
+                          style: AppTypography.helperOf(context),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
+
+                  // Website Configuration Button
+                  GestureDetector(
+                    onTap: () {
+                      if (website != null) {
+                        Get.toNamed(
+                          AppRoutes.websiteConfig,
+                          arguments: {'websiteId': website!.id},
+                        );
+                      } else {
+                        Get.toNamed(AppRoutes.websiteConfig);
+                      }
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceMutedOf(context),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.borderSubtleOf(context)),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        LucideIcons.settings,
+                        size: 18,
+                        color: AppColors.inkMutedOf(context),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
 
                   // Near-black Primary Pill Action: "Open >"
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.ink,
+                      color: AppColors.isDark(context) ? Colors.white : AppColors.ink,
                       borderRadius: BorderRadius.circular(999),
                       boxShadow: const [
                         BoxShadow(
@@ -323,21 +362,21 @@ class ContinueEditingHeroCard extends StatelessWidget {
                       ],
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Open',
+                          'open'.tr,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.isDark(context) ? AppColors.ink : Colors.white,
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
                           ),
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Icon(
                           LucideIcons.chevronRight,
-                          color: Colors.white,
+                          color: AppColors.isDark(context) ? AppColors.ink : Colors.white,
                           size: 15,
                         ),
                       ],

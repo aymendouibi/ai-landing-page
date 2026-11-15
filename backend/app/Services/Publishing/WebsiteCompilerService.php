@@ -311,8 +311,26 @@ img { max-width: 100%; height: auto; display: block; }
 @media (max-width: 768px) {
     .hero h1 { font-size: 2.5rem; }
     .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .about-grid { grid-template-columns: 1fr !important; }
     .footer-inner { flex-direction: column; gap: 1.5rem; text-align: center; }
 }
+
+/* Products & eCommerce */
+.products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.75rem; margin-top: 2rem; }
+.product-card { background: var(--surface); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: var(--shadow-sm); }
+.product-card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+.product-card p { color: var(--text-secondary); font-size: 0.95rem; }
+
+/* Image Section */
+.image-section { padding: 2.5rem 0; }
+.image-frame { width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); }
+.image-caption { margin-top: 0.75rem; text-align: center; font-size: 0.9rem; color: var(--text-secondary); }
+
+/* About / Story */
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+
+/* Text Section */
+.text-section { padding: 4rem 0; }
 CSS;
     }
 
@@ -448,6 +466,8 @@ HTML;
                 $ctaLink = htmlspecialchars($props['ctaLink'] ?? '#contact', ENT_QUOTES, 'UTF-8');
                 $secCtaText = !empty($props['secondaryCtaText']) ? htmlspecialchars($props['secondaryCtaText'], ENT_QUOTES, 'UTF-8') : null;
                 $secCtaLink = !empty($props['secondaryCtaLink']) ? htmlspecialchars($props['secondaryCtaLink'], ENT_QUOTES, 'UTF-8') : null;
+                $badge = !empty($props['badge']) ? '<div class="hero-badge" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.85rem; border-radius: 9999px; background: rgba(99, 102, 241, 0.12); color: var(--primary); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; border: 1px solid rgba(99, 102, 241, 0.25); margin-bottom: 1.5rem;">' . htmlspecialchars($props['badge'], ENT_QUOTES, 'UTF-8') . '</div><br>' : '';
+                $heroImg = !empty($props['image']['src']) ? '<div class="hero-image-frame" style="margin-top: 3.5rem; max-width: 1000px; margin-left: auto; margin-right: auto; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.1);"><img src="' . htmlspecialchars($props['image']['src'], ENT_QUOTES, 'UTF-8') . '" alt="' . $headline . '" style="width: 100%; height: auto; display: block;" loading="lazy"></div>' : '';
 
                 $actions = "<a href=\"{$ctaLink}\" class=\"btn-primary\">{$ctaText}</a>";
                 if ($secCtaText && $secCtaLink) {
@@ -457,10 +477,39 @@ HTML;
                 return <<<HTML
 <section id="hero" class="section hero {$bgStyle}">
     <div class="container">
+        {$badge}
         <h1>{$headline}</h1>
         <p>{$subheadline}</p>
         <div class="hero-actions">
             {$actions}
+        </div>
+        {$heroImg}
+    </div>
+</section>
+HTML;
+
+            case 'statistics':
+                $title = htmlspecialchars($props['title'] ?? 'Our Impact in Numbers', ENT_QUOTES, 'UTF-8');
+                $metrics = $props['metrics'] ?? [];
+                $metricsHtml = '';
+                foreach ($metrics as $m) {
+                    $val = htmlspecialchars($m['value'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $lbl = htmlspecialchars($m['label'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $metricsHtml .= <<<HTML
+<div class="stat-card" style="text-align: center; padding: 2rem 1.5rem; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: var(--shadow-sm);">
+    <div style="font-size: 2.75rem; font-weight: 800; color: var(--primary); letter-spacing: -0.03em;">{$val}</div>
+    <div style="margin-top: 0.5rem; font-size: 0.95rem; font-weight: 500; color: var(--text-secondary);">{$lbl}</div>
+</div>
+HTML;
+                }
+                return <<<HTML
+<section id="metrics" class="section {$bgStyle}">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 2.5rem;">
+            <h2>{$title}</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            {$metricsHtml}
         </div>
     </div>
 </section>
@@ -475,8 +524,12 @@ HTML;
                 foreach ($items as $item) {
                     $iTitle = htmlspecialchars($item['title'] ?? '', ENT_QUOTES, 'UTF-8');
                     $iDesc = htmlspecialchars($item['description'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $icon = htmlspecialchars($item['icon'] ?? 'Sparkles', ENT_QUOTES, 'UTF-8');
                     $cards .= <<<HTML
 <div class="feature-card">
+    <div class="feature-icon" style="width: 44px; height: 44px; border-radius: 10px; background: rgba(37, 99, 235, 0.1); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-weight: 700; font-size: 0.85rem;">
+        {$icon}
+    </div>
     <h3>{$iTitle}</h3>
     <p>{$iDesc}</p>
 </div>
@@ -500,8 +553,8 @@ HTML;
             case 'cta':
                 $headline = htmlspecialchars($props['headline'] ?? 'Ready to get started?', ENT_QUOTES, 'UTF-8');
                 $desc = htmlspecialchars($props['description'] ?? '', ENT_QUOTES, 'UTF-8');
-                $btnText = htmlspecialchars($props['buttonText'] ?? 'Get Started', ENT_QUOTES, 'UTF-8');
-                $btnLink = htmlspecialchars($props['buttonLink'] ?? '#contact', ENT_QUOTES, 'UTF-8');
+                $btnText = htmlspecialchars($props['buttonText'] ?? $props['ctaText'] ?? 'Get Started', ENT_QUOTES, 'UTF-8');
+                $btnLink = htmlspecialchars($props['buttonLink'] ?? $props['ctaLink'] ?? '#contact', ENT_QUOTES, 'UTF-8');
 
                 return <<<HTML
 <section class="section {$bgStyle}">
@@ -546,6 +599,184 @@ HTML;
                     <button type="submit" class="btn-primary">Send Message</button>
                 </form>
             </div>
+        </div>
+    </div>
+</section>
+HTML;
+
+            case 'image':
+                $imgSrc = htmlspecialchars($props['url'] ?? $props['src'] ?? $props['imageUrl'] ?? $props['image'] ?? 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=80', ENT_QUOTES, 'UTF-8');
+                $alt = htmlspecialchars($props['alt'] ?? 'Website visual', ENT_QUOTES, 'UTF-8');
+                $isFit = ($props['fit'] ?? 'crop') === 'fit';
+                $objFit = $isFit ? 'contain' : 'cover';
+                $maxH = $isFit ? '420px' : '340px';
+                $caption = !empty($props['caption']) ? '<p class="image-caption">' . htmlspecialchars($props['caption'], ENT_QUOTES, 'UTF-8') . '</p>' : '';
+
+                return <<<HTML
+<section class="section image-section {$bgStyle}">
+    <div class="container">
+        <div class="image-frame">
+            <img src="{$imgSrc}" alt="{$alt}" style="width: 100%; max-height: {$maxH}; object-fit: {$objFit}; display: block;" loading="lazy">
+        </div>
+        {$caption}
+    </div>
+</section>
+HTML;
+
+            case 'products':
+                $title = htmlspecialchars($props['headline'] ?? $props['title'] ?? 'Our Products', ENT_QUOTES, 'UTF-8');
+                $subtitle = htmlspecialchars($props['subheadline'] ?? $props['subtitle'] ?? $props['description'] ?? '', ENT_QUOTES, 'UTF-8');
+                $items = $props['items'] ?? [
+                    ['name' => 'Signature Blend', 'price' => '$18.00', 'description' => 'Rich, balanced with notes of chocolate and roasted hazelnut.'],
+                    ['name' => 'Single Origin Ethiopia', 'price' => '$22.00', 'description' => 'Bright and floral with delicate jasmine and citrus finish.'],
+                    ['name' => 'Cold Brew Reserve', 'price' => '$16.00', 'description' => 'Steeped for 18 hours. Smooth, naturally sweet and bold.'],
+                ];
+
+                $itemsHtml = '';
+                foreach ($items as $item) {
+                    $iName = htmlspecialchars($item['name'] ?? $item['title'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $iPrice = htmlspecialchars($item['price'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $iDesc = htmlspecialchars($item['description'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $iImg = !empty($item['image']) ? '<img src="' . htmlspecialchars($item['image'], ENT_QUOTES, 'UTF-8') . '" alt="' . $iName . '" style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px;">' : '';
+                    $itemsHtml .= <<<HTML
+<div class="product-card">
+    {$iImg}
+    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 0.75rem;">
+        <h3>{$iName}</h3>
+        <span style="font-weight: 700; color: var(--primary);">{$iPrice}</span>
+    </div>
+    <p style="margin-top: 0.5rem; color: var(--text-secondary);">{$iDesc}</p>
+</div>
+HTML;
+                }
+
+                return <<<HTML
+<section id="products" class="section {$bgStyle}">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2>{$title}</h2>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">{$subtitle}</p>
+        </div>
+        <div class="products-grid">
+            {$itemsHtml}
+        </div>
+    </div>
+</section>
+HTML;
+
+            case 'story':
+            case 'about':
+                $title = htmlspecialchars($props['headline'] ?? $props['title'] ?? 'Our Story', ENT_QUOTES, 'UTF-8');
+                $body = htmlspecialchars($props['subheadline'] ?? $props['body'] ?? $props['content'] ?? $props['description'] ?? '', ENT_QUOTES, 'UTF-8');
+                $img = !empty($props['image']) ? '<div class="about-image"><img src="' . htmlspecialchars($props['image'], ENT_QUOTES, 'UTF-8') . '" alt="' . $title . '" style="width: 100%; border-radius: 12px; object-fit: cover;"></div>' : '';
+
+                return <<<HTML
+<section id="about" class="section about-section {$bgStyle}">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-content">
+                <h2>{$title}</h2>
+                <p style="margin-top: 1rem; line-height: 1.7; color: var(--text-secondary);">{$body}</p>
+            </div>
+            {$img}
+        </div>
+    </div>
+</section>
+HTML;
+
+            case 'gallery':
+                $title = htmlspecialchars($props['title'] ?? 'Gallery', ENT_QUOTES, 'UTF-8');
+                $images = $props['images'] ?? [
+                    ['url' => 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80', 'alt' => 'Gallery photo 1'],
+                    ['url' => 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80', 'alt' => 'Gallery photo 2'],
+                    ['url' => 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80', 'alt' => 'Gallery photo 3'],
+                ];
+                $galleryHtml = '';
+                foreach ($images as $gImg) {
+                    $gUrl = htmlspecialchars($gImg['url'] ?? $gImg['src'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $gAlt = htmlspecialchars($gImg['alt'] ?? 'Gallery image', ENT_QUOTES, 'UTF-8');
+                    $galleryHtml .= "<div class=\"gallery-item\"><img src=\"{$gUrl}\" alt=\"{$gAlt}\" style=\"width: 100%; height: 200px; object-fit: cover; border-radius: 10px;\" loading=\"lazy\"></div>";
+                }
+
+                return <<<HTML
+<section id="gallery" class="section {$bgStyle}">
+    <div class="container">
+        <h2>{$title}</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+            {$galleryHtml}
+        </div>
+    </div>
+</section>
+HTML;
+
+            case 'text':
+                $headline = !empty($props['headline']) ? '<h2>' . htmlspecialchars($props['headline'], ENT_QUOTES, 'UTF-8') . '</h2>' : '';
+                $content = htmlspecialchars($props['content'] ?? $props['body'] ?? $props['text'] ?? '', ENT_QUOTES, 'UTF-8');
+
+                return <<<HTML
+<section class="section text-section {$bgStyle}">
+    <div class="container" style="max-width: 720px; line-height: 1.8;">
+        {$headline}
+        <div class="text-body" style="margin-top: 1rem; color: var(--text-secondary); font-size: 1.1rem;">
+            <p>{$content}</p>
+        </div>
+    </div>
+</section>
+HTML;
+
+            case 'visit':
+                $title = htmlspecialchars($props['title'] ?? 'Visit Us', ENT_QUOTES, 'UTF-8');
+                $address = htmlspecialchars($props['address'] ?? '123 Coffee Lane, Portland, OR', ENT_QUOTES, 'UTF-8');
+                $hours = htmlspecialchars($props['hours'] ?? 'Mon - Sun: 7:00 AM - 6:00 PM', ENT_QUOTES, 'UTF-8');
+                $phone = htmlspecialchars($props['phone'] ?? '(555) 123-4567', ENT_QUOTES, 'UTF-8');
+
+                return <<<HTML
+<section id="visit" class="section visit-section {$bgStyle}">
+    <div class="container">
+        <h2>{$title}</h2>
+        <div class="visit-card" style="margin-top: 1.5rem; padding: 1.5rem; background: var(--surface); border-radius: 14px; border: 1px solid rgba(0, 0, 0, 0.08);">
+            <p><strong>Address:</strong> {$address}</p>
+            <p style="margin-top: 0.5rem;"><strong>Hours:</strong> {$hours}</p>
+            <p style="margin-top: 0.5rem;"><strong>Phone:</strong> {$phone}</p>
+        </div>
+    </div>
+</section>
+HTML;
+
+            case 'testimonials':
+            case 'reviews':
+                $title = htmlspecialchars($props['title'] ?? 'What Our Customers Say', ENT_QUOTES, 'UTF-8');
+                $items = $props['items'] ?? [];
+                $cards = '';
+                foreach ($items as $item) {
+                    $quote = htmlspecialchars($item['quote'] ?? $item['content'] ?? '', ENT_QUOTES, 'UTF-8');
+                    $author = htmlspecialchars($item['author'] ?? $item['name'] ?? 'Customer', ENT_QUOTES, 'UTF-8');
+                    $role = !empty($item['role']) ? '<span style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-top: 0.2rem;">' . htmlspecialchars($item['role'], ENT_QUOTES, 'UTF-8') . '</span>' : '';
+                    $avatar = !empty($item['avatar']) ? '<img src="' . htmlspecialchars($item['avatar'], ENT_QUOTES, 'UTF-8') . '" alt="' . $author . '" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; margin-right: 12px;">' : '';
+                    $ratingStars = !empty($item['rating']) ? '<div style="color: #F59E0B; margin-bottom: 0.75rem; letter-spacing: 2px;">' . str_repeat('★', (int)$item['rating']) . '</div>' : '';
+
+                    $cards .= <<<HTML
+<div class="testimonial-card" style="padding: 1.5rem; background: var(--surface); border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.06); display: flex; flex-direction: column; justify-content: space-between;">
+    <div>
+        {$ratingStars}
+        <p style="font-style: italic; color: var(--text-secondary); line-height: 1.6;">"{$quote}"</p>
+    </div>
+    <div style="display: flex; align-items: center; margin-top: 1.25rem;">
+        {$avatar}
+        <div>
+            <div style="font-weight: 600; color: var(--primary);">{$author}</div>
+            {$role}
+        </div>
+    </div>
+</div>
+HTML;
+                }
+                return <<<HTML
+<section class="section {$bgStyle}">
+    <div class="container">
+        <h2>{$title}</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+            {$cards}
         </div>
     </div>
 </section>

@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "810241219942",
+    "project_id": "website-generator-ce422",
+    "storage_bucket": "website-generator-ce422.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:810241219942:android:bdb4a568ce68ff7c813ca7",
+        "android_client_info": {
+          "package_name": "com.douibi.landing.ai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "810241219942-549910ojds19j2cvstun0nl3gdkc4o6k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.douibi.landing.ai",
+            "certificate_hash": "c120b58e20e13db658d844098b0acb219736e15b"
+          }
+        },
+        {
+          "client_id": "810241219942-jirdafhdi7fieq2ebkopk7dgm1qq1guu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.douibi.landing.ai",
+            "certificate_hash": "1d85aeb3fd45398edfb0728db7e27f765481697d"
+          }
+        },
+        {
+          "client_id": "810241219942-mo6ne66u4221qokjcf4l1scutpmf39u7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcQdM1hVJoih8c9LkogfVs2ibgysO8eKU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "810241219942-mo6ne66u4221qokjcf4l1scutpmf39u7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "810241219942-7iknljf99skdolpvbh9l69iktqsqgdr0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.douibi.landing.ai"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

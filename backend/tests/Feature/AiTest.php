@@ -240,5 +240,57 @@ class AiTest extends TestCase
             ->assertJsonPath('website.revision_number', 2)
             ->assertJsonPath('website.document.pages.0.sections.0.props.headline', 'AI Generated Brand New Headline');
     }
+
+    public function test_ai_edit_works_with_raw_document_without_auth(): void
+    {
+        $mockClient = Mockery::mock(OpenRouterClient::class);
+        $mockClient->shouldReceive('chatCompletion')
+            ->once()
+            ->andReturn([
+                'content' => json_encode([
+                    'operations' => [
+                        [
+                            'type' => 'update_component',
+                            'section_id' => 'sec_hero',
+                            'props' => ['headline' => 'Super Fresh Coffee'],
+                        ],
+                    ],
+                    'summary' => 'Changed hero headline',
+                ]),
+                'model_used' => 'nvidia/nemotron-3.5-lightning:free',
+                'tokens_input' => 80,
+                'tokens_output' => 60,
+                'cost' => 0.0,
+            ]);
+
+        $this->app->instance(OpenRouterClient::class, $mockClient);
+
+        $rawDoc = [
+            'schema_version' => 1,
+            'site' => ['name' => 'Demo Site', 'theme' => ['colors' => ['primary' => '#000', 'background' => '#FFF']]],
+            'pages' => [
+                [
+                    'id' => 'page_home',
+                    'title' => 'Home',
+                    'sections' => [
+                        [
+                            'id' => 'sec_hero',
+                            'component' => 'hero',
+                            'props' => ['headline' => 'Old Headline'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/ai/edit', [
+            'document' => $rawDoc,
+            'instruction' => 'Change headline to Super Fresh Coffee',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('operations_applied', 1)
+            ->assertJsonPath('document.pages.0.sections.0.props.headline', 'Super Fresh Coffee');
+    }
 }
 

@@ -17,6 +17,7 @@ use App\Models\WebsiteRevision;
 use App\Services\Billing\SubscriptionEntitlementService;
 use App\Services\Documents\DefaultDocumentFactory;
 use App\Services\Documents\WebsiteDocumentService;
+use App\Services\Publishing\WebsiteCompilerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -270,6 +271,78 @@ class WebsiteController extends Controller
         return response()->json([
             'message' => 'Lock released successfully.',
         ]);
+    }
+
+    /**
+     * Export website project as a standalone ZIP archive (Premium feature only).
+     */
+    public function exportZip(
+        Request $request,
+        Website $website,
+        WebsiteCompilerService $compiler
+    ) {
+        Gate::authorize('view', $website);
+
+        // Strict entitlement check: Exporting projects is a Premium feature only
+        $this->entitlementService->assertCan($request->user(), 'code_export');
+
+        $document = $website->currentRevision?->document ?? $website->document ?? [];
+
+        // Compile HTML/CSS/JS files
+        $compiledFiles = $compiler->compile(
+            $document,
+            $website->id,
+            $website->subdomain ? "https://{$website->subdomain}.sites.aibuilder.app" : null
+        );
+
+        // Include raw website document schema and README
+        $compiledFiles['schema.json'] = json_encode($document, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $compiledFiles['README.md'] = <<<MARKDOWN
+# {$website->name}
+
+Exported from AI Builder.
+
+## Running Locally
+You can open `index.html` directly in any web browser, or serve it using any static HTTP server:
+
+```bash
+# Python 3
+python3 -m http.server 8000
+
+# Node.js
+npx serve .
+```
+
+## Structure
+- `index.html` - Semantic production HTML markup with Tailwind CSS
+- `assets/style.css` - Custom design preset stylesheets and utility rules
+- `assets/main.js` - Interactive navigation, form submissions, and animations
+- `schema.json` - Complete website document AST and component hierarchy
+MARKDOWN;
+
+        $tempZipPath = tempnam(sys_get_temp_dir(), 'export_') . '.zip';
+        $zip = new \ZipArchive();
+
+        if ($zip->open($tempZipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return response()->json([
+                'error' => 'export_failed',
+                'message' => 'Unable to generate zip archive.',
+            ], 500);
+        }
+
+        foreach ($compiledFiles as $filePath => $content) {
+            $zip->addFromString($filePath, $content);
+        }
+
+        $zip->close();
+
+        $slug = $website->slug ?: Str::slug($website->name) ?: 'website';
+        $fileName = "{$slug}-project.zip";
+
+        return response()->download($tempZipPath, $fileName, [
+            'Content-Type' => 'application/zip',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+        ])->deleteFileAfterSend(true);
     }
 
     /**

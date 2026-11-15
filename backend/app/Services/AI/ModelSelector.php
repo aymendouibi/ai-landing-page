@@ -17,8 +17,8 @@ class ModelSelector
         'website_planning' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
         'content_generation' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
         'document_generation' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-        'editing' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-        'remix' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'editing' => 'google/gemini-2.5-flash',
+        'remix' => 'google/gemini-2.5-flash',
         'vision_qa' => 'nvidia/nemotron-3.5-super-vl:free',
     ];
 
@@ -30,13 +30,21 @@ class ModelSelector
      */
     public function getModelForTask(string $task): string
     {
-        // 1. Check if an active model config is configured in DB
+        // 1. Check for specific environment override for this task
+        if (in_array($task, ['editing', 'remix'], true)) {
+            $configuredEditModel = config('services.openrouter.edit_model');
+            if (!empty($configuredEditModel)) {
+                return (string) $configuredEditModel;
+            }
+        }
+
+        // 2. Check if an active model config is configured in DB
         $config = AiModelConfig::getForTask($task);
         if ($config && !empty($config->model)) {
             return $config->model;
         }
 
-        // 2. Return sensible default
+        // 3. Return sensible default
         return self::DEFAULT_MODELS_BY_TASK[$task] ?? 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free';
     }
 }

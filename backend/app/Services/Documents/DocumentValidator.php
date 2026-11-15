@@ -17,8 +17,10 @@ class DocumentValidator
         'features',
         'benefits',
         'products',
+        'gallery',
         'galleries',
         'video',
+        'story',
         'about',
         'statistics',
         'testimonials',
@@ -28,10 +30,13 @@ class DocumentValidator
         'team',
         'faq',
         'contact',
+        'visit',
         'forms',
         'newsletter',
+        'text',
         'cta',
         'footer',
+        'image',
     ];
 
     /**
@@ -181,8 +186,8 @@ class DocumentValidator
                 $errors[] = "Section component \"{$section['component']}\" is not supported.";
             }
 
-            // Variant
-            if (empty($section['variant']) || !is_string($section['variant'])) {
+            // Variant (optional, must be string if provided)
+            if (isset($section['variant']) && !is_string($section['variant'])) {
                 $errors[] = "Section at index {$sIndex} in page \"{$pageId}\" must define a string \"variant\".";
             }
 

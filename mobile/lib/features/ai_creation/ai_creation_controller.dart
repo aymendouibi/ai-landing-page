@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/designsystem/app_snackbar.dart';
 import '../../core/network/api_client.dart';
 import '../../core/routes/app_routes.dart';
 import '../dashboard/dashboard_controller.dart';
+import '../subscription/subscription_view.dart';
 
 class AiCreationController extends GetxController {
   final promptController = TextEditingController();
@@ -19,6 +21,15 @@ class AiCreationController extends GetxController {
     'Retail',
   ];
 
+  bool get isLimitReached {
+    if (Get.isRegistered<DashboardController>()) {
+      final dc = Get.find<DashboardController>();
+      return dc.aiGenerationsMonthly.value > 0 &&
+          dc.aiGenerationsUsed.value >= dc.aiGenerationsMonthly.value;
+    }
+    return false;
+  }
+
   void setIndustry(String industry) {
     selectedIndustry.value = industry;
   }
@@ -27,6 +38,11 @@ class AiCreationController extends GetxController {
     final prompt = promptController.text.trim();
     if (prompt.isEmpty) {
       errorMessage.value = 'Please describe your website or business idea.';
+      return;
+    }
+
+    if (isLimitReached) {
+      SubscriptionView.open();
       return;
     }
 
@@ -57,19 +73,19 @@ class AiCreationController extends GetxController {
 
       // Refresh dashboard if it exists
       if (Get.isRegistered<DashboardController>()) {
-        Get.find<DashboardController>().loadData();
+        final dc = Get.find<DashboardController>();
+        dc.aiGenerationsUsed.value++;
+        dc.loadData();
       }
 
-      Get.snackbar(
-        'Success',
-        'Website generated successfully!',
-        backgroundColor: Colors.white.withValues(alpha: 0.9),
-        colorText: const Color(0xFF0C0C14),
-        snackPosition: SnackPosition.TOP,
-      );
+      AppSnackbar.success('ai_creator_generated_success'.tr);
 
       Get.offNamed(AppRoutes.editor, arguments: {'websiteId': websiteId});
     } catch (e) {
+      if (ApiClient.isSubscriptionLimitError(e)) {
+        SubscriptionView.open();
+        return;
+      }
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {
       isLoading.value = false;

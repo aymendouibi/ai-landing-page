@@ -41,8 +41,11 @@ class CloudflareHostingService
         // 1. Verify subdomain validity
         $this->validateSubdomain($website->subdomain);
 
-        $platformDomain = config('app.platform_domain', 'yourplatform.com');
-        $primaryUrl = "https://{$website->subdomain}.{$platformDomain}";
+        $platformDomain = config('app.platform_domain');
+        $appUrl = rtrim(config('app.url', 'http://localhost:8000'), '/');
+        $primaryUrl = $platformDomain
+            ? "https://{$website->subdomain}.{$platformDomain}"
+            : "{$appUrl}/{$website->subdomain}";
 
         // Collect all active custom domains
         $activeCustomDomains = $website->domains()
