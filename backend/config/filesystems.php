@@ -47,12 +47,24 @@ return [
             'report' => false,
         ],
 
-        'hosting' => [
+        'hosting' => env('HOSTING_DISK', env('AWS_ACCESS_KEY_ID') ? 's3' : 'local') === 's3' ? [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_REGION', env('AWS_DEFAULT_REGION', 'eu-central-1')),
+            'bucket' => env('AWS_BUCKET', 'assets'),
+            'url' => env('AWS_URL'),
+            'endpoint' => env('AWS_ENDPOINT_URL_S3', env('AWS_ENDPOINT')),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', true),
+            'throw' => true,
+            'report' => false,
+            'root' => 'hosting',
+        ] : [
             'driver' => 'local',
             'root' => storage_path('app/hosting'),
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/hosting',
             'visibility' => 'public',
-            'throw' => false,
+            'throw' => true,
         ],
 
         's3' => [
