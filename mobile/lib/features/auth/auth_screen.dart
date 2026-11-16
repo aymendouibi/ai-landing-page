@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../profile/components/privacy_policy_sheet.dart';
+import '../profile/components/terms_of_service_sheet.dart';
 import 'auth_controller.dart';
 
 class AuthScreen extends StatelessWidget {
@@ -338,12 +340,23 @@ class AuthScreen extends StatelessWidget {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  'auth_terms_of_service'.tr,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF5B45E0),
+                                GestureDetector(
+                                  key: const Key('auth_terms_button'),
+                                  onTap: () => TermsOfServiceSheet.show(context),
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 6,
+                                      horizontal: 4,
+                                    ),
+                                    child: Text(
+                                      'auth_terms_of_service'.tr,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF5B45E0),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const Text(
@@ -353,12 +366,23 @@ class AuthScreen extends StatelessWidget {
                                     color: Color(0xFF94A3B8),
                                   ),
                                 ),
-                                Text(
-                                  'auth_privacy_policy'.tr,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF5B45E0),
+                                GestureDetector(
+                                  key: const Key('auth_privacy_button'),
+                                  onTap: () => PrivacyPolicySheet.show(context),
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 6,
+                                      horizontal: 4,
+                                    ),
+                                    child: Text(
+                                      'auth_privacy_policy'.tr,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF5B45E0),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],

@@ -77,7 +77,94 @@
                 <p class="text-[11px] text-slate-500 mt-2">Local development only</p>
             </div>
         @endif
+
+        <!-- Footer legal links -->
+        <div class="mt-6 pt-5 border-t border-slate-800/80 text-center">
+            <div class="flex items-center justify-center gap-3 text-xs text-slate-500">
+                <button type="button" onclick="openModal('termsModal')" class="hover:text-indigo-400 transition font-medium">Terms of Service</button>
+                <span>·</span>
+                <button type="button" onclick="openModal('privacyModal')" class="hover:text-indigo-400 transition font-medium">Privacy Policy</button>
+            </div>
+            <p class="text-[11px] text-slate-600 mt-2">© {{ date('Y') }} AI Landing Page. All rights reserved.</p>
+        </div>
     </div>
+
+    <!-- Terms Modal -->
+    <div id="termsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 text-slate-200 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                <h3 class="text-base font-bold text-white">Terms of Service</h3>
+                <button type="button" onclick="closeModal('termsModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">✕</button>
+            </div>
+            <div class="overflow-y-auto py-4 space-y-4 text-xs text-slate-300 leading-relaxed pr-2">
+                <div>
+                    <h4 class="font-semibold text-white mb-1">1. Acceptance of Terms</h4>
+                    <p>By accessing or using AI Landing Page, you agree to be bound by these Terms of Service and all applicable local, national, and international laws. If you disagree with any part of these terms, you may not access the service.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-white mb-1">2. Ownership of Generated Content</h4>
+                    <p>You retain full ownership, intellectual property rights, and copyright to all landing pages, websites, graphics, layouts, and copy created using this platform. We assert zero claim of ownership over websites published or exported by you.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-white mb-1">3. Acceptable Use Policy</h4>
+                    <p>You agree not to use the platform to create websites that engage in deceptive phishing, distribute malicious software, promote illegal activities, or infringe on third-party trademarks or copyrighted content.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-white mb-1">4. Hosting & Availability</h4>
+                    <p>We provide edge CDN hosting and automated SSL deployment. While we strive for 99.9% uptime, we cannot guarantee uninterrupted access.</p>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-slate-800 flex justify-end">
+                <button type="button" onclick="closeModal('termsModal')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div id="privacyModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 text-slate-200 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                <h3 class="text-base font-bold text-white">Privacy Policy</h3>
+                <button type="button" onclick="closeModal('privacyModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">✕</button>
+            </div>
+            <div class="overflow-y-auto py-4 space-y-4 text-xs text-slate-300 leading-relaxed pr-2">
+                <div>
+                    <h4 class="font-semibold text-white mb-1">1. Information We Collect</h4>
+                    <p>We collect information necessary to provide you with the AI Landing Page, publishing, and hosting services. This includes account information, website content, AI prompts, and diagnostic technical logs.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-white mb-1">2. How We Use Your Data</h4>
+                    <p>Your data is strictly used to deliver, maintain, and enhance the AI Landing Page platform: rendering your responsive components, managing deployments, and processing subscriptions.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-white mb-1">3. Data Security & Storage</h4>
+                    <p>Your passwords and tokens are hashed using bcrypt. All data in transit is encrypted using modern TLS 1.3 encryption protocols.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-white mb-1">4. Third-Party Integrations</h4>
+                    <p>We integrate with trusted providers including Stripe for billing, OpenRouter for LLM inference, and Cloudflare for edge CDN hosting and DNS verification.</p>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-slate-800 flex justify-end">
+                <button type="button" onclick="closeModal('privacyModal')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal('termsModal');
+                closeModal('privacyModal');
+            }
+        });
+    </script>
 </body>
 </html>
 

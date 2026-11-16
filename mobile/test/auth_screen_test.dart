@@ -124,4 +124,60 @@ void main() {
     expect(find.text('Continue with Apple'), findsNothing);
     expect(find.text('Continue with Google'), findsOneWidget);
   });
+
+  testWidgets('AuthScreen terms button opens TermsOfServiceSheet on tap', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('en', 'US'),
+        home: const AuthScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final termsBtn = find.byKey(const Key('auth_terms_button'));
+    expect(termsBtn, findsOneWidget);
+    await tester.tap(termsBtn);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Terms of Service'), findsWidgets);
+    expect(find.text('1. Acceptance of Terms'), findsOneWidget);
+  });
+
+  testWidgets('AuthScreen privacy button opens PrivacyPolicySheet on tap', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('en', 'US'),
+        home: const AuthScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final privacyBtn = find.byKey(const Key('auth_privacy_button'));
+    expect(privacyBtn, findsOneWidget);
+    await tester.tap(privacyBtn);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Privacy Policy'), findsWidgets);
+    expect(find.text('1. Information We Collect'), findsOneWidget);
+  });
 }
