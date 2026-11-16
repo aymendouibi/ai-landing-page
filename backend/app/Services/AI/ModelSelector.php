@@ -12,11 +12,11 @@ class ModelSelector
      * @var array<string, string>
      */
     protected const DEFAULT_MODELS_BY_TASK = [
-        'business_analysis' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-        'design_planning' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-        'website_planning' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-        'content_generation' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-        'document_generation' => 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+        'business_analysis' => 'google/gemini-2.5-flash',
+        'design_planning' => 'google/gemini-2.5-flash',
+        'website_planning' => 'google/gemini-2.5-flash',
+        'content_generation' => 'google/gemini-2.5-flash',
+        'document_generation' => 'google/gemini-2.5-flash',
         'editing' => 'google/gemini-2.5-flash',
         'remix' => 'google/gemini-2.5-flash',
         'vision_qa' => 'nvidia/nemotron-3.5-super-vl:free',
@@ -30,7 +30,19 @@ class ModelSelector
      */
     public function getModelForTask(string $task): string
     {
-        // 1. Check for specific environment override for this task
+        // 1. Check if an active task-specific model config exists in DB
+        $config = AiModelConfig::getForTask($task);
+        if ($config && !empty($config->model)) {
+            return $config->model;
+        }
+
+        // 2. Check if an active global model config is set in DB
+        $globalConfig = AiModelConfig::getForTask('global');
+        if ($globalConfig && !empty($globalConfig->model)) {
+            return $globalConfig->model;
+        }
+
+        // 3. Check for specific environment override for editing/remix
         if (in_array($task, ['editing', 'remix'], true)) {
             $configuredEditModel = config('services.openrouter.edit_model');
             if (!empty($configuredEditModel)) {
@@ -38,14 +50,22 @@ class ModelSelector
             }
         }
 
-        // 2. Check if an active model config is configured in DB
-        $config = AiModelConfig::getForTask($task);
-        if ($config && !empty($config->model)) {
-            return $config->model;
-        }
+        // 4. Return sensible default
+        return self::DEFAULT_MODELS_BY_TASK[$task] ?? 'google/gemini-2.5-flash';
+    }
 
-        // 3. Return sensible default
-        return self::DEFAULT_MODELS_BY_TASK[$task] ?? 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free';
+    /**
+     * Get all currently resolved models mapped by task.
+     *
+     * @return array<string, string>
+     */
+    public function getAllResolvedModels(): array
+    {
+        $tasks = array_keys(self::DEFAULT_MODELS_BY_TASK);
+        $result = [];
+        foreach ($tasks as $task) {
+            $result[$task] = $this->getModelForTask($task);
+        }
+        return $result;
     }
 }
-

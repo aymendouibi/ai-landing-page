@@ -78,14 +78,69 @@
     </div>
 
     <!-- Quick Navigation Hub -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <a href="{{ route('admin.users.index') }}" class="p-3.5 bg-slate-900/40 hover:bg-slate-800/60 border border-slate-800 rounded-xl transition flex items-center gap-3">
+            <div class="p-2 rounded-lg bg-violet-500/10 text-violet-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-white flex items-center gap-1">
+                    <span>Créateurs</span>
+                    <span class="text-[9px] px-1 rounded bg-violet-600 text-white font-black">PRO</span>
+                </p>
+                <p class="text-[10px] text-slate-400">Profils & pages créées</p>
+            </div>
+        </a>
+
+        <a href="{{ route('admin.feedback.index') }}" class="p-3.5 bg-slate-900/40 hover:bg-slate-800/60 border border-slate-800 rounded-xl transition flex items-center gap-3">
+            <div class="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span>Avis Mobiles</span>
+                    @php $nbFb = \App\Models\Feedback::where('status', 'new')->count(); @endphp
+                    @if($nbFb > 0)
+                        <span class="px-1.5 rounded-full bg-amber-500 text-slate-950 text-[9px] font-black">{{ $nbFb }}</span>
+                    @endif
+                </p>
+                <p class="text-[10px] text-slate-400">Retours & avis clients</p>
+            </div>
+        </a>
+
+        <a href="{{ route('admin.ai_settings.index') }}" class="p-3.5 bg-slate-900/40 hover:bg-slate-800/60 border border-slate-800 rounded-xl transition flex items-center gap-3">
+            <div class="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-white">Modèle OpenRouter</p>
+                <p class="text-[10px] text-slate-400">Changer l'IA de l'app</p>
+            </div>
+        </a>
+
+        <a href="{{ route('admin.logs.index') }}" class="p-3.5 bg-slate-900/40 hover:bg-slate-800/60 border border-slate-800 rounded-xl transition flex items-center gap-3">
+            <div class="p-2 rounded-lg bg-rose-500/10 text-rose-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span>Logs Erreurs</span>
+                    @php $nbLogs = \App\Models\AppErrorLog::whereNull('resolved_at')->count(); @endphp
+                    @if($nbLogs > 0)
+                        <span class="px-1.5 rounded-full bg-rose-500 text-white text-[9px] font-black">{{ $nbLogs }}</span>
+                    @endif
+                </p>
+                <p class="text-[10px] text-slate-400">Paiements & pipeline</p>
+            </div>
+        </a>
+
         <a href="{{ route('admin.templates.index') }}" class="p-3.5 bg-slate-900/40 hover:bg-slate-800/60 border border-slate-800 rounded-xl transition flex items-center gap-3">
             <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
             </div>
             <div>
-                <p class="text-xs font-bold text-white">Templates Studio</p>
-                <p class="text-[10px] text-slate-400">Curate & publish designs</p>
+                <p class="text-xs font-bold text-white">Templates</p>
+                <p class="text-[10px] text-slate-400">Catalogue & styles</p>
             </div>
         </a>
 
@@ -94,28 +149,8 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
             </div>
             <div>
-                <p class="text-xs font-bold text-white">User Websites</p>
-                <p class="text-[10px] text-slate-400">Subdomains & status</p>
-            </div>
-        </a>
-
-        <a href="{{ route('admin.users.index') }}" class="p-3.5 bg-slate-900/40 hover:bg-slate-800/60 border border-slate-800 rounded-xl transition flex items-center gap-3">
-            <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            </div>
-            <div>
-                <p class="text-xs font-bold text-white">Users & Roles</p>
-                <p class="text-[10px] text-slate-400">Access controls & stats</p>
-            </div>
-        </a>
-
-        <a href="{{ route('admin.system.index') }}" class="p-3.5 bg-slate-900/40 hover:bg-slate-800/60 border border-slate-800 rounded-xl transition flex items-center gap-3">
-            <div class="p-2 rounded-lg bg-purple-500/10 text-purple-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-            </div>
-            <div>
-                <p class="text-xs font-bold text-white">System Health</p>
-                <p class="text-[10px] text-slate-400">Node, DB & storage</p>
+                <p class="text-xs font-bold text-white">Sites Web</p>
+                <p class="text-[10px] text-slate-400">Tous les sous-domaines</p>
             </div>
         </a>
     </div>

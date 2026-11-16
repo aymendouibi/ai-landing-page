@@ -133,5 +133,8 @@ Route::prefix('v1')->group(function () {
             Route::post('/portal', [BillingController::class, 'portal']);
             Route::post('/google-play/verify', [BillingController::class, 'verifyGooglePlay']);
         });
+
+        // Feedback / Reviews ("Envoyer les avis")
+        Route::post('/feedback', [\App\Http\Controllers\Api\V1\FeedbackController::class, 'store']);
     });
 });

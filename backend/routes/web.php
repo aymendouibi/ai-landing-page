@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminAiSettingsController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminDeploymentController;
+use App\Http\Controllers\Admin\AdminFeedbackController;
+use App\Http\Controllers\Admin\AdminLogController;
 use App\Http\Controllers\Admin\AdminSystemController;
 use App\Http\Controllers\Admin\AdminTemplateController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -72,7 +75,23 @@ Route::prefix('admin')->middleware(['web', 'admin'])->group(function () {
 
     // Users Management
     Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('admin.users.show');
     Route::post('/users/{user}/toggle-role', [AdminUserController::class, 'toggleRole'])->name('admin.users.toggle_role');
+
+    // Avis & Feedback from Mobile ("Envoyer les avis")
+    Route::get('/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback.index');
+    Route::patch('/feedback/{feedback}', [AdminFeedbackController::class, 'updateStatus'])->name('admin.feedback.update_status');
+    Route::delete('/feedback/{feedback}', [AdminFeedbackController::class, 'destroy'])->name('admin.feedback.destroy');
+
+    // Logs & Error Monitoring (Payments, AI, System)
+    Route::get('/logs', [AdminLogController::class, 'index'])->name('admin.logs.index');
+    Route::post('/logs/clear', [AdminLogController::class, 'clear'])->name('admin.logs.clear');
+    Route::post('/logs/{log}/resolve', [AdminLogController::class, 'resolve'])->name('admin.logs.resolve');
+
+    // AI Model & OpenRouter Configuration
+    Route::get('/ai-settings', [AdminAiSettingsController::class, 'index'])->name('admin.ai_settings.index');
+    Route::post('/ai-settings', [AdminAiSettingsController::class, 'update'])->name('admin.ai_settings.update');
+    Route::post('/ai-settings/test', [AdminAiSettingsController::class, 'testConnection'])->name('admin.ai_settings.test');
 
     // Deployments History
     Route::get('/deployments', [AdminDeploymentController::class, 'index'])->name('admin.deployments.index');

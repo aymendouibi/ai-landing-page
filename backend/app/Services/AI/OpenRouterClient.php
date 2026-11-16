@@ -129,6 +129,10 @@ class OpenRouterClient
             $status = $response->status();
             $errorBody = $response->body();
             Log::error("OpenRouter API error [{$status}] for model {$model}", ['response' => $errorBody]);
+            \App\Models\AppErrorLog::logAiError(
+                "OpenRouter API HTTP {$status} error for model {$model}",
+                ['status' => $status, 'error' => $errorBody, 'model' => $model]
+            );
             throw new Exception("OpenRouter API HTTP {$status}: {$errorBody}");
         }
 

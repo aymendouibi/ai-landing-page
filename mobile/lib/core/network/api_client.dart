@@ -1337,4 +1337,32 @@ CRITICAL RULES:
       );
     }
   }
+
+  /// Submit user feedback / review ("Envoyer les avis")
+  static Future<bool> sendFeedback({
+    required String category,
+    required String message,
+    int? rating,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/feedback'),
+        headers: await _headers(),
+        body: jsonEncode({
+          'category': category,
+          'message': message,
+          if (rating != null) 'rating': rating,
+          'metadata': {
+            'platform': Platform.isAndroid ? 'Android' : (Platform.isIOS ? 'iOS' : 'Other'),
+            ...?metadata,
+          },
+        }),
+      );
+
+      return response.statusCode >= 200 && response.statusCode < 300;
+    } catch (_) {
+      return false;
+    }
+  }
 }

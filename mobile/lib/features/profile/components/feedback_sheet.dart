@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/app_snackbar.dart';
 import '../../../core/designsystem/colors.dart';
+import '../../../core/network/api_client.dart';
 
 class FeedbackSheet extends StatefulWidget {
   const FeedbackSheet({super.key});
@@ -26,6 +27,7 @@ class FeedbackSheet extends StatefulWidget {
 class _FeedbackSheetState extends State<FeedbackSheet> {
   final _feedbackController = TextEditingController();
   int _selectedCategory = 0;
+  bool _isSubmitting = false;
   final _categories = [
     'feedback_cat_feature',
     'feedback_cat_bug',
@@ -39,12 +41,32 @@ class _FeedbackSheetState extends State<FeedbackSheet> {
     super.dispose();
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
+    if (_isSubmitting) return;
+
     final text = _feedbackController.text.trim();
     if (text.isEmpty) {
       AppSnackbar.error('feedback_enter_message'.tr, context: context);
       return;
     }
+
+    setState(() => _isSubmitting = true);
+
+    final categoryKey = _categories[_selectedCategory];
+    final categoryName = switch (categoryKey) {
+      'feedback_cat_feature' => 'feature',
+      'feedback_cat_bug' => 'bug',
+      'feedback_cat_ai' => 'ai_quality',
+      _ => 'general',
+    };
+
+    await ApiClient.sendFeedback(
+      category: categoryName,
+      message: text,
+    );
+
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
 
     Navigator.pop(context);
     AppSnackbar.success(
@@ -231,7 +253,7 @@ class _FeedbackSheetState extends State<FeedbackSheet> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _handleSubmit,
+                    onPressed: _isSubmitting ? null : _handleSubmit,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       backgroundColor: AppColors.inkOf(context),
@@ -241,13 +263,22 @@ class _FeedbackSheetState extends State<FeedbackSheet> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(
-                      'feedback_submit'.tr,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    child: _isSubmitting
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: isDark ? Colors.black : Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'feedback_submit'.tr,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   ),
                 ),
               ],

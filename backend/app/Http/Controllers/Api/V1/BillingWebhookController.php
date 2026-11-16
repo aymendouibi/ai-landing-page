@@ -28,6 +28,12 @@ class BillingWebhookController extends Controller
             return response()->json($result);
         } catch (Exception $e) {
             Log::error('Stripe webhook processing error: ' . $e->getMessage(), ['payload' => $payload]);
+            \App\Models\AppErrorLog::logPaymentError(
+                'Stripe webhook processing exception: ' . $e->getMessage(),
+                ['payload' => $payload],
+                null,
+                $e
+            );
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }

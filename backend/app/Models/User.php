@@ -54,6 +54,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Project::class);
     }
 
+    public function websites(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(Website::class, Project::class);
+    }
+
     public function mediaAssets(): HasMany
     {
         return $this->hasMany(MediaAsset::class);
@@ -94,5 +99,27 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->subscription()
             ->where('status', SubscriptionStatus::Active)
             ->first();
+    }
+
+    public function isPremium(): bool
+    {
+        $sub = $this->subscription;
+        if (!$sub || !$sub->isActive()) {
+            return false;
+        }
+
+        $slug = $sub->plan?->slug;
+        return in_array($slug, ['pro', 'premium', 'business'], true);
+    }
+
+    public function getTierLabel(): string
+    {
+        if ($this->isAdmin()) {
+            return 'Admin';
+        }
+        if ($this->isPremium()) {
+            return $this->subscription?->plan?->name ?? 'Premium';
+        }
+        return 'Free';
     }
 }
