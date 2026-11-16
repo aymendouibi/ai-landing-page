@@ -123,7 +123,7 @@ class AuthScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: controller.isLoading.value ? null : controller.login,
+                      onPressed: controller.isAnyLoading ? null : controller.login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.ink,
                         shape: RoundedRectangleBorder(
@@ -148,7 +148,138 @@ class AuthScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
+
+                // Divider: "Or continue with"
+                Row(
+                  children: [
+                    const Expanded(child: Divider(color: AppColors.borderSubtle)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: Text(
+                        'auth_or_continue_with'.tr,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.inkMuted,
+                        ),
+                      ),
+                    ),
+                    const Expanded(child: Divider(color: AppColors.borderSubtle)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Continue with Apple button
+                Obx(() {
+                  if (!controller.isAppleSupported.value) {
+                    return const SizedBox.shrink();
+                  }
+                  return Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: controller.isAnyLoading
+                              ? null
+                              : controller.signInWithApple,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor: Colors.black.withValues(alpha: 0.6),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: controller.isLoadingApple.value
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.apple,
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'auth_continue_apple'.tr,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  );
+                }),
+
+                // Continue with Google button
+                Obx(
+                  () => SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: OutlinedButton(
+                      onPressed: controller.isAnyLoading
+                          ? null
+                          : controller.signInWithGoogle,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: AppColors.surface,
+                        foregroundColor: AppColors.ink,
+                        side: const BorderSide(color: AppColors.borderSubtle, width: 1.2),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: controller.isLoadingGoogle.value
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: AppColors.ink,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/icons/google_logo.png',
+                                  width: 20,
+                                  height: 20,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  'auth_continue_google'.tr,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.ink,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Text(
                   'auth_default_credentials'.tr,
                   style: const TextStyle(fontSize: 12, color: AppColors.inkMuted),

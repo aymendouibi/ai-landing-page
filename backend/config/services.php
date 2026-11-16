@@ -39,10 +39,12 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'android_client_id' => env('GOOGLE_ANDROID_CLIENT_ID'),
+        'ios_client_id' => env('GOOGLE_IOS_CLIENT_ID'),
     ],
 
     'apple' => [
         'client_id' => env('APPLE_SERVICE_ID'),
+        'bundle_id' => env('APPLE_BUNDLE_ID', 'com.aibuilder.aibuilder'),
         'team_id' => env('APPLE_TEAM_ID'),
         'key_id' => env('APPLE_KEY_ID'),
         'private_key' => env('APPLE_PRIVATE_KEY_PATH'),

@@ -41,9 +41,12 @@ class AppleTokenVerifier
         }
 
         // Validate audience against configured Apple Service/App ID
-        $configuredAud = config('services.apple.client_id');
-        if ($configuredAud && ($payload['aud'] ?? '') !== $configuredAud) {
-            throw new Exception('Apple token audience does not match configured Apple Service ID.');
+        $configuredAud = array_filter([
+            config('services.apple.client_id'),
+            config('services.apple.bundle_id'),
+        ]);
+        if (!empty($configuredAud) && !in_array($payload['aud'] ?? '', $configuredAud, true)) {
+            throw new Exception('Apple token audience does not match configured Apple Service ID or Bundle ID.');
         }
 
         $email = $payload['email'] ?? null;

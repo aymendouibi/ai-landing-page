@@ -115,5 +115,105 @@ class AuthTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+    public function test_user_can_authenticate_with_google(): void
+    {
+        $mockVerifier = $this->createMock(\App\Services\Auth\GoogleTokenVerifier::class);
+        $mockVerifier->method('verify')->willReturn([
+            'sub' => 'google_sub_123456',
+            'email' => 'googleuser@example.com',
+            'name' => 'Google User',
+            'picture' => 'https://example.com/avatar.jpg',
+            'email_verified' => true,
+        ]);
+        $this->app->instance(\App\Services\Auth\GoogleTokenVerifier::class, $mockVerifier);
+
+        $response = $this->postJson('/api/v1/auth/google', [
+            'id_token' => 'valid_mock_google_id_token',
+            'device_name' => 'iPhone Simulator',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+                'user' => ['id', 'name', 'email'],
+                'token',
+            ])
+            ->assertJsonPath('user.email', 'googleuser@example.com');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'googleuser@example.com',
+            'name' => 'Google User',
+        ]);
+
+        $this->assertDatabaseHas('user_auth_providers', [
+            'provider' => \App\Enums\AuthProvider::Google->value,
+            'provider_user_id' => 'google_sub_123456',
+        ]);
+    }
+
+    public function test_google_sign_in_rejects_invalid_token(): void
+    {
+        $mockVerifier = $this->createMock(\App\Services\Auth\GoogleTokenVerifier::class);
+        $mockVerifier->method('verify')->willThrowException(new \Exception('Invalid Google ID token.'));
+        $this->app->instance(\App\Services\Auth\GoogleTokenVerifier::class, $mockVerifier);
+
+        $response = $this->postJson('/api/v1/auth/google', [
+            'id_token' => 'invalid_token_sample',
+        ]);
+
+        $response->assertStatus(401)
+            ->assertJson(['message' => 'Invalid Google ID token.']);
+    }
+
+    public function test_user_can_authenticate_with_apple(): void
+    {
+        $mockVerifier = $this->createMock(\App\Services\Auth\AppleTokenVerifier::class);
+        $mockVerifier->method('verify')->willReturn([
+            'sub' => 'apple_sub_987654',
+            'email' => 'appleuser@privaterelay.appleid.com',
+            'email_verified' => true,
+            'is_private_email' => true,
+        ]);
+        $this->app->instance(\App\Services\Auth\AppleTokenVerifier::class, $mockVerifier);
+
+        $response = $this->postJson('/api/v1/auth/apple', [
+            'identity_token' => 'valid_mock_apple_identity_token',
+            'name' => 'Apple User',
+            'device_name' => 'iPhone 17 Pro',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+                'user' => ['id', 'name', 'email'],
+                'token',
+            ])
+            ->assertJsonPath('user.email', 'appleuser@privaterelay.appleid.com');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'appleuser@privaterelay.appleid.com',
+            'name' => 'Apple User',
+        ]);
+
+        $this->assertDatabaseHas('user_auth_providers', [
+            'provider' => \App\Enums\AuthProvider::Apple->value,
+            'provider_user_id' => 'apple_sub_987654',
+        ]);
+    }
+
+    public function test_apple_sign_in_rejects_invalid_token(): void
+    {
+        $mockVerifier = $this->createMock(\App\Services\Auth\AppleTokenVerifier::class);
+        $mockVerifier->method('verify')->willThrowException(new \Exception('Malformed Apple identity token.'));
+        $this->app->instance(\App\Services\Auth\AppleTokenVerifier::class, $mockVerifier);
+
+        $response = $this->postJson('/api/v1/auth/apple', [
+            'identity_token' => 'invalid_apple_jwt',
+        ]);
+
+        $response->assertStatus(401)
+            ->assertJson(['message' => 'Malformed Apple identity token.']);
+    }
 }
 

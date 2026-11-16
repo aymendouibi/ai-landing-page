@@ -68,6 +68,16 @@
 				<string>ai-landing-page</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>Google Sign-In</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.810241219942-7iknljf99skdolpvbh9l69iktqsqgdr0</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>

@@ -87,6 +87,78 @@ class ApiClient {
     }
   }
 
+  static Future<Map<String, dynamic>> signInWithGoogle(
+    String idToken, {
+    String? deviceName,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/v1/auth/google'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({
+        'id_token': idToken,
+        if (deviceName != null) 'device_name': deviceName,
+      }),
+    );
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final user = data['user'] as Map<String, dynamic>;
+      final token = data['token'] as String;
+      await SessionManager.saveSession(
+        token: token,
+        userId: user['id'] as String,
+        name: user['name'] as String? ?? 'Google User',
+        email: user['email'] as String? ?? '',
+      );
+      return data;
+    } else {
+      throw Exception(
+        data['message'] ?? 'Google sign-in failed (${response.statusCode})',
+      );
+    }
+  }
+
+  static Future<Map<String, dynamic>> signInWithApple(
+    String identityToken, {
+    String? name,
+    String? deviceName,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/v1/auth/apple'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({
+        'identity_token': identityToken,
+        if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
+        if (deviceName != null) 'device_name': deviceName,
+      }),
+    );
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final user = data['user'] as Map<String, dynamic>;
+      final token = data['token'] as String;
+      await SessionManager.saveSession(
+        token: token,
+        userId: user['id'] as String,
+        name: (user['name'] as String?)?.isNotEmpty == true
+            ? user['name'] as String
+            : (name?.isNotEmpty == true ? name! : 'Apple User'),
+        email: user['email'] as String? ?? '',
+      );
+      return data;
+    } else {
+      throw Exception(
+        data['message'] ?? 'Apple sign-in failed (${response.statusCode})',
+      );
+    }
+  }
+
   static Future<List<Project>> getProjects() async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/v1/projects'),
