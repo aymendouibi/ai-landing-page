@@ -46,7 +46,7 @@ Route::get('/canvas', function () {
 // Admin Guest Routes (Login, Dev Quick-Login)
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
-    Route::post('/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+    Route::post('/login', [AdminAuthController::class, 'login'])->middleware('throttle:5,1')->name('admin.login.submit');
     Route::get('/quick-login', [AdminAuthController::class, 'quickLogin'])->name('admin.quick_login');
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 });

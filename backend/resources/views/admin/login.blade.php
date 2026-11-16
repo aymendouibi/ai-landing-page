@@ -43,7 +43,8 @@
             @csrf
             <div>
                 <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Email Address</label>
-                <input type="email" name="email" value="{{ old('email', 'admin@aibuilder.local') }}" required autofocus
+                <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                    placeholder="admin@yourdomain.com"
                     class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-white text-sm focus:outline-none focus:border-indigo-500 transition placeholder-slate-600">
             </div>
 
@@ -51,13 +52,14 @@
                 <div class="flex items-center justify-between mb-1.5">
                     <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Password</label>
                 </div>
-                <input type="password" name="password" value="AdminSecret123!" required
+                <input type="password" name="password" required
+                    placeholder="••••••••••••"
                     class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-white text-sm focus:outline-none focus:border-indigo-500 transition placeholder-slate-600">
             </div>
 
             <div class="flex items-center justify-between pt-1">
                 <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
-                    <input type="checkbox" name="remember" checked class="rounded border-slate-800 bg-slate-950 text-indigo-600 focus:ring-0">
+                    <input type="checkbox" name="remember" class="rounded border-slate-800 bg-slate-950 text-indigo-600 focus:ring-0">
                     <span>Remember this session</span>
                 </label>
             </div>
@@ -67,12 +69,14 @@
             </button>
         </form>
 
-        <div class="mt-6 pt-5 border-t border-slate-800/80 text-center">
-            <a href="{{ route('admin.quick_login') }}" class="w-full block py-2.5 px-4 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white text-xs font-semibold transition text-center">
-                ⚡ 1-Click Dev Admin Login
-            </a>
-            <p class="text-[11px] text-slate-500 mt-2">Logs in with default seeded admin credentials</p>
-        </div>
+        @if(app()->isLocal())
+            <div class="mt-6 pt-5 border-t border-slate-800/80 text-center">
+                <a href="{{ route('admin.quick_login') }}" class="w-full block py-2.5 px-4 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white text-xs font-semibold transition text-center">
+                    ⚡ 1-Click Dev Admin Login
+                </a>
+                <p class="text-[11px] text-slate-500 mt-2">Local development only</p>
+            </div>
+        @endif
     </div>
 </body>
 </html>

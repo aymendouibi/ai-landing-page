@@ -66,6 +66,10 @@ class AdminAuthController extends Controller
      */
     public function quickLogin(Request $request): RedirectResponse
     {
+        if (!app()->isLocal()) {
+            abort(403, '1-Click developer login is disabled in production.');
+        }
+
         $admin = User::firstOrCreate(
             ['email' => 'admin@aibuilder.local'],
             [

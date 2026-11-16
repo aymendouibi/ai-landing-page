@@ -68,7 +68,9 @@ class DashboardController extends GetxController {
   void setThemeMode(ThemeMode mode) {
     themeMode.value = mode;
     Get.changeThemeMode(mode);
-    final str = mode == ThemeMode.dark ? 'dark' : (mode == ThemeMode.light ? 'light' : 'system');
+    final str = mode == ThemeMode.dark
+        ? 'dark'
+        : (mode == ThemeMode.light ? 'light' : 'system');
     SessionManager.saveThemeMode(str);
   }
 
@@ -80,7 +82,9 @@ class DashboardController extends GetxController {
     userEmail.value = email;
     final parts = name.trim().split(RegExp(r'\s+'));
     if (parts.length == 1 && parts[0].isNotEmpty) {
-      userInitials.value = parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+      userInitials.value = parts[0]
+          .substring(0, parts[0].length >= 2 ? 2 : 1)
+          .toUpperCase();
     } else if (parts.length >= 2) {
       userInitials.value = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
@@ -97,8 +101,12 @@ class DashboardController extends GetxController {
     final initials = await SessionManager.getUserInitials();
     final name = await SessionManager.getUserName();
     final email = await SessionManager.getUserEmail();
-    userInitials.value = (initials.isNotEmpty && initials != 'DC') ? initials : 'MR';
-    userName.value = (name != null && name.trim().isNotEmpty) ? name : 'Morgan Reed';
+    userInitials.value = (initials.isNotEmpty && initials != 'DC')
+        ? initials
+        : 'MR';
+    userName.value = (name != null && name.trim().isNotEmpty)
+        ? name
+        : 'Morgan Reed';
     if (email != null && email.trim().isNotEmpty) {
       userEmail.value = email;
     } else {
@@ -124,7 +132,8 @@ class DashboardController extends GetxController {
         return timeB.compareTo(timeA);
       });
 
-      if (!Platform.environment.containsKey('FLUTTER_TEST') || websites.isEmpty) {
+      if (!Platform.environment.containsKey('FLUTTER_TEST') ||
+          websites.isEmpty) {
         websites.assignAll(orderedWebsites);
       }
       _generatePreviewItems();
@@ -151,13 +160,13 @@ class DashboardController extends GetxController {
         if (entitlements != null) {
           aiGenerationsMonthly.value =
               (entitlements['ai_generations_monthly'] as num?)?.toInt() ??
-                  (isPremium ? 90 : 4);
+              (isPremium ? 90 : 4);
           hasAds.value = entitlements['has_ads'] == true;
           canUseCustomDomains.value =
               ((entitlements['custom_domains'] as num?)?.toInt() ?? 0) > 0;
           canAccessAllTemplates.value =
               entitlements['all_templates'] == true ||
-                  entitlements['premium_templates'] == true;
+              entitlements['premium_templates'] == true;
         }
 
         if (usage != null) {
@@ -198,19 +207,20 @@ class DashboardController extends GetxController {
         if (plan != null) {
           planSlug.value = plan['slug']?.toString() ?? targetSlug;
           planName.value =
-              plan['name']?.toString() ?? (targetSlug == 'pro' ? 'Premium' : 'Free');
+              plan['name']?.toString() ??
+              (targetSlug == 'pro' ? 'Premium' : 'Free');
         }
 
         if (entitlements != null) {
           aiGenerationsMonthly.value =
               (entitlements['ai_generations_monthly'] as num?)?.toInt() ??
-                  (isPremium ? 90 : 4);
+              (isPremium ? 90 : 4);
           hasAds.value = entitlements['has_ads'] == true;
           canUseCustomDomains.value =
               ((entitlements['custom_domains'] as num?)?.toInt() ?? 0) > 0;
           canAccessAllTemplates.value =
               entitlements['all_templates'] == true ||
-                  entitlements['premium_templates'] == true;
+              entitlements['premium_templates'] == true;
         }
 
         if (usage != null) {
@@ -248,7 +258,8 @@ class DashboardController extends GetxController {
   }
 
   String _formatTimeAgo(DateTime? date, {bool isLive = false}) {
-    if (date == null) return isLive ? 'Live · Published recently' : 'Draft · Edited recently';
+    if (date == null)
+      return isLive ? 'Live · Published recently' : 'Draft · Edited recently';
     final now = DateTime.now();
     final diff = now.difference(date);
     if (isLive) {
@@ -269,15 +280,21 @@ class DashboardController extends GetxController {
 
     // Map all user websites from backend (only real user websites)
     for (final site in websites) {
-      if (deletedWebsiteIds.contains(site.id) || deletedWebsiteIds.contains(site.slug)) continue;
+      if (deletedWebsiteIds.contains(site.id) ||
+          deletedWebsiteIds.contains(site.slug))
+        continue;
 
       String headline = 'Crafted for Modern Growth';
-      String body = 'Clean architecture, custom layout, and optimized speed for high conversion.';
-      String category = site.status == 'published' ? 'Published Website' : 'Draft Project';
+      String body =
+          'Clean architecture, custom layout, and optimized speed for high conversion.';
+      String category = site.status == 'published'
+          ? 'Published Website'
+          : 'Draft Project';
       String ctaText = 'Explore work';
       Color ctaColor = const Color(0xFF111827);
       double ctaBorderRadius = 4.0;
-      String imageUrl = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80';
+      String imageUrl =
+          'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80';
       Color bgCanvasColor = const Color(0xFFFFFFFF);
       bool isSerif = false;
 
@@ -288,16 +305,28 @@ class DashboardController extends GetxController {
           final sections = (pages.first as Map)['sections'] as List?;
           if (sections != null) {
             for (final sec in sections) {
-              if (sec is Map && (sec['component'] == 'hero' || sec['type'] == 'hero')) {
+              if (sec is Map &&
+                  (sec['component'] == 'hero' || sec['type'] == 'hero')) {
                 final props = sec['props'] as Map?;
                 if (props != null) {
-                  headline = props['headline']?.toString() ?? props['title']?.toString() ?? headline;
-                  body = props['subheadline']?.toString() ?? props['description']?.toString() ?? body;
-                  ctaText = props['ctaText']?.toString() ?? props['cta_text']?.toString() ?? ctaText;
+                  headline =
+                      props['headline']?.toString() ??
+                      props['title']?.toString() ??
+                      headline;
+                  body =
+                      props['subheadline']?.toString() ??
+                      props['description']?.toString() ??
+                      body;
+                  ctaText =
+                      props['ctaText']?.toString() ??
+                      props['cta_text']?.toString() ??
+                      ctaText;
                   String? img;
-                  final rawImg = props['image'] ?? props['imageUrl'] ?? props['url'];
+                  final rawImg =
+                      props['image'] ?? props['imageUrl'] ?? props['url'];
                   if (rawImg is Map) {
-                    img = rawImg['src']?.toString() ?? rawImg['url']?.toString();
+                    img =
+                        rawImg['src']?.toString() ?? rawImg['url']?.toString();
                   } else if (rawImg is String && rawImg.startsWith('http')) {
                     img = rawImg;
                   }
@@ -380,7 +409,9 @@ class DashboardController extends GetxController {
 
   void openWebsite(String websiteId) {
     SessionManager.recordRecentWebsite(websiteId);
-    Get.toNamed(AppRoutes.editor, arguments: {'websiteId': websiteId})?.then((_) {
+    Get.toNamed(AppRoutes.editor, arguments: {'websiteId': websiteId})?.then((
+      _,
+    ) {
       loadData();
     });
   }
@@ -401,7 +432,10 @@ class DashboardController extends GetxController {
       final projects = await ApiClient.getProjects();
       if (projects.isEmpty) {
         AppSnackbar.info('No workspace project found', title: 'Notice');
-        AppSnackbar.info('No workspace project found', title: 'common_notice'.tr);
+        AppSnackbar.info(
+          'No workspace project found',
+          title: 'common_notice'.tr,
+        );
         return;
       }
       final emptyDocument = {
@@ -421,10 +455,7 @@ class DashboardController extends GetxController {
                 'inverse': '#FFFFFF',
               },
             },
-            'typography': {
-              'headingFamily': 'Inter',
-              'bodyFamily': 'Inter',
-            },
+            'typography': {'headingFamily': 'Inter', 'bodyFamily': 'Inter'},
           },
           'settings': {
             'language': 'en',
@@ -436,12 +467,7 @@ class DashboardController extends GetxController {
           'items': [],
         },
         'pages': [
-          {
-            'id': 'page_home',
-            'slug': '/',
-            'title': 'Home',
-            'sections': [],
-          },
+          {'id': 'page_home', 'slug': '/', 'title': 'Home', 'sections': []},
         ],
       };
 
@@ -487,4 +513,3 @@ class DashboardController extends GetxController {
     }
   }
 }
-
