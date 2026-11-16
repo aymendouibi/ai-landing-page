@@ -67,7 +67,7 @@ class AiBuilderApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'AI Website Builder',
+      title: 'AI Landing Page',
       debugShowCheckedModeBanner: false,
       initialRoute: isLoggedIn ? AppRoutes.dashboard : AppRoutes.auth,
       getPages: AppPages.pages,

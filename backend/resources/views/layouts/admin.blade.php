@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Dashboard') - AI Website Builder</title>
+    <title>@yield('title', 'Admin Dashboard') - AI Landing Page</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,7 +24,7 @@
                 <img src="/images/logo.png" class="w-9 h-9 rounded-xl shadow-lg shadow-indigo-500/20 object-cover" alt="LandingCraft AI Logo">
                 <div>
                     <h1 class="text-sm font-black text-white tracking-tight flex items-center gap-1.5">
-                        AI BUILDER
+                        AI LANDING PAGE
                         <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-bold border border-indigo-500/30">Admin</span>
                     </h1>
                     <p class="text-[11px] text-slate-400 font-medium">Control Center</p>

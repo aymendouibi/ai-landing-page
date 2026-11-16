@@ -302,7 +302,7 @@ class WebsiteController extends Controller
         $compiledFiles['README.md'] = <<<MARKDOWN
 # {$website->name}
 
-Exported from AI Builder.
+Exported from AI Landing Page.
 
 ## Running Locally
 You can open `index.html` directly in any web browser, or serve it using any static HTTP server:

@@ -170,7 +170,7 @@ class AdminTemplateController extends Controller
                 'source_website_id' => $validated['source_website_id'] ?? null,
                 'preview_images' => $previewImages,
                 'status' => TemplateStatus::Published,
-                'author' => 'AI Builder Team',
+                'author' => 'AI Landing Page Team',
                 'license_type' => 'internal',
                 'use_count' => 0,
             ]);
@@ -342,7 +342,7 @@ class AdminTemplateController extends Controller
                 'source_website_id' => $website->id,
                 'preview_images' => $previewImages,
                 'status' => TemplateStatus::Published,
-                'author' => 'AI Builder Studio',
+                'author' => 'AI Landing Page Studio',
                 'license_type' => 'internal',
                 'use_count' => 0,
             ]);

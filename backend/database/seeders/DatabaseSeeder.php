@@ -159,7 +159,7 @@ class DatabaseSeeder extends Seeder
                 'preview_images' => ['https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80'],
                 'status' => TemplateStatus::Published,
                 'license_type' => 'internal',
-                'author' => 'AI Builder Studio',
+                'author' => 'AI Landing Page Studio',
                 'use_count' => 142,
                 'is_premium' => false,
             ]
@@ -200,7 +200,7 @@ class DatabaseSeeder extends Seeder
                 'preview_images' => ['https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80'],
                 'status' => TemplateStatus::Published,
                 'license_type' => 'internal',
-                'author' => 'AI Builder Studio',
+                'author' => 'AI Landing Page Studio',
                 'use_count' => 88,
                 'is_premium' => false,
             ]

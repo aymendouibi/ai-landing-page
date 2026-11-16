@@ -202,7 +202,7 @@ class ProjectExportService {
 
     <!-- Footer -->
     <footer class="py-12 border-t border-slate-100 text-center text-xs text-slate-400">
-      <p>&copy; ${DateTime.now().year} $title. All rights reserved. Exported with AI Landing Page Builder.</p>
+      <p>&copy; ${DateTime.now().year} $title. All rights reserved. Exported with AI Landing Page.</p>
     </footer>
   </main>
   <script src="assets/main.js"></script>
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
   String _generateReadme(String title) {
     return '''# $title
 
-This project was exported as a production-ready standalone ZIP bundle from **AI Landing Page Builder**.
+This project was exported as a production-ready standalone ZIP bundle from **AI Landing Page**.
 
 ## 🚀 Running Locally
 

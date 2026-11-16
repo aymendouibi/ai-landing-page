@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Landing Page Builder — Build, Remix & Publish from Your Phone</title>
-    <meta name="description" content="The premier mobile-first AI website builder. Design high-converting, responsive landing pages from your phone with instant Cloudflare edge hosting and custom domains.">
+    <title>AI Landing Page — Build, Remix & Publish from Your Phone</title>
+    <meta name="description" content="The premier mobile-first AI landing page platform. Design high-converting, responsive landing pages from your phone with instant Cloudflare edge hosting and custom domains.">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     
@@ -691,7 +691,7 @@
                 <img src="/images/logo.png" class="w-6 h-6 rounded-lg object-cover" alt="LandingCraft AI">
                 <span class="text-white font-bold">LandingCraft AI</span>
                 <span>·</span>
-                <span>© 2026 AI Landing Page Builder. All rights reserved.</span>
+                <span>© 2026 AI Landing Page. All rights reserved.</span>
             </div>
             <div class="flex items-center space-x-6 text-xs text-slate-400">
                 <a href="/admin/login" class="hover:text-white transition-colors">Admin Login</a>

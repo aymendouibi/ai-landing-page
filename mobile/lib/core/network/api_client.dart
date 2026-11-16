@@ -719,7 +719,7 @@ CRITICAL RULES:
             'Authorization': 'Bearer $openRouterApiKey',
             'Content-Type': 'application/json',
             'HTTP-Referer': 'https://ai-landing-page.xyz',
-            'X-Title': 'AI Website Builder',
+            'X-Title': 'AI Landing Page',
           },
           body: jsonEncode({
             'model': 'google/gemini-2.5-flash',

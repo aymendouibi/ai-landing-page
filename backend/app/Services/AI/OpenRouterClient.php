@@ -116,7 +116,7 @@ class OpenRouterClient
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->apiKey,
             'HTTP-Referer' => config('app.url', 'http://localhost:8000'),
-            'X-Title' => 'AI Website Builder',
+            'X-Title' => 'AI Landing Page',
             'Content-Type' => 'application/json',
         ])
         ->timeout(45)

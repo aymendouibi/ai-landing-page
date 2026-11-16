@@ -1,4 +1,4 @@
-# AI Website Builder
+# AI Landing Page
 
 A full-stack mobile-first AI website builder composed of three core services:
 1. **Backend** — Laravel 11 REST API handling authentication, document schema storage, database migrations, OpenRouter/Gemini AI endpoints, and media asset uploads.

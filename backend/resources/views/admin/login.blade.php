@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Sign In - AI Website Builder</title>
+    <title>Admin Sign In - AI Landing Page</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,8 +20,8 @@
     <div class="w-full max-w-md bg-slate-900/80 border border-slate-800 rounded-3xl p-8 backdrop-blur-xl shadow-2xl relative z-10">
         <!-- Logo -->
         <div class="text-center mb-8">
-            <img src="/images/logo.png" class="w-14 h-14 rounded-2xl mx-auto shadow-xl shadow-indigo-500/25 mb-3 object-cover" alt="AI Builder Admin">
-            <h1 class="text-xl font-black text-white tracking-tight">AI Builder Admin</h1>
+            <img src="/images/logo.png" class="w-14 h-14 rounded-2xl mx-auto shadow-xl shadow-indigo-500/25 mb-3 object-cover" alt="AI Landing Page Admin">
+            <h1 class="text-xl font-black text-white tracking-tight">AI Landing Page Admin</h1>
             <p class="text-xs text-slate-400 mt-1">Authenticate to access platform management</p>
         </div>
 

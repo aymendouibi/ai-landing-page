@@ -111,7 +111,7 @@ class TermsOfServiceSheet extends StatelessWidget {
                       context,
                       title: '1. Acceptance of Terms',
                       body:
-                          'By accessing or using AI Landing Page Builder, you agree to be bound by these Terms of Service and all applicable local, national, and international laws. If you disagree with any part of these terms, you may not access the service.',
+                          'By accessing or using AI Landing Page, you agree to be bound by these Terms of Service and all applicable local, national, and international laws. If you disagree with any part of these terms, you may not access the service.',
                     ),
                     _buildSection(
                       context,

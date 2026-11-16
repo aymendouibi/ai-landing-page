@@ -25,7 +25,7 @@ return new class extends Migration
                 'badge' => "EDITOR'S PICK",
                 'is_featured' => true,
                 'description' => "Warm tones and rich storytelling for your neighborhood's next favorite.",
-                'author' => 'AI Builder Studio',
+                'author' => 'AI Landing Page Studio',
                 'preview_images' => ['https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1200&q=80'],
                 'headline' => 'Good coffee. Better mornings.',
                 'subheadline' => 'Single-origin beans from farms we visit, roasted in our shop and shipped same day.',

@@ -11,7 +11,7 @@ class StripeService extends GetxService {
   static const String publishableKey =
       'pk_test_51NXR4jCCKIK7McZ4Kq34fUd9N6fEzj2QXMZmKUtTYh7TSvkeA47t3kP7ngDKiiEHi7bFm4AVw4J3MKUxDB8qGjIJ00Qi1TitQp';
   static const String urlScheme = 'ai-landing-page';
-  static const String merchantName = 'AI Landing Page Builder';
+  static const String merchantName = 'AI Landing Page';
 
   static const double monthlyPrice = 4.99;
   static const double yearlyPrice = 59.88;

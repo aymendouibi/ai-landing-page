@@ -102,7 +102,7 @@ class PrivacyPolicySheet extends StatelessWidget {
                       context,
                       title: '1. Information We Collect',
                       body:
-                          'We collect information necessary to provide you with the AI website builder, publishing, and hosting services. This includes:\n\n'
+                          'We collect information necessary to provide you with the AI Landing Page, publishing, and hosting services. This includes:\n\n'
                           '• Account Information: Name, email address, password hash, and OAuth credentials (when signing in with Google or Apple).\n'
                           '• Website Content & Media: Site configurations, page layouts, text copy, images, uploaded branding assets, and custom domain DNS records.\n'
                           '• AI Interactions: Prompts, edit instructions, and generation history sent to our AI pipeline to draft and remix website sections.\n'
@@ -112,7 +112,7 @@ class PrivacyPolicySheet extends StatelessWidget {
                       context,
                       title: '2. How We Use Your Data',
                       body:
-                          'Your data is strictly used to deliver, maintain, and enhance the builder platform:\n\n'
+                          'Your data is strictly used to deliver, maintain, and enhance the AI Landing Page platform:\n\n'
                           '• Compiling and rendering your website HTML, CSS, and modern responsive components.\n'
                           '• Managing live deployments, edge CDN hosting, and SSL certificates.\n'
                           '• Processing subscription billing, invoices, and entitlements via Stripe.\n'

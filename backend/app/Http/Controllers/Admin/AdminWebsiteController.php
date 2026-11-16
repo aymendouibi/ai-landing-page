@@ -106,7 +106,7 @@ class AdminWebsiteController extends Controller
                 'source_website_id' => $website->id,
                 'preview_images' => $previewImages,
                 'status' => TemplateStatus::Published,
-                'author' => 'AI Builder Studio',
+                'author' => 'AI Landing Page Studio',
                 'license_type' => 'internal',
                 'use_count' => 0,
             ]);

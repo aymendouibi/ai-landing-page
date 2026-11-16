@@ -132,7 +132,7 @@ class BillingService
                         'plan' => $interval,
                         'interval' => $interval,
                     ],
-                    'description' => "AI Landing Page Builder Pro - {$interval}",
+                    'description' => "AI Landing Page Pro - {$interval}",
                 ]);
 
                 return [
@@ -152,7 +152,7 @@ class BillingService
                 'customer' => $customer->stripe_customer_id,
                 'setup_future_usage' => 'off_session',
                 'automatic_payment_methods[enabled]' => 'true',
-                'description' => "AI Landing Page Builder Pro - {$interval}",
+                'description' => "AI Landing Page Pro - {$interval}",
                 'metadata[user_id]' => (string) $user->id,
                 'metadata[userId]' => (string) $user->id,
                 'metadata[plan]' => $interval,
@@ -181,7 +181,7 @@ class BillingService
                     'customer' => $customer->stripe_customer_id,
                     'setup_future_usage' => 'off_session',
                     'automatic_payment_methods[enabled]' => 'true',
-                    'description' => "AI Landing Page Builder Pro - {$interval}",
+                    'description' => "AI Landing Page Pro - {$interval}",
                     'metadata[user_id]' => (string) $user->id,
                     'metadata[userId]' => (string) $user->id,
                     'metadata[plan]' => $interval,

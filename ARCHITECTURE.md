@@ -1,4 +1,4 @@
-# Architecture & Deployment Guide: AI Website Builder
+# Architecture & Deployment Guide: AI Landing Page
 
 This document outlines the complete architectural layout of the project, including repository structure, hosting infrastructure, domain configuration, and data flow between all components.
 

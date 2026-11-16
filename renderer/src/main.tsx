@@ -254,7 +254,7 @@ function App() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>AI Website Builder Canvas</span>
+          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>AI Landing Page Canvas</span>
           <span style={{ fontSize: '0.75rem', background: '#334155', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
             Renderer Preview
           </span>
