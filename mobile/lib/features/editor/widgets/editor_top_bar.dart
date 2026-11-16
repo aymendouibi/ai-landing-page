@@ -35,6 +35,7 @@ class EditorTopBar extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 onPressed: () {
+                  controller.setPortrait();
                   Get.offAllNamed(AppRoutes.dashboard);
                 },
               ),
@@ -93,6 +94,7 @@ class EditorTopBar extends StatelessWidget {
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 tooltip: 'editor_website_config'.tr,
                 onPressed: () {
+                  controller.setPortrait();
                   Get.toNamed(
                     AppRoutes.websiteConfig,
                     arguments: {'websiteId': controller.websiteId},
@@ -196,6 +198,7 @@ class EditorLandscapeTopBar extends StatelessWidget {
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             onPressed: () {
+              controller.setPortrait();
               Get.offAllNamed(AppRoutes.dashboard);
             },
           ),
@@ -322,6 +325,7 @@ class EditorLandscapeTopBar extends StatelessWidget {
             constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
             tooltip: 'editor_website_config'.tr,
             onPressed: () {
+              controller.setPortrait();
               Get.toNamed(
                 AppRoutes.websiteConfig,
                 arguments: {'websiteId': controller.websiteId},

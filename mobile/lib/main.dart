@@ -9,6 +9,7 @@ import 'core/localization/app_translations.dart';
 import 'core/localization/supported_locales.dart';
 import 'core/routes/app_pages.dart';
 import 'core/routes/app_routes.dart';
+import 'core/routes/orientation_route_observer.dart';
 import 'core/services/stripe_service.dart';
 import 'core/storage/session_manager.dart';
 import 'core/widgets/app_showcase.dart';
@@ -70,6 +71,12 @@ class AiBuilderApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: isLoggedIn ? AppRoutes.dashboard : AppRoutes.auth,
       getPages: AppPages.pages,
+      navigatorObservers: [OrientationRouteObserver()],
+      routingCallback: (routing) {
+        if (routing != null && routing.current != AppRoutes.editor) {
+          OrientationRouteObserver.lockPortrait();
+        }
+      },
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: initialThemeMode,

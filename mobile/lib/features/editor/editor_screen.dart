@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/designsystem/colors.dart';
+import '../../core/routes/orientation_route_observer.dart';
 import '../../core/widgets/app_showcase.dart';
 import 'editor_controller.dart';
 import 'widgets/editor_bottom_dock.dart';
@@ -8,12 +9,33 @@ import 'widgets/editor_bottom_panel.dart';
 import 'widgets/editor_canvas_view.dart';
 import 'widgets/editor_top_bar.dart';
 
-class EditorScreen extends StatelessWidget {
+class EditorScreen extends StatefulWidget {
   const EditorScreen({super.key});
 
   @override
+  State<EditorScreen> createState() => _EditorScreenState();
+}
+
+class _EditorScreenState extends State<EditorScreen> {
+  late final EditorController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<EditorController>()
+        ? Get.find<EditorController>()
+        : Get.put(EditorController());
+  }
+
+  @override
+  void dispose() {
+    // Force portrait orientation immediately when leaving the editor
+    OrientationRouteObserver.lockPortrait();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.put(EditorController());
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
@@ -32,24 +54,30 @@ class EditorScreen extends StatelessWidget {
       ]);
     });
 
-    return Scaffold(
-      backgroundColor: AppColors.isDark(context)
-          ? const Color(0xFF0F172A)
-          : const Color(0xFFEDF2F7),
-      body: SafeArea(
-        child: isLandscape
-            ? Column(
-                children: [
-                  EditorLandscapeTopBar(controller: controller),
-                  Expanded(child: _buildLandscapeBody(context, controller)),
-                ],
-              )
-            : Column(
-                children: [
-                  EditorTopBar(controller: controller),
-                  Expanded(child: _buildPortraitBody(context, controller)),
-                ],
-              ),
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        OrientationRouteObserver.lockPortrait();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.isDark(context)
+            ? const Color(0xFF0F172A)
+            : const Color(0xFFEDF2F7),
+        body: SafeArea(
+          child: isLandscape
+              ? Column(
+                  children: [
+                    EditorLandscapeTopBar(controller: controller),
+                    Expanded(child: _buildLandscapeBody(context, controller)),
+                  ],
+                )
+              : Column(
+                  children: [
+                    EditorTopBar(controller: controller),
+                    Expanded(child: _buildPortraitBody(context, controller)),
+                  ],
+                ),
+        ),
       ),
     );
   }
