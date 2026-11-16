@@ -28,10 +28,8 @@ class ManageDnsSheet extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (sheetCtx) => ManageDnsSheet(
-        controller: controller,
-        isDark: isDark,
-      ),
+      builder: (sheetCtx) =>
+          ManageDnsSheet(controller: controller, isDark: isDark),
     );
   }
 
@@ -86,7 +84,9 @@ class ManageDnsSheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF161922) : const Color(0xFFF6F8FA),
+                color: isDark
+                    ? const Color(0xFF161922)
+                    : const Color(0xFFF6F8FA),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.borderSubtleOf(context)),
               ),
@@ -94,7 +94,12 @@ class ManageDnsSheet extends StatelessWidget {
                 children: [
                   _buildDnsRow('CNAME', '@', 'sites.aibuilder.app', context),
                   const Divider(height: 16),
-                  _buildDnsRow('TXT', '_verify', 'aibuilder-site-verify', context),
+                  _buildDnsRow(
+                    'TXT',
+                    '_verify',
+                    'aibuilder-site-verify',
+                    context,
+                  ),
                 ],
               ),
             ),
@@ -112,7 +117,9 @@ class ManageDnsSheet extends StatelessWidget {
                               'Type: CNAME\nHost: @\nTarget: sites.aibuilder.app\n\nType: TXT\nHost: _verify\nValue: aibuilder-site-verify',
                         ),
                       );
-                      AppSnackbar.copied(message: 'site_settings_dns_copied'.tr);
+                      AppSnackbar.copied(
+                        message: 'site_settings_dns_copied'.tr,
+                      );
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -120,7 +127,10 @@ class ManageDnsSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: Text('site_settings_copy_records'.tr),
+                    child: Text(
+                      'site_settings_copy_records'.tr,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -131,7 +141,7 @@ class ManageDnsSheet extends StatelessWidget {
                       AppSnackbar.success('site_settings_dns_verified'.tr);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981),
+                      backgroundColor: const Color(0xFF7C5CFF),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(

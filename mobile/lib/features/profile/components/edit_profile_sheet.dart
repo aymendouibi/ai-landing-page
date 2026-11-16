@@ -8,10 +8,7 @@ import '../../dashboard/dashboard_controller.dart';
 class EditProfileSheet extends StatefulWidget {
   final DashboardController controller;
 
-  const EditProfileSheet({
-    super.key,
-    required this.controller,
-  });
+  const EditProfileSheet({super.key, required this.controller});
 
   static void show(BuildContext context, DashboardController controller) {
     showModalBottomSheet(
@@ -57,7 +54,11 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
     final email = _emailController.text.trim();
 
     if (name.isEmpty) {
-      AppSnackbar.error('Name cannot be empty', title: 'Validation', context: context);
+      AppSnackbar.error(
+        'Name cannot be empty',
+        title: 'Validation',
+        context: context,
+      );
       return;
     }
 
@@ -231,10 +232,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                   vertical: 12,
                 ),
               ),
-              style: TextStyle(
-                fontSize: 15,
-                color: AppColors.inkOf(context),
-              ),
+              style: TextStyle(fontSize: 15, color: AppColors.inkOf(context)),
             ),
             const SizedBox(height: 16),
 
@@ -264,10 +262,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                   vertical: 12,
                 ),
               ),
-              style: TextStyle(
-                fontSize: 15,
-                color: AppColors.inkOf(context),
-              ),
+              style: TextStyle(fontSize: 15, color: AppColors.inkOf(context)),
             ),
             const SizedBox(height: 24),
 
@@ -320,6 +315,7 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                           )
                         : Text(
                             'profile_save_changes'.tr,
+                            textAlign: TextAlign.center,
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,

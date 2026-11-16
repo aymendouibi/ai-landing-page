@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin Dashboard') - AI Website Builder</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,11 +21,7 @@
         <aside class="w-64 bg-slate-900/80 border-r border-slate-800/80 backdrop-blur-md flex flex-col shrink-0 hidden md:flex">
             <!-- Brand -->
             <div class="h-16 flex items-center px-6 border-b border-slate-800/80 gap-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                    </svg>
-                </div>
+                <img src="/images/logo.png" class="w-9 h-9 rounded-xl shadow-lg shadow-indigo-500/20 object-cover" alt="LandingCraft AI Logo">
                 <div>
                     <h1 class="text-sm font-black text-white tracking-tight flex items-center gap-1.5">
                         AI BUILDER

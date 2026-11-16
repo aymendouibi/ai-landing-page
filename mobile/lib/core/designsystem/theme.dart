@@ -6,10 +6,11 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
       fontFamily: 'Roboto',
       colorScheme: const ColorScheme.light(
-        primary: AppColors.ink,
+        primary: AppColors.primary,
         secondary: AppColors.atmosphereViolet,
         surface: AppColors.surface,
         onSurface: AppColors.ink,

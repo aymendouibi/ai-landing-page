@@ -255,6 +255,24 @@ void main() {
       expect(find.text('aibuilder-site-verify'), findsOneWidget);
       expect(find.text('Copy Records'), findsOneWidget);
       expect(find.text('Verify DNS'), findsOneWidget);
+
+      final verifyBtn = tester.widget<ElevatedButton>(
+        find.widgetWithText(ElevatedButton, 'Verify DNS'),
+      );
+      expect(
+        verifyBtn.style?.backgroundColor?.resolve({}),
+        equals(const Color(0xFF7C5CFF)),
+      );
+    });
+
+    test('sub_premium is translated in all supported locales', () {
+      final translations = AppTranslations().keys;
+      expect(translations.keys, isNotEmpty);
+      for (final locale in translations.keys) {
+        final val = translations[locale]?['sub_premium'];
+        expect(val, isNotNull, reason: 'Missing sub_premium in $locale');
+        expect(val, isNotEmpty, reason: 'Empty sub_premium in $locale');
+      }
     });
 
     testWidgets('WebsiteConfigLandingFilesCard renders import and export options', (tester) async {

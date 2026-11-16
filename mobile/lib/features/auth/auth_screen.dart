@@ -20,14 +20,14 @@ class AuthScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: AppColors.ink,
-                    borderRadius: BorderRadius.circular(16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/images/app_logo.png',
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.cover,
                   ),
-                  child: const Icon(LucideIcons.sparkles, color: Colors.white, size: 28),
                 ),
                 const SizedBox(height: 20),
                 Text(

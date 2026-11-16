@@ -116,11 +116,25 @@ class DashboardScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'projects_title'.tr,
-                    style: AppTypography.largePageTitle.copyWith(
-                      color: AppColors.inkOf(context),
-                    ),
+                  Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(9),
+                        child: Image.asset(
+                          'assets/images/app_logo.png',
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'projects_title'.tr,
+                        style: AppTypography.largePageTitle.copyWith(
+                          color: AppColors.inkOf(context),
+                        ),
+                      ),
+                    ],
                   ),
 
                   // Circular Avatar

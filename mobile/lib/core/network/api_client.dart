@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:http/http.dart' as http;
 import '../models/website.dart';
 import '../storage/session_manager.dart';

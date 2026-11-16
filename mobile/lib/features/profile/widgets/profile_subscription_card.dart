@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
 import '../../dashboard/dashboard_controller.dart';
-import '../../subscription/past_subscriptions_view.dart';
 import '../../subscription/subscription_view.dart';
 
 class ProfileSubscriptionCard extends StatelessWidget {
@@ -146,42 +145,6 @@ class ProfileSubscriptionCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Center(
-              child: InkWell(
-                onTap: () => PastSubscriptionsView.open(context),
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        LucideIcons.receipt,
-                        size: 14,
-                        color: isCardDark
-                            ? const Color(0xFFCBD5E1)
-                            : const Color(0xFF475569),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'profile_past_subscriptions'.tr,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          color: isCardDark
-                              ? const Color(0xFFCBD5E1)
-                              : const Color(0xFF475569),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ),

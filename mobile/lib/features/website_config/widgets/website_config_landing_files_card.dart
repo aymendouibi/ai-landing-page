@@ -65,7 +65,9 @@ class WebsiteConfigLandingFilesCard extends StatelessWidget {
                   'site_settings_import_desc'.tr,
                   style: TextStyle(
                     fontSize: 12.5,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -73,9 +75,14 @@ class WebsiteConfigLandingFilesCard extends StatelessWidget {
                 // File container box
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF161922) : const Color(0xFFF6F8FA),
+                    color: isDark
+                        ? const Color(0xFF161922)
+                        : const Color(0xFFF6F8FA),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isDark
@@ -99,7 +106,9 @@ class WebsiteConfigLandingFilesCard extends StatelessWidget {
                         controller.importedZipInfo.value,
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
                         ),
                       ),
                     ],
@@ -115,7 +124,9 @@ class WebsiteConfigLandingFilesCard extends StatelessWidget {
                         ? null
                         : () => controller.chooseZipFile(),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFC4B5FD), // Lilac button matching mockup
+                      backgroundColor: const Color(
+                        0xFFC4B5FD,
+                      ), // Lilac button matching mockup
                       foregroundColor: const Color(0xFF141724),
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -143,7 +154,9 @@ class WebsiteConfigLandingFilesCard extends StatelessWidget {
                   'site_settings_import_replace_note'.tr,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                   ),
                 ),
 
@@ -173,15 +186,24 @@ class WebsiteConfigLandingFilesCard extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: isPremium
-                                ? const Color(0xFF10B981).withValues(alpha: 0.12)
-                                : const Color(0xFFD97706).withValues(alpha: 0.12),
+                                ? const Color(
+                                    0xFF10B981,
+                                  ).withValues(alpha: 0.12)
+                                : const Color(
+                                    0xFFD97706,
+                                  ).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            isPremium ? 'site_settings_premium_zip'.tr : 'site_settings_premium_only'.tr,
+                            isPremium
+                                ? 'site_settings_premium_zip'.tr
+                                : 'site_settings_premium_only'.tr,
                             style: TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w800,
@@ -200,7 +222,9 @@ class WebsiteConfigLandingFilesCard extends StatelessWidget {
                           : 'site_settings_zip_locked_desc'.tr,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -218,7 +242,10 @@ class WebsiteConfigLandingFilesCard extends StatelessWidget {
                           isPremium
                               ? 'site_settings_download_zip_btn'.tr
                               : 'site_settings_export_zip_unlock_btn'.tr,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isPremium
@@ -228,7 +255,10 @@ class WebsiteConfigLandingFilesCard extends StatelessWidget {
                               ? (isDark ? Colors.black : Colors.white)
                               : Colors.white,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 10,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -245,7 +275,11 @@ class WebsiteConfigLandingFilesCard extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 6,
                     children: [
-                      Icon(LucideIcons.copy, size: 14, color: AppColors.inkMutedOf(context)),
+                      Icon(
+                        LucideIcons.copy,
+                        size: 14,
+                        color: AppColors.inkMutedOf(context),
+                      ),
                       Text(
                         'site_settings_copy_code'.tr,
                         style: TextStyle(

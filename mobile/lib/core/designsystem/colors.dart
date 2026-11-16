@@ -14,6 +14,7 @@ class AppColors {
   static const borderSubtle = Color(0x140C0C14); // rgba(12,12,20, 0.08)
   static const borderStrong = Color(0x240C0C14); // rgba(12,12,20, 0.14)
 
+  static const primary = atmosphereViolet;
   static const atmosphereViolet = Color(0xFF7C5CFF);
   static const atmosphereCyan = Color(0xFF2BC8E8);
   static const atmospherePink = Color(0xFFE46BFF);

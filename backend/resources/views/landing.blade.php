@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Landing Page Builder — Build, Remix & Publish from Your Phone</title>
     <meta name="description" content="The premier mobile-first AI website builder. Design high-converting, responsive landing pages from your phone with instant Cloudflare edge hosting and custom domains.">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/></svg>">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,13 +124,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <!-- Brand Logo -->
             <a href="/" class="flex items-center space-x-3 group">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-purple-600 p-[1px] shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform">
-                    <div class="w-full h-full bg-dark-base rounded-[11px] flex items-center justify-center">
-                        <svg class="w-5 h-5 text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                        </svg>
-                    </div>
-                </div>
+                <img src="/images/logo.png" class="w-10 h-10 rounded-xl shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform object-cover" alt="LandingCraft AI Logo">
                 <div>
                     <span class="text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
                         LandingCraft <span class="text-xs px-2 py-0.5 rounded-full font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20">AI</span>
@@ -693,6 +688,7 @@
     <footer class="border-t border-white/[0.06] bg-dark-base py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-slate-500">
             <div class="flex items-center space-x-3">
+                <img src="/images/logo.png" class="w-6 h-6 rounded-lg object-cover" alt="LandingCraft AI">
                 <span class="text-white font-bold">LandingCraft AI</span>
                 <span>·</span>
                 <span>© 2026 AI Landing Page Builder. All rights reserved.</span>

@@ -11,9 +11,7 @@ Widget buildTestWidget(Widget child) {
   return GetMaterialApp(
     translations: AppTranslations(),
     locale: const Locale('en', 'US'),
-    getPages: [
-      GetPage(name: '/auth', page: () => const SizedBox()),
-    ],
+    getPages: [GetPage(name: '/auth', page: () => const SizedBox())],
     home: Scaffold(body: child),
   );
 }
@@ -39,7 +37,9 @@ void main() {
   });
 
   group('ProfileView and Modular Profile Widgets Tests', () {
-    testWidgets('ProfileView renders all modular sections correctly', (tester) async {
+    testWidgets('ProfileView renders all modular sections correctly', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -57,11 +57,11 @@ void main() {
       expect(find.byType(ProfileSectionTitle), findsNWidgets(3));
     });
 
-    testWidgets('ProfileUserCard renders user details and Free/Premium badge', (tester) async {
+    testWidgets('ProfileUserCard renders user details and Free/Premium badge', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        buildTestWidget(
-          ProfileUserCard(controller: controller, isDark: false),
-        ),
+        buildTestWidget(ProfileUserCard(controller: controller, isDark: false)),
       );
       await tester.pumpAndSettle();
 
@@ -79,23 +79,27 @@ void main() {
       expect(find.text('Premium'), findsOneWidget);
     });
 
-    testWidgets('ProfileSubscriptionCard renders promotional view on Free tier', (tester) async {
-      controller.planSlug.value = 'free';
-      await tester.pumpWidget(
-        buildTestWidget(
-          ProfileSubscriptionCard(controller: controller, isDark: false),
-        ),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'ProfileSubscriptionCard renders promotional view on Free tier',
+      (tester) async {
+        controller.planSlug.value = 'free';
+        await tester.pumpWidget(
+          buildTestWidget(
+            ProfileSubscriptionCard(controller: controller, isDark: false),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Premium'), findsOneWidget);
-      expect(find.text('€4.99'), findsOneWidget);
-      expect(find.text('Upgrade to Premium'), findsOneWidget);
-      expect(find.text('Past subscriptions & receipts'), findsOneWidget);
-      expect(find.text('60 landing page generations'), findsOneWidget);
-    });
+        expect(find.text('Premium'), findsOneWidget);
+        expect(find.text('€4.99'), findsOneWidget);
+        expect(find.text('Upgrade to Premium'), findsOneWidget);
+        expect(find.text('60 landing page generations'), findsOneWidget);
+      },
+    );
 
-    testWidgets('ProfileSubscriptionCard renders active view on Premium tier', (tester) async {
+    testWidgets('ProfileSubscriptionCard renders active view on Premium tier', (
+      tester,
+    ) async {
       controller.planSlug.value = 'pro';
       controller.subscriptionPeriodEnd.value = '31 Dec 2026';
 
@@ -108,11 +112,16 @@ void main() {
 
       expect(find.text('Premium'), findsOneWidget);
       expect(find.text('€4.99 / month'), findsOneWidget);
-      expect(find.text('Your Premium membership is active until 31 Dec 2026.'), findsOneWidget);
+      expect(
+        find.text('Your Premium membership is active until 31 Dec 2026.'),
+        findsOneWidget,
+      );
       expect(find.text('Manage subscription'), findsOneWidget);
     });
 
-    testWidgets('ProfilePreferencesCard toggles theme mode switch', (tester) async {
+    testWidgets('ProfilePreferencesCard toggles theme mode switch', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildTestWidget(
           ProfilePreferencesCard(controller: controller, isDark: false),
@@ -133,11 +142,11 @@ void main() {
       expect(controller.themeMode.value, equals(ThemeMode.dark));
     });
 
-    testWidgets('ProfileSupportCard renders Help Guide and Send Feedback', (tester) async {
+    testWidgets('ProfileSupportCard renders Help Guide and Send Feedback', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        buildTestWidget(
-          const ProfileSupportCard(isDark: false),
-        ),
+        buildTestWidget(const ProfileSupportCard(isDark: false)),
       );
       await tester.pumpAndSettle();
 
@@ -145,35 +154,46 @@ void main() {
       expect(find.text('Send feedback'), findsOneWidget);
     });
 
-    testWidgets('ProfilePrivacyCard renders legal rows and opens sign out dialog', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(
-          ProfilePrivacyCard(controller: controller, isDark: false),
-        ),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'ProfilePrivacyCard renders legal rows and opens sign out dialog',
+      (tester) async {
+        await tester.pumpWidget(
+          buildTestWidget(
+            ProfilePrivacyCard(controller: controller, isDark: false),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Privacy policy'), findsOneWidget);
-      expect(find.text('Terms of service'), findsOneWidget);
-      expect(find.text('Billing history'), findsOneWidget);
-      expect(find.text('Sign out'), findsOneWidget);
+        expect(find.text('Privacy policy'), findsOneWidget);
+        expect(find.text('Terms of service'), findsOneWidget);
+        expect(find.text('Billing history'), findsOneWidget);
+        expect(find.text('Sign out'), findsOneWidget);
 
-      // Tap Sign out
-      await tester.tap(find.text('Sign out'));
-      await tester.pumpAndSettle();
+        // Tap Sign out
+        await tester.tap(find.text('Sign out'));
+        await tester.pumpAndSettle();
 
-      // Sign out dialog should appear
-      expect(find.text('Are you sure you want to sign out of your account?'), findsOneWidget);
-      expect(find.text('Cancel'), findsOneWidget);
+        // Sign out dialog should appear
+        expect(
+          find.text('Are you sure you want to sign out of your account?'),
+          findsOneWidget,
+        );
+        expect(find.text('Cancel'), findsOneWidget);
 
-      // Tap Cancel
-      await tester.tap(find.text('Cancel'));
-      await tester.pumpAndSettle();
+        // Tap Cancel
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Are you sure you want to sign out of your account?'), findsNothing);
-    });
+        expect(
+          find.text('Are you sure you want to sign out of your account?'),
+          findsNothing,
+        );
+      },
+    );
 
-    testWidgets('ProfileIconBadge renders with custom icon and colors', (tester) async {
+    testWidgets('ProfileIconBadge renders with custom icon and colors', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildTestWidget(
           const ProfileIconBadge(
@@ -190,16 +210,16 @@ void main() {
 
     testWidgets('ProfileSectionTitle renders title text', (tester) async {
       await tester.pumpWidget(
-        buildTestWidget(
-          const ProfileSectionTitle(title: 'Account Settings'),
-        ),
+        buildTestWidget(const ProfileSectionTitle(title: 'Account Settings')),
       );
       await tester.pumpAndSettle();
 
       expect(find.text('Account Settings'), findsOneWidget);
     });
 
-    testWidgets('ProfileSignOutDialog executes logout when confirmed', (tester) async {
+    testWidgets('ProfileSignOutDialog executes logout when confirmed', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildTestWidget(
           Builder(
@@ -215,7 +235,10 @@ void main() {
       await tester.tap(find.text('Open Dialog'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Are you sure you want to sign out of your account?'), findsOneWidget);
+      expect(
+        find.text('Are you sure you want to sign out of your account?'),
+        findsOneWidget,
+      );
 
       // Confirm sign out (tap second Sign out button which is in the dialog actions)
       final signOutButtons = find.text('Sign out');
@@ -223,7 +246,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Dialog dismissed
-      expect(find.text('Are you sure you want to sign out of your account?'), findsNothing);
+      expect(
+        find.text('Are you sure you want to sign out of your account?'),
+        findsNothing,
+      );
     });
   });
 }
