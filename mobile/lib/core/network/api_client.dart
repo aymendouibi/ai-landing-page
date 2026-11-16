@@ -213,9 +213,33 @@ class ApiClient {
       final list = (data['data'] as List)
           .map((e) => Project.fromJson(e))
           .toList();
+      if (list.isEmpty) {
+        final created = await createProject('My Workspace');
+        if (created != null) {
+          list.add(created);
+        }
+      }
       return list;
     }
     return [];
+  }
+
+  static Future<Project?> createProject(String name, {String? description}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/projects'),
+        headers: await _headers(),
+        body: jsonEncode({
+          'name': name,
+          'description': description ?? 'Main workspace for your landing pages',
+        }),
+      );
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        return Project.fromJson(data['project']);
+      }
+    } catch (_) {}
+    return null;
   }
 
   static Future<List<Website>> getWebsites() async {

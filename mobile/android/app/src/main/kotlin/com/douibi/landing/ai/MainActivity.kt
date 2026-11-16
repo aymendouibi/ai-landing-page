@@ -1,4 +1,4 @@
-package com.aibuilder.aibuilder
+package com.douibi.landing.ai
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

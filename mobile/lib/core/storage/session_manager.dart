@@ -121,6 +121,29 @@ class SessionManager {
   }
 
   static const _keyDeletedWebsites = 'deleted_website_ids';
+  static const _recentOpenedWebsitesKey = 'recent_opened_website_ids';
+
+  static Future<List<String>> getRecentOpenedWebsiteIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_recentOpenedWebsitesKey) ?? [];
+  }
+
+  static Future<void> recordRecentWebsite(String id) async {
+    if (id.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList(_recentOpenedWebsitesKey) ?? [];
+    list.remove(id);
+    list.insert(0, id);
+    if (list.length > 30) {
+      list.removeRange(30, list.length);
+    }
+    await prefs.setStringList(_recentOpenedWebsitesKey, list);
+  }
+
+  static Future<void> clearRecentWebsites() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_recentOpenedWebsitesKey);
+  }
 
   static Future<Set<String>> getDeletedWebsiteIds() async {
     final prefs = await SharedPreferences.getInstance();
@@ -146,5 +169,7 @@ class SessionManager {
     await prefs.remove(_userIdKey);
     await prefs.remove(_userNameKey);
     await prefs.remove(_userEmailKey);
+    await prefs.remove(_keyDeletedWebsites);
+    await prefs.remove(_recentOpenedWebsitesKey);
   }
 }

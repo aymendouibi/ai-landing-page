@@ -4,6 +4,7 @@ import '../../core/designsystem/app_snackbar.dart';
 import '../../core/models/website.dart';
 import '../../core/network/api_client.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/storage/session_manager.dart';
 import '../dashboard/dashboard_controller.dart';
 import '../profile/components/subscription_plan_sheet.dart';
 import '../subscription/subscription_view.dart';
@@ -250,6 +251,7 @@ class TemplatesController extends GetxController {
       AppSnackbar.success('Website created from template!');
       AppSnackbar.success('templates_created_success'.tr);
 
+      await SessionManager.recordRecentWebsite(site.id);
       Get.offNamed(AppRoutes.editor, arguments: {'websiteId': site.id});
     } catch (e) {
       if (ApiClient.isSubscriptionLimitError(e)) {

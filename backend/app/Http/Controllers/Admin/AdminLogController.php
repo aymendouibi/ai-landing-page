@@ -41,6 +41,7 @@ class AdminLogController extends Controller
             'total' => AppErrorLog::count(),
             'payment' => AppErrorLog::where('category', 'payment')->count(),
             'ai' => AppErrorLog::where('category', 'ai')->count(),
+            'auth' => AppErrorLog::where('category', 'auth')->count(),
             'system' => AppErrorLog::where('category', 'system')->count(),
             'unresolved' => AppErrorLog::whereNull('resolved_at')->count(),
         ];

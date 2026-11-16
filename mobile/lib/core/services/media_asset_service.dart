@@ -20,74 +20,7 @@ class MediaAssetService {
   static const int maxStorageMb = 100;
   static const String _storageKey = 'custom_uploaded_media_assets';
 
-  static final List<UploadedImage> defaultImages = [
-    const UploadedImage(
-      id: 'img_1',
-      filename: 'café-interior.jpg',
-      dimensions: '1600 × 1200',
-      url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=80',
-      alt: 'Sunlit seating inside the Lumen Coffee café',
-      siteId: 'showcase_studio_marlow',
-      siteName: 'Studio Marlow',
-      fileSizeKb: 1420,
-      mimeType: 'image/jpeg',
-    ),
-    const UploadedImage(
-      id: 'img_2',
-      filename: 'latte-art.jpg',
-      dimensions: '1600 × 1280',
-      url: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=1200&q=80',
-      alt: 'Barista pouring tulip latte art in ceramic cup',
-      siteId: 'showcase_studio_marlow',
-      siteName: 'Studio Marlow',
-      fileSizeKb: 1680,
-      mimeType: 'image/jpeg',
-    ),
-    const UploadedImage(
-      id: 'img_3',
-      filename: 'roastery.jpg',
-      dimensions: '1600 × 1200',
-      url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80',
-      alt: 'Vintage cast iron drum coffee roaster in operation',
-      siteId: 'showcase_studio_marlow',
-      siteName: 'Studio Marlow',
-      fileSizeKb: 1350,
-      mimeType: 'image/jpeg',
-    ),
-    const UploadedImage(
-      id: 'img_4',
-      filename: 'huila.jpg',
-      dimensions: '1200 × 1200',
-      url: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=1200&q=80',
-      alt: 'Single origin roasted coffee beans from Huila Colombia',
-      siteId: 'showcase_studio_marlow',
-      siteName: 'Studio Marlow',
-      fileSizeKb: 980,
-      mimeType: 'image/jpeg',
-    ),
-    const UploadedImage(
-      id: 'img_5',
-      filename: 'guji.jpg',
-      dimensions: '1200 × 1200',
-      url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=80',
-      alt: 'Ceramic cups on wooden cafe table with plants',
-      siteId: 'showcase_kite_yoga',
-      siteName: 'Kite Yoga',
-      fileSizeKb: 1120,
-      mimeType: 'image/jpeg',
-    ),
-    const UploadedImage(
-      id: 'img_6',
-      filename: 'espresso.jpg',
-      dimensions: '1200 × 1200',
-      url: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1200&q=80',
-      alt: 'Fresh ground espresso beans inside portafilter',
-      siteId: 'showcase_kite_yoga',
-      siteName: 'Kite Yoga',
-      fileSizeKb: 890,
-      mimeType: 'image/jpeg',
-    ),
-  ];
+  static final List<UploadedImage> defaultImages = [];
 
   final uploadedImages = <UploadedImage>[].obs;
 

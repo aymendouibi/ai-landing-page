@@ -26,100 +26,8 @@ class AssetsController extends GetxController {
   final userName = RxnString();
   final isLoading = false.obs;
 
-  static final List<WebsitePreviewItem> defaultPageItems = [
-    const WebsitePreviewItem(
-      id: 'showcase_studio_marlow',
-      title: 'Studio Marlow',
-      category: 'Architecture, Copenhagen',
-      categoryColor: Color(0xFF475569),
-      headline: 'Quiet buildings for busy lives',
-      body: 'Homes, libraries and small civic spaces, designed with the people who use them.',
-      ctaText: 'See our work',
-      ctaColor: Color(0xFF111827),
-      ctaBorderRadius: 2.0,
-      imageUrl: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=600&q=80',
-      isSerif: true,
-      bgCanvasColor: Color(0xFFFFFFFF),
-      isLive: true,
-      domain: 'studiomarlow.com',
-    ),
-    const WebsitePreviewItem(
-      id: 'showcase_kite_yoga',
-      title: 'Kite Yoga',
-      category: 'East 6th St, Austin',
-      categoryColor: Color(0xFF5D6B50),
-      headline: 'Slow mornings start here',
-      body: 'Small classes in a sunlit studio, timers to daily practice.',
-      ctaText: 'See the schedule',
-      ctaColor: Color(0xFF5D6B50),
-      ctaBorderRadius: 10.0,
-      imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=600&q=80',
-      isSerif: false,
-      bgCanvasColor: Color(0xFFFAF8F4),
-      isLive: false,
-      timeAgo: 'Draft · Edited 3 days ago',
-    ),
-    const WebsitePreviewItem(
-      id: 'showcase_lumen_coffee',
-      title: 'Lumen Coffee',
-      category: 'Roastery & Café, Portland',
-      categoryColor: Color(0xFF9E4B28),
-      headline: 'Small-batch coffee, roasted weekly',
-      body: 'Single-origin beans from ethical farms, roasted fresh in our Pacific shop.',
-      ctaText: 'Order beans',
-      ctaColor: Color(0xFF9E4B28),
-      ctaBorderRadius: 6.0,
-      imageUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=600&q=80',
-      isSerif: true,
-      bgCanvasColor: Color(0xFFFBF9F5),
-      isLive: true,
-      domain: 'lumencoffee.com',
-    ),
-    const WebsitePreviewItem(
-      id: 'showcase_nordic_ceramic',
-      title: 'Nordic Ceramic',
-      category: 'Studio & Shop, Stockholm',
-      categoryColor: Color(0xFF334155),
-      headline: 'Tactile vessels made by hand',
-      body: 'Stoneware and porcelain tableware thrown in Stockholm and glazed in matte earth.',
-      ctaText: 'Explore shop',
-      ctaColor: Color(0xFF1E293B),
-      ctaBorderRadius: 4.0,
-      imageUrl: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80',
-      isSerif: true,
-      bgCanvasColor: Color(0xFFFAFAFA),
-      isLive: false,
-      timeAgo: 'Draft · Edited 1 day ago',
-    ),
-  ];
-
-  static List<UserSiteInfo> get defaultSites => [
-    const UserSiteInfo(
-      id: 'showcase_studio_marlow',
-      name: 'Studio Marlow',
-      domain: 'studiomarlow.com',
-      status: 'live',
-      category: 'Architecture, Copenhagen',
-      imageUrl: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=600&q=80',
-      assetCount: 4,
-      timeAgo: 'Live · Active now',
-      isLive: true,
-    ),
-    const UserSiteInfo(
-      id: 'showcase_kite_yoga',
-      name: 'Kite Yoga',
-      subdomain: 'kiteyoga.aibuilder.app',
-      status: 'draft',
-      category: 'East 6th St, Austin',
-      imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=600&q=80',
-      assetCount: 2,
-      timeAgo: 'Draft · Edited 3 days ago',
-      isLive: false,
-    ),
-  ];
-
-  final pageItems = <WebsitePreviewItem>[...defaultPageItems].obs;
-  final sites = <UserSiteInfo>[...defaultSites].obs;
+  final pageItems = <WebsitePreviewItem>[].obs;
+  final sites = <UserSiteInfo>[].obs;
 
   @override
   void onInit() {
@@ -139,14 +47,13 @@ class AssetsController extends GetxController {
   Future<void> loadSites() async {
     isLoading.value = true;
     try {
-      final siteList = <UserSiteInfo>[...defaultSites];
-      final previewList = <WebsitePreviewItem>[...defaultPageItems];
+      final siteList = <UserSiteInfo>[];
+      final previewList = <WebsitePreviewItem>[];
 
-      // User websites fetched from backend
+      // User websites fetched from backend (only real websites)
       try {
         final backendWebsites = await ApiClient.getWebsites();
         for (final site in backendWebsites) {
-          if (site.slug == 'studio-marlow' || site.slug == 'kite-yoga') continue;
 
           final isLive = site.status == 'published' || site.status == 'live';
           String headline = 'Crafted for Modern Growth';
@@ -303,7 +210,10 @@ class AssetsController extends GetxController {
   }
 
   void openWebsite(String siteId) {
-    Get.toNamed(AppRoutes.editor, arguments: {'websiteId': siteId});
+    SessionManager.recordRecentWebsite(siteId);
+    Get.toNamed(AppRoutes.editor, arguments: {'websiteId': siteId})?.then((_) {
+      loadSites();
+    });
   }
 
   void _showSnackbar(

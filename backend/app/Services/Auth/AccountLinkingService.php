@@ -151,6 +151,12 @@ class AccountLinkingService
                 'avatar_url' => $providerData['picture'] ?? $providerData['avatar'] ?? null,
             ]);
 
+            \App\Models\Project::create([
+                'user_id' => $user->id,
+                'name' => 'Default Workspace',
+                'description' => 'Main workspace for your landing pages',
+            ]);
+
             UserAuthProvider::create([
                 'user_id' => $user->id,
                 'provider' => $provider,

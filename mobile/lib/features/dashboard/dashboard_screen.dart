@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/designsystem/colors.dart';
 import '../../core/designsystem/gradients.dart';
 import '../../core/designsystem/typography.dart';
@@ -116,25 +117,31 @@ class DashboardScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(9),
-                        child: Image.asset(
-                          'assets/images/app_logo.png',
-                          width: 32,
-                          height: 32,
-                          fit: BoxFit.cover,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(9),
+                          child: Image.asset(
+                            'assets/images/app_logo.png',
+                            width: 32,
+                            height: 32,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'projects_title'.tr,
-                        style: AppTypography.largePageTitle.copyWith(
-                          color: AppColors.inkOf(context),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            'projects_title'.tr,
+                            style: AppTypography.largePageTitle.copyWith(
+                              color: AppColors.inkOf(context),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
                   // Circular Avatar
@@ -220,12 +227,56 @@ class DashboardScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // Horizontal Carousel of Website Previews
-              SizedBox(
-                height: 355,
-                child: Obx(() {
-                  final items = controller.previewItems;
-                  return ListView.separated(
+              // Horizontal Carousel of Website Previews or Clean Empty State
+              Obx(() {
+                final items = controller.previewItems;
+                if (items.isEmpty) {
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceOf(context),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.borderSubtleOf(context),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceMutedOf(context),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            LucideIcons.layoutTemplate,
+                            size: 22,
+                            color: AppColors.inkMutedOf(context),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No recent projects',
+                          style: AppTypography.itemTitleOf(context),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Websites you create or edit will appear here.',
+                          textAlign: TextAlign.center,
+                          style: AppTypography.helperOf(context),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return SizedBox(
+                  height: 355,
+                  child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: items.length,
                     separatorBuilder: (context, index) =>
@@ -234,28 +285,12 @@ class DashboardScreen extends StatelessWidget {
                       final item = items[index];
                       return RecentProjectCard(
                         item: item,
-                        onClick: () {
-                          if (item.id.startsWith('showcase_')) {
-                            final targetId = controller.heroWebsite?.id;
-                            if (targetId != null) {
-                              controller.openWebsite(targetId);
-                            } else {
-                              NewWebsiteBottomSheet.show(
-                                context,
-                                onDescribeToAi: controller.openAiCreation,
-                                onStartFromTemplate: controller.openTemplates,
-                                onBlankWebsite: controller.createBlankWebsite,
-                              );
-                            }
-                          } else {
-                            controller.openWebsite(item.id);
-                          }
-                        },
+                        onClick: () => controller.openWebsite(item.id),
                       );
                     },
-                  );
-                }),
-              ),
+                  ),
+                );
+              }),
             ],
           ),
         ),

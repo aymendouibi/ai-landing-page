@@ -16,7 +16,7 @@
 
 @section('content')
     <!-- KPI Metrics Grid -->
-    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-6 gap-4">
         <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl">
             <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Erreurs</p>
             <h3 class="text-2xl font-black text-white mt-1">{{ $metrics['total'] }}</h3>
@@ -39,6 +39,15 @@
             </div>
             <h3 class="text-2xl font-black text-white mt-1">{{ $metrics['ai'] }}</h3>
             <p class="text-[11px] text-cyan-400/80 mt-1">OpenRouter & Modèles</p>
+        </div>
+
+        <div class="bg-slate-900/60 border border-purple-500/30 p-4 rounded-2xl relative overflow-hidden bg-gradient-to-br from-purple-950/20 to-slate-900/60 shadow-lg shadow-purple-500/5">
+            <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-purple-400 uppercase tracking-wider">Erreurs Auth</p>
+                <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-black text-white mt-1">{{ $metrics['auth'] ?? 0 }}</h3>
+            <p class="text-[11px] text-purple-400/80 mt-1">Google, Apple, Login</p>
         </div>
 
         <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl">
@@ -72,6 +81,10 @@
             <a href="{{ route('admin.logs.index', ['category' => 'ai']) }}" class="px-3.5 py-1.5 text-xs font-bold rounded-xl {{ $currentCategory === 'ai' ? 'bg-cyan-600 text-white shadow-md shadow-cyan-600/30' : 'text-cyan-400 hover:text-white bg-cyan-500/10 border border-cyan-500/20' }} transition flex items-center gap-1.5">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 <span>Pipeline IA ({{ $metrics['ai'] }})</span>
+            </a>
+            <a href="{{ route('admin.logs.index', ['category' => 'auth']) }}" class="px-3.5 py-1.5 text-xs font-bold rounded-xl {{ $currentCategory === 'auth' ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30' : 'text-purple-400 hover:text-white bg-purple-500/10 border border-purple-500/20' }} transition flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <span>Auth ({{ $metrics['auth'] ?? 0 }})</span>
             </a>
             <a href="{{ route('admin.logs.index', ['category' => 'system']) }}" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl {{ $currentCategory === 'system' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white bg-slate-800/40' }} transition">
                 Système ({{ $metrics['system'] }})
@@ -116,6 +129,11 @@
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                             PIPELINE IA
+                                        </span>
+                                    @elseif($log->category === 'auth')
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                            AUTH
                                         </span>
                                     @else
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-300">

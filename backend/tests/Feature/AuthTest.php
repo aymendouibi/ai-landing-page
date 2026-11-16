@@ -82,6 +82,11 @@ class AuthTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
+
+        $this->assertDatabaseHas('app_error_logs', [
+            'category' => 'auth',
+            'severity' => 'warning',
+        ]);
     }
 
     public function test_authenticated_user_can_get_profile(): void
@@ -214,6 +219,36 @@ class AuthTest extends TestCase
 
         $response->assertStatus(401)
             ->assertJson(['message' => 'Malformed Apple identity token.']);
+    }
+
+    public function test_apple_sign_in_with_real_verifier_accepts_bundle_id(): void
+    {
+        $b64UrlEncode = fn(string $data) => rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+        $header = $b64UrlEncode(json_encode(['alg' => 'RS256', 'kid' => 'apple_kid']));
+        $payload = $b64UrlEncode(json_encode([
+            'iss' => 'https://appleid.apple.com',
+            'aud' => 'com.douibi.landing.ai',
+            'exp' => time() + 3600,
+            'sub' => 'apple_live_sub_112233',
+            'email' => 'liveuser@apple.com',
+            'email_verified' => true,
+        ]));
+        $sig = $b64UrlEncode('sig');
+        $token = "{$header}.{$payload}.{$sig}";
+
+        $response = $this->postJson('/api/v1/auth/apple', [
+            'identity_token' => $token,
+            'name' => 'Live Apple User',
+            'device_name' => 'iPhone 17 Pro',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('user.email', 'liveuser@apple.com');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'liveuser@apple.com',
+            'name' => 'Live Apple User',
+        ]);
     }
 }
 

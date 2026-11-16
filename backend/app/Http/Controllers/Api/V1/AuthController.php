@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\AppleAuthRequest;
 use App\Http\Requests\Auth\GoogleAuthRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\AppErrorLog;
 use App\Models\User;
 use App\Services\Auth\AccountLinkingService;
 use App\Services\Auth\AppleTokenVerifier;
@@ -38,6 +39,12 @@ class AuthController extends Controller
             'role' => \App\Enums\UserRole::User,
         ]);
 
+        \App\Models\Project::create([
+            'user_id' => $user->id,
+            'name' => 'Default Workspace',
+            'description' => 'Main workspace for your landing pages',
+        ]);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -55,6 +62,16 @@ class AuthController extends Controller
         $user = User::where('email', $request->validated('email'))->first();
 
         if (!$user || !$user->password || !Hash::check($request->validated('password'), $user->password)) {
+            AppErrorLog::logAuthError(
+                'Invalid login credentials for email: ' . $request->validated('email'),
+                [
+                    'email' => $request->validated('email'),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ],
+                $user?->id
+            );
+
             throw ValidationException::withMessages([
                 'email' => ['Invalid email or password.'],
             ]);
@@ -104,6 +121,15 @@ class AuthController extends Controller
         try {
             $googlePayload = $this->googleTokenVerifier->verify($request->validated('id_token'));
         } catch (Exception $e) {
+            AppErrorLog::logAuthError(
+                'Google token verification failed: ' . $e->getMessage(),
+                [
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ],
+                null,
+                $e
+            );
             return response()->json(['message' => $e->getMessage()], 401);
         }
 
@@ -136,6 +162,15 @@ class AuthController extends Controller
         try {
             $applePayload = $this->appleTokenVerifier->verify($request->validated('identity_token'));
         } catch (Exception $e) {
+            AppErrorLog::logAuthError(
+                'Apple token verification failed: ' . $e->getMessage(),
+                [
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ],
+                null,
+                $e
+            );
             return response()->json(['message' => $e->getMessage()], 401);
         }
 

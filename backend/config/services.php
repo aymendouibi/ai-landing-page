@@ -44,7 +44,8 @@ return [
 
     'apple' => [
         'client_id' => env('APPLE_SERVICE_ID'),
-        'bundle_id' => env('APPLE_BUNDLE_ID', 'com.aibuilder.aibuilder'),
+        'bundle_id' => env('APPLE_BUNDLE_ID', 'com.douibi.landing.ai'),
+        'allowed_bundle_ids' => env('APPLE_ALLOWED_BUNDLE_IDS', 'com.douibi.landing.ai,com.aibuilder.aibuilder'),
         'team_id' => env('APPLE_TEAM_ID'),
         'key_id' => env('APPLE_KEY_ID'),
         'private_key' => env('APPLE_PRIVATE_KEY_PATH'),

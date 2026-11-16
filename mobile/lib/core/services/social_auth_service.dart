@@ -84,14 +84,24 @@ class SocialAuthService {
       return SocialAuthResult.success(data);
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
+        debugPrint('ℹ️ [AUTH GOOGLE]: Sign-in was cancelled by user.');
         return SocialAuthResult.cancelled();
       }
-      debugPrint('GoogleSignInException: ${e.code} - ${e.description}');
-      return SocialAuthResult.failure(
-        e.description ?? 'Google sign-in was interrupted. Please try again.',
-      );
-    } catch (e) {
-      debugPrint('Google Sign-In Error: $e');
+      debugPrint('════════════════════════════════════════════════════════════');
+      debugPrint('❌ [AUTH GOOGLE ERROR]: ${e.description ?? e.code.toString()}');
+      debugPrint('   Exception Code: ${e.code}');
+      debugPrint('   Description: ${e.description}');
+      debugPrint('   Details: ${e.details}');
+      debugPrint('════════════════════════════════════════════════════════════');
+      final displayMessage = (e.description?.contains('keychain') ?? false)
+          ? 'Google Sign-In configuration error: Bundle ID or client ID mismatch in GoogleService-Info.plist.'
+          : (e.description ?? 'Google sign-in was interrupted. Please try again.');
+      return SocialAuthResult.failure(displayMessage);
+    } catch (e, stack) {
+      debugPrint('════════════════════════════════════════════════════════════');
+      debugPrint('❌ [AUTH GOOGLE EXCEPTION]: $e');
+      debugPrint('   Stack trace: $stack');
+      debugPrint('════════════════════════════════════════════════════════════');
       final msg = e.toString().replaceFirst('Exception: ', '');
       return SocialAuthResult.failure(msg);
     }
@@ -104,6 +114,7 @@ class SocialAuthService {
       if (!isAvailable) {
         final available = await SignInWithApple.isAvailable();
         if (!available) {
+          debugPrint('⚠️ [AUTH APPLE]: Sign in with Apple not supported on this device/platform.');
           return SocialAuthResult.failure(
             'Sign in with Apple is not supported on this device.',
           );
@@ -119,6 +130,7 @@ class SocialAuthService {
 
       final identityToken = credential.identityToken;
       if (identityToken == null || identityToken.isEmpty) {
+        debugPrint('❌ [AUTH APPLE ERROR]: Missing identity token in Apple credential.');
         return SocialAuthResult.failure(
           'Could not retrieve Apple identity token.',
         );
@@ -144,11 +156,25 @@ class SocialAuthService {
       return SocialAuthResult.success(data);
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) {
+        debugPrint('ℹ️ [AUTH APPLE]: User cancelled authorization.');
         return SocialAuthResult.cancelled();
       }
-      return SocialAuthResult.failure('Apple sign-in: ${e.message}');
-    } catch (e) {
-      debugPrint('Apple Sign-In Error: $e');
+      debugPrint('════════════════════════════════════════════════════════════');
+      debugPrint('❌ [AUTH APPLE ERROR]: ${e.message}');
+      debugPrint('   Code: ${e.code}');
+      debugPrint('════════════════════════════════════════════════════════════');
+      final isNotEntitled = e.message.contains('-7026') ||
+          e.code == AuthorizationErrorCode.unknown ||
+          e.message.toLowerCase().contains('unknown');
+      final displayMessage = isNotEntitled
+          ? 'Apple Sign-In is unavailable on the simulator without an Apple Developer provisioning profile and iCloud sign-in.'
+          : 'Apple sign-in: ${e.message}';
+      return SocialAuthResult.failure(displayMessage);
+    } catch (e, stack) {
+      debugPrint('════════════════════════════════════════════════════════════');
+      debugPrint('❌ [AUTH APPLE EXCEPTION]: $e');
+      debugPrint('   Stack trace: $stack');
+      debugPrint('════════════════════════════════════════════════════════════');
       final msg = e.toString().replaceFirst('Exception: ', '');
       return SocialAuthResult.failure(msg);
     }

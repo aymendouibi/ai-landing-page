@@ -20,10 +20,209 @@ class ContinueEditingHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final siteName = website?.name ?? 'Lumen Coffee';
-    final statusText = website?.status == 'published'
-        ? 'published_recently'.tr
-        : 'edited_recently'.tr;
+    if (website == null) {
+      return _buildEmptyState(context);
+    }
+    return _buildHeroWebsiteCard(context, website!);
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+    return GestureDetector(
+      onTap: onOpenClick,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceOf(context),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.borderSubtleOf(context), width: 1.0),
+          boxShadow: [
+            BoxShadow(
+              color: isDark ? Colors.black.withValues(alpha: 0.3) : const Color(0x181E1E50),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 180,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDark
+                      ? [
+                          const Color(0xFF1E1B4B),
+                          const Color(0xFF0F172A),
+                          const Color(0xFF172554),
+                        ]
+                      : [
+                          const Color(0xFFEEF2FF),
+                          const Color(0xFFF8FAFC),
+                          const Color(0xFFE0E7FF),
+                        ],
+                ),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark
+                            ? Colors.indigoAccent.withValues(alpha: 0.2)
+                            : Colors.indigo.shade50,
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.indigoAccent.withValues(alpha: 0.4)
+                              : Colors.indigo.shade200,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Icon(
+                        LucideIcons.sparkles,
+                        size: 26,
+                        color: isDark ? const Color(0xFF818CF8) : const Color(0xFF4F46E5),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Ready to bring your idea to life?',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.inkOf(context),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Build high-converting landing pages with AI in seconds',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.inkMutedOf(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'No pages generated yet',
+                          style: AppTypography.heroCardTitleOf(context).copyWith(fontSize: 16),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Tap here to create your first website',
+                          style: AppTypography.helperOf(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white : AppColors.ink,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.plus,
+                          size: 15,
+                          color: isDark ? AppColors.ink : Colors.white,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Create Page',
+                          style: TextStyle(
+                            color: isDark ? AppColors.ink : Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroWebsiteCard(BuildContext context, Website site) {
+    final siteName = site.name.isNotEmpty ? site.name : 'Untitled Website';
+    final isLive = site.status == 'published' || site.status == 'live';
+    final statusText = isLive ? 'published_recently'.tr : 'edited_recently'.tr;
+
+    String headline = 'Crafted for Modern Growth';
+    String subheadline = 'Clean architecture and custom layout optimized for conversion.';
+    String ctaText = 'Explore work';
+    String imageUrl = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80';
+    Color primaryColor = const Color(0xFF1E293B);
+    Color canvasBg = const Color(0xFFFAF7F2);
+
+    final doc = site.document;
+    if (doc != null) {
+      final pages = doc['pages'] as List?;
+      if (pages != null && pages.isNotEmpty) {
+        final sections = (pages.first as Map)['sections'] as List?;
+        if (sections != null) {
+          for (final sec in sections) {
+            if (sec is Map && (sec['component'] == 'hero' || sec['type'] == 'hero')) {
+              final props = sec['props'] as Map?;
+              if (props != null) {
+                headline = props['headline']?.toString() ?? props['title']?.toString() ?? headline;
+                subheadline = props['subheadline']?.toString() ?? props['description']?.toString() ?? subheadline;
+                ctaText = props['ctaText']?.toString() ?? props['cta_text']?.toString() ?? ctaText;
+                final raw = props['image'] ?? props['imageUrl'] ?? props['url'];
+                if (raw is Map) {
+                  imageUrl = raw['src']?.toString() ?? raw['url']?.toString() ?? imageUrl;
+                } else if (raw is String && raw.startsWith('http')) {
+                  imageUrl = raw;
+                }
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      final theme = (doc['site'] as Map?)?['theme'] as Map?;
+      final colors = theme?['colors'] as Map?;
+      if (colors != null) {
+        if (colors['primary'] != null) {
+          final hex = colors['primary'].toString().replaceAll('#', '');
+          if (hex.length == 6) {
+            primaryColor = Color(int.parse('FF$hex', radix: 16));
+          }
+        }
+        if (colors['background'] != null) {
+          final hex = colors['background'].toString().replaceAll('#', '');
+          if (hex.length == 6) {
+            canvasBg = Color(int.parse('FF$hex', radix: 16));
+          }
+        }
+      }
+    }
 
     return GestureDetector(
       onTap: onOpenClick,
@@ -46,7 +245,6 @@ class ContinueEditingHeroCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Mockup Canvas Preview Area
             Container(
               height: 235,
               width: double.infinity,
@@ -54,14 +252,14 @@ class ContinueEditingHeroCard extends StatelessWidget {
               padding: const EdgeInsets.only(top: 16, left: 14, right: 14),
               child: Stack(
                 children: [
-                  // Desktop Browser Frame Mockup (Left / Center)
+                  // Desktop Browser Frame Mockup
                   Align(
                     alignment: Alignment.topLeft,
                     child: Container(
                       width: MediaQuery.of(context).size.width * 0.65,
                       height: double.infinity,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFAF7F2),
+                        color: canvasBg,
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(12),
                           topRight: Radius.circular(12),
@@ -72,7 +270,6 @@ class ContinueEditingHeroCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Desktop Nav
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -84,7 +281,6 @@ class ContinueEditingHeroCard extends StatelessWidget {
                                   style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
-                                    fontFamily: 'serif',
                                     color: Color(0xFF2C241E),
                                   ),
                                 ),
@@ -94,18 +290,18 @@ class ContinueEditingHeroCard extends StatelessWidget {
                                 children: [
                                   _miniText('demo_shop'.tr),
                                   const SizedBox(width: 6),
-                                  _miniText('demo_subscriptions'.tr),
-                                  const SizedBox(width: 6),
                                   _miniText('demo_visit'.tr),
                                   const SizedBox(width: 6),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF9E4B28),
+                                      color: primaryColor,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
-                                      'demo_order'.tr,
+                                      ctaText,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(fontSize: 6, color: Colors.white),
                                     ),
                                   ),
@@ -114,8 +310,6 @@ class ContinueEditingHeroCard extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 14),
-
-                          // Desktop Hero Copy & Image
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -123,29 +317,21 @@ class ContinueEditingHeroCard extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Roastery and café in Portland',
-                                      style: TextStyle(
-                                        fontSize: 7,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF9E4B28),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 3),
-                                    const Text(
-                                      'Small-batch coffee, roasted every Friday',
-                                      style: TextStyle(
-                                        fontSize: 12,
+                                    Text(
+                                      headline,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 11,
                                         fontWeight: FontWeight.bold,
-                                        fontFamily: 'serif',
                                         height: 1.15,
                                         color: Color(0xFF2C241E),
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    const Text(
-                                      'Single-origin beans from farms we visit, roasted in our shop and shipped same day.',
-                                      style: TextStyle(
+                                    Text(
+                                      subheadline,
+                                      style: const TextStyle(
                                         fontSize: 6.5,
                                         height: 1.25,
                                         color: Color(0xFF7A6B5D),
@@ -157,11 +343,13 @@ class ContinueEditingHeroCard extends StatelessWidget {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF9E4B28),
+                                        color: primaryColor,
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
-                                        'demo_order_beans'.tr,
+                                        ctaText,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(fontSize: 6.5, color: Colors.white),
                                       ),
                                     ),
@@ -176,8 +364,7 @@ class ContinueEditingHeroCard extends StatelessWidget {
                                   height: 90,
                                   color: const Color(0xFFDCC8B4),
                                   child: CachedNetworkImage(
-                                    imageUrl:
-                                        'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80',
+                                    imageUrl: imageUrl,
                                     fit: BoxFit.cover,
                                     errorWidget: (context, url, error) => const SizedBox(),
                                   ),
@@ -190,7 +377,7 @@ class ContinueEditingHeroCard extends StatelessWidget {
                     ),
                   ),
 
-                  // Overlapping Mobile Frame Mockup (Right)
+                  // Overlapping Mobile Frame Mockup
                   Positioned(
                     right: 4,
                     bottom: 0,
@@ -198,7 +385,7 @@ class ContinueEditingHeroCard extends StatelessWidget {
                       width: 135,
                       height: 205,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFAF7F2),
+                        color: canvasBg,
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(14),
                           topRight: Radius.circular(14),
@@ -216,38 +403,32 @@ class ContinueEditingHeroCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Mobile Nav
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                siteName,
-                                style: const TextStyle(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'serif',
-                                  color: Color(0xFF2C241E),
+                              Expanded(
+                                child: Text(
+                                  siteName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF2C241E),
+                                  ),
                                 ),
                               ),
                               const Icon(LucideIcons.menu, size: 10, color: Color(0xFF2C241E)),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'Roastery and café in Portland',
-                            style: TextStyle(
-                              fontSize: 5.5,
-                              color: Color(0xFF9E4B28),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          const Text(
-                            'Small-batch coffee, roasted every Friday',
-                            style: TextStyle(
+                          Text(
+                            headline,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'serif',
                               height: 1.15,
                               color: Color(0xFF2C241E),
                             ),
@@ -256,11 +437,13 @@ class ContinueEditingHeroCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF9E4B28),
+                              color: primaryColor,
                               borderRadius: BorderRadius.circular(3),
                             ),
                             child: Text(
-                              'demo_order_beans'.tr,
+                              ctaText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 5.5, color: Colors.white),
                             ),
                           ),
@@ -268,15 +451,11 @@ class ContinueEditingHeroCard extends StatelessWidget {
                           Expanded(
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(5),
-                              child: Container(
+                              child: CachedNetworkImage(
+                                imageUrl: imageUrl,
                                 width: double.infinity,
-                                color: const Color(0xFFDCC8B4),
-                                child: CachedNetworkImage(
-                                  imageUrl:
-                                      'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80',
-                                  fit: BoxFit.cover,
-                                  errorWidget: (context, url, error) => const SizedBox(),
-                                ),
+                                fit: BoxFit.cover,
+                                errorWidget: (context, url, error) => const SizedBox(),
                               ),
                             ),
                           ),
@@ -288,11 +467,10 @@ class ContinueEditingHeroCard extends StatelessWidget {
               ),
             ),
 
-            // Bottom Content Information Section
+            // Card Footer
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Column(
@@ -314,11 +492,11 @@ class ContinueEditingHeroCard extends StatelessWidget {
                           statusText,
                           style: AppTypography.helperOf(context),
                         ),
-                        if (website != null && (website!.status == 'published' || website!.status == 'live')) ...[
+                        if (isLive) ...[
                           const SizedBox(height: 5),
                           GestureDetector(
                             onTap: () {
-                              final sub = website!.subdomain ?? website!.slug;
+                              final sub = site.subdomain ?? site.slug;
                               final fullUrl = 'https://www.ai-landing-page.xyz/sites/$sub';
                               Clipboard.setData(ClipboardData(text: fullUrl));
                               Get.snackbar(
@@ -343,7 +521,7 @@ class ContinueEditingHeroCard extends StatelessWidget {
                                 const SizedBox(width: 5),
                                 Flexible(
                                   child: Text(
-                                    'www.ai-landing-page.xyz/sites/${website!.subdomain ?? website!.slug}',
+                                    'www.ai-landing-page.xyz/sites/${site.subdomain ?? site.slug}',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
@@ -369,17 +547,12 @@ class ContinueEditingHeroCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
 
-                  // Website Configuration Button
                   GestureDetector(
                     onTap: () {
-                      if (website != null) {
-                        Get.toNamed(
-                          AppRoutes.websiteConfig,
-                          arguments: {'websiteId': website!.id},
-                        );
-                      } else {
-                        Get.toNamed(AppRoutes.websiteConfig);
-                      }
+                      Get.toNamed(
+                        AppRoutes.websiteConfig,
+                        arguments: {'websiteId': site.id},
+                      );
                     },
                     child: Container(
                       width: 40,
@@ -399,7 +572,6 @@ class ContinueEditingHeroCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
 
-                  // Near-black Primary Pill Action: "Open >"
                   Container(
                     decoration: BoxDecoration(
                       color: AppColors.isDark(context) ? Colors.white : AppColors.ink,

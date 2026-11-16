@@ -28,13 +28,34 @@ class AdminErrorLogTest extends TestCase
             ['model' => 'anthropic/claude-3.5-sonnet']
         );
 
+        AppErrorLog::logAuthError(
+            'Google token verification failed: Invalid audience',
+            ['provider' => 'google']
+        );
+
         $response = $this->actingAs($admin)->get('/admin/logs');
 
         $response->assertStatus(200)
             ->assertSee('Stripe card_declined: Insufficient funds')
             ->assertSee('OpenRouter API rate limit reached 429')
+            ->assertSee('Google token verification failed: Invalid audience')
             ->assertSee('PAIEMENT')
-            ->assertSee('PIPELINE IA');
+            ->assertSee('PIPELINE IA')
+            ->assertSee('AUTH');
+    }
+
+    public function test_auth_errors_can_be_filtered_in_admin(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+
+        AppErrorLog::logPaymentError('Payment issue');
+        AppErrorLog::logAuthError('Apple token expired');
+
+        $response = $this->actingAs($admin)->get('/admin/logs?category=auth');
+
+        $response->assertStatus(200)
+            ->assertSee('Apple token expired')
+            ->assertDontSee('Payment issue');
     }
 
     public function test_admin_can_resolve_error_log(): void

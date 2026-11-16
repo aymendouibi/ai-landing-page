@@ -6,8 +6,8 @@ import '../../core/services/social_auth_service.dart';
 
 class AuthController extends GetxController {
   final nameController = TextEditingController();
-  final emailController = TextEditingController(text: 'user@aibuilder.local');
-  final passwordController = TextEditingController(text: 'UserSecret123!');
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
   final isRegisterMode = false.obs;
   final isPasswordVisible = false.obs;
   final isLoading = false.obs;
@@ -67,8 +67,10 @@ class AuthController extends GetxController {
 
     try {
       await ApiClient.login(email, password);
+      debugPrint('✅ [AUTH LOGIN]: Login successful for $email');
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
+      debugPrint('❌ [AUTH LOGIN ERROR]: $e');
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {
       isLoading.value = false;
@@ -98,8 +100,10 @@ class AuthController extends GetxController {
 
     try {
       await ApiClient.register(name, email, password);
+      debugPrint('✅ [AUTH REGISTER]: Registered user successfully: $email');
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
+      debugPrint('❌ [AUTH REGISTER ERROR]: $e');
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {
       isLoading.value = false;
@@ -127,14 +131,18 @@ class AuthController extends GetxController {
     try {
       final result = await SocialAuthService.signInWithGoogle();
       if (result.cancelled) {
+        debugPrint('ℹ️ [AUTH CONTROLLER]: Google sign-in cancelled.');
         return;
       }
       if (result.success) {
+        debugPrint('✅ [AUTH CONTROLLER]: Google sign-in successful.');
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
+        debugPrint('❌ [AUTH CONTROLLER]: Google sign-in failed: ${result.errorMessage}');
         errorMessage.value = result.errorMessage ?? 'Google sign-in failed.';
       }
     } catch (e) {
+      debugPrint('❌ [AUTH CONTROLLER]: Google sign-in uncaught exception: $e');
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {
       isLoadingGoogle.value = false;
@@ -149,14 +157,18 @@ class AuthController extends GetxController {
     try {
       final result = await SocialAuthService.signInWithApple();
       if (result.cancelled) {
+        debugPrint('ℹ️ [AUTH CONTROLLER]: Apple sign-in cancelled.');
         return;
       }
       if (result.success) {
+        debugPrint('✅ [AUTH CONTROLLER]: Apple sign-in successful.');
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
+        debugPrint('❌ [AUTH CONTROLLER]: Apple sign-in failed: ${result.errorMessage}');
         errorMessage.value = result.errorMessage ?? 'Apple sign-in failed.';
       }
     } catch (e) {
+      debugPrint('❌ [AUTH CONTROLLER]: Apple sign-in uncaught exception: $e');
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
     } finally {
       isLoadingApple.value = false;

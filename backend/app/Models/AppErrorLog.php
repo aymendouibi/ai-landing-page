@@ -36,6 +36,19 @@ class AppErrorLog extends Model
         return $this->belongsTo(User::class);
     }
 
+    public static function logAuthError(string $message, array $context = [], ?string $userId = null, ?\Throwable $exception = null): self
+    {
+        return static::create([
+            'category' => 'auth',
+            'severity' => 'warning',
+            'user_id' => $userId,
+            'message' => $message,
+            'exception_class' => $exception ? get_class($exception) : null,
+            'context' => $context,
+            'stack_trace' => $exception ? substr($exception->getTraceAsString(), 0, 4000) : null,
+        ]);
+    }
+
     public static function logPaymentError(string $message, array $context = [], ?string $userId = null, ?\Throwable $exception = null): self
     {
         return static::create([

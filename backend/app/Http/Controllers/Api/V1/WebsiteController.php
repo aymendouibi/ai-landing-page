@@ -121,6 +121,8 @@ class WebsiteController extends Controller
     {
         Gate::authorize('view', $website);
 
+        $website->touch();
+
         $website->load(['project', 'currentRevision', 'domains', 'deployments' => function ($q) {
             $q->take(5);
         }]);

@@ -27,6 +27,8 @@ class Website {
   final String? subdomain;
   final int revisionNumber;
   final Map<String, dynamic>? document;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   Website({
     required this.id,
@@ -37,6 +39,8 @@ class Website {
     this.subdomain,
     required this.revisionNumber,
     this.document,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory Website.fromJson(Map<String, dynamic> json) {
@@ -49,6 +53,8 @@ class Website {
       subdomain: json['subdomain'] as String?,
       revisionNumber: json['revision_number'] as int? ?? 1,
       document: json['document'] as Map<String, dynamic>?,
+      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
+      updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'].toString()) : null,
     );
   }
 }

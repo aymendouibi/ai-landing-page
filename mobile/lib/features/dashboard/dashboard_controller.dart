@@ -109,8 +109,23 @@ class DashboardController extends GetxController {
       deletedWebsiteIds.assignAll(await SessionManager.getDeletedWebsiteIds());
       await loadSubscription();
       final fetchedWebsites = await ApiClient.getWebsites();
+
+      // Sort websites: recently opened first, then by updatedAt descending
+      final recentOpenedIds = await SessionManager.getRecentOpenedWebsiteIds();
+      final orderedWebsites = List<Website>.from(fetchedWebsites);
+      orderedWebsites.sort((a, b) {
+        final idxA = recentOpenedIds.indexOf(a.id);
+        final idxB = recentOpenedIds.indexOf(b.id);
+        if (idxA != -1 && idxB != -1) return idxA.compareTo(idxB);
+        if (idxA != -1) return -1;
+        if (idxB != -1) return 1;
+        final timeA = a.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final timeB = b.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return timeB.compareTo(timeA);
+      });
+
       if (!Platform.environment.containsKey('FLUTTER_TEST') || websites.isEmpty) {
-        websites.assignAll(fetchedWebsites);
+        websites.assignAll(orderedWebsites);
       }
       _generatePreviewItems();
     } catch (_) {
@@ -232,65 +247,33 @@ class DashboardController extends GetxController {
     }
   }
 
+  String _formatTimeAgo(DateTime? date, {bool isLive = false}) {
+    if (date == null) return isLive ? 'Live · Published recently' : 'Draft · Edited recently';
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (isLive) {
+      if (diff.inMinutes < 60) return 'Live · Published recently';
+      if (diff.inHours < 24) return 'Live · Published ${diff.inHours}h ago';
+      if (diff.inDays == 1) return 'Live · Published yesterday';
+      return 'Live · Published ${diff.inDays}d ago';
+    }
+    if (diff.inMinutes < 1) return 'Draft · Edited just now';
+    if (diff.inMinutes < 60) return 'Draft · Edited ${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return 'Draft · Edited ${diff.inHours}h ago';
+    if (diff.inDays == 1) return 'Draft · Edited yesterday';
+    return 'Draft · Edited ${diff.inDays}d ago';
+  }
+
   void _generatePreviewItems() {
     final list = <WebsitePreviewItem>[];
 
-    // 1. Prioritize Studio Marlow and Kite Yoga showcase cards unless user has real website or deleted them
-    final hasRealMarlow = websites.any((w) => w.slug == 'studio-marlow' || w.id == 'showcase_studio_marlow');
-    if (!hasRealMarlow &&
-        !deletedWebsiteIds.contains('showcase_studio_marlow') &&
-        !deletedWebsiteIds.contains('studio-marlow')) {
-      list.add(
-        const WebsitePreviewItem(
-          id: 'showcase_studio_marlow',
-          title: 'Studio Marlow',
-          category: 'Architecture, Copenhagen',
-          categoryColor: Color(0xFF475569),
-          headline: 'Quiet buildings for busy lives',
-          body: 'Homes, libraries and small civic spaces, designed with the people who use them.',
-          ctaText: 'See our work',
-          ctaColor: Color(0xFF111827),
-          ctaBorderRadius: 2.0,
-          imageUrl: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=600&q=80',
-          isSerif: true,
-          bgCanvasColor: Color(0xFFFFFFFF),
-          isLive: true,
-          domain: 'studiomarlow.com',
-        ),
-      );
-    }
-
-    final hasRealKite = websites.any((w) => w.slug == 'kite-yoga' || w.id == 'showcase_kite_yoga');
-    if (!hasRealKite &&
-        !deletedWebsiteIds.contains('showcase_kite_yoga') &&
-        !deletedWebsiteIds.contains('kite-yoga')) {
-      list.add(
-        const WebsitePreviewItem(
-          id: 'showcase_kite_yoga',
-          title: 'Kite Yoga',
-          category: 'East 6th St, Austin',
-          categoryColor: Color(0xFF5D6B50),
-          headline: 'Slow mornings start here',
-          body: 'Small classes in a sunlit studio, timers to daily practice.',
-          ctaText: 'See the schedule',
-          ctaColor: Color(0xFF5D6B50),
-          ctaBorderRadius: 10.0,
-          imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=600&q=80',
-          isSerif: false,
-          bgCanvasColor: Color(0xFFFAF8F4),
-          isLive: false,
-          timeAgo: 'Draft · Edited 3 days ago',
-        ),
-      );
-    }
-
-    // 2. Map all user websites from backend
+    // Map all user websites from backend (only real user websites)
     for (final site in websites) {
       if (deletedWebsiteIds.contains(site.id) || deletedWebsiteIds.contains(site.slug)) continue;
 
       String headline = 'Crafted for Modern Growth';
       String body = 'Clean architecture, custom layout, and optimized speed for high conversion.';
-      String category = 'Digital Studio, San Francisco';
+      String category = site.status == 'published' ? 'Published Website' : 'Draft Project';
       String ctaText = 'Explore work';
       Color ctaColor = const Color(0xFF111827);
       double ctaBorderRadius = 4.0;
@@ -364,7 +347,7 @@ class DashboardController extends GetxController {
           domain: isLive
               ? 'www.ai-landing-page.xyz/sites/${site.subdomain ?? site.slug}'
               : null,
-          timeAgo: isLive ? null : 'Draft · Edited recently',
+          timeAgo: _formatTimeAgo(site.updatedAt, isLive: isLive),
         ),
       );
     }
@@ -396,7 +379,10 @@ class DashboardController extends GetxController {
   }
 
   void openWebsite(String websiteId) {
-    Get.toNamed(AppRoutes.editor, arguments: {'websiteId': websiteId});
+    SessionManager.recordRecentWebsite(websiteId);
+    Get.toNamed(AppRoutes.editor, arguments: {'websiteId': websiteId})?.then((_) {
+      loadData();
+    });
   }
 
   void openAiCreation() {
@@ -464,6 +450,7 @@ class DashboardController extends GetxController {
         projects.first.id,
         document: emptyDocument,
       );
+      await SessionManager.recordRecentWebsite(newSite.id);
       await loadData();
       openWebsite(newSite.id);
     } catch (e) {
