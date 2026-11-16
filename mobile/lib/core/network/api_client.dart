@@ -87,6 +87,49 @@ class ApiClient {
     }
   }
 
+  static Future<Map<String, dynamic>> register(
+    String name,
+    String email,
+    String password,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/v1/auth/register'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final user = data['user'] as Map<String, dynamic>;
+      final token = data['token'] as String;
+      await SessionManager.saveSession(
+        token: token,
+        userId: user['id'] as String,
+        name: user['name'] as String,
+        email: user['email'] as String,
+      );
+      return data;
+    } else {
+      final errors = data['errors'];
+      if (errors is Map && errors.isNotEmpty) {
+        final firstError = errors.values.first;
+        if (firstError is List && firstError.isNotEmpty) {
+          throw Exception(firstError.first.toString());
+        }
+      }
+      throw Exception(
+        data['message'] ?? 'Registration failed (${response.statusCode})',
+      );
+    }
+  }
+
   static Future<Map<String, dynamic>> signInWithGoogle(
     String idToken, {
     String? deviceName,

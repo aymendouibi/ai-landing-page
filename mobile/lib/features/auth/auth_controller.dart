@@ -5,8 +5,11 @@ import '../../core/routes/app_routes.dart';
 import '../../core/services/social_auth_service.dart';
 
 class AuthController extends GetxController {
+  final nameController = TextEditingController();
   final emailController = TextEditingController(text: 'user@aibuilder.local');
   final passwordController = TextEditingController(text: 'UserSecret123!');
+  final isRegisterMode = false.obs;
+  final isPasswordVisible = false.obs;
   final isLoading = false.obs;
   final isLoadingGoogle = false.obs;
   final isLoadingApple = false.obs;
@@ -23,6 +26,23 @@ class AuthController extends GetxController {
   void onInit() {
     super.onInit();
     _checkAppleSupport();
+  }
+
+  void toggleMode() {
+    isRegisterMode.toggle();
+    errorMessage.value = null;
+  }
+
+  void togglePasswordVisibility() {
+    isPasswordVisible.toggle();
+  }
+
+  Future<void> submit() async {
+    if (isRegisterMode.value) {
+      await register();
+    } else {
+      await login();
+    }
   }
 
   Future<void> _checkAppleSupport() async {
@@ -53,6 +73,50 @@ class AuthController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> register() async {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (name.isEmpty) {
+      errorMessage.value = 'Please enter your full name';
+      return;
+    }
+    if (email.isEmpty || !email.contains('@')) {
+      errorMessage.value = 'Please enter a valid email address';
+      return;
+    }
+    if (password.length < 8) {
+      errorMessage.value = 'Password must be at least 8 characters long';
+      return;
+    }
+
+    isLoading.value = true;
+    errorMessage.value = null;
+
+    try {
+      await ApiClient.register(name, email, password);
+      Get.offAllNamed(AppRoutes.dashboard);
+    } catch (e) {
+      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void forgotPassword() {
+    Get.snackbar(
+      'Forgot Password',
+      'Password reset instructions will be sent to ${emailController.text.trim().isNotEmpty ? emailController.text.trim() : 'your email'}.',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFF1E2235),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+      borderRadius: 14,
+      duration: const Duration(seconds: 4),
+    );
   }
 
   Future<void> signInWithGoogle() async {
@@ -109,6 +173,7 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.onClose();
