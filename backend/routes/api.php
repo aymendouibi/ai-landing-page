@@ -50,6 +50,26 @@ Route::prefix('v1')->group(function () {
     // Public Billing Webhooks
     Route::post('/billing/webhook/stripe', [BillingWebhookController::class, 'stripe']);
 
+    // Public Scheduled Cron Webhook (Free forever: triggered via GitHub Actions, cron-job.org, or curl)
+    Route::match(['get', 'post'], '/cron/remind-drafts', function (\Illuminate\Http\Request $request, \App\Services\NotificationService $service) {
+        $secret = config('app.cron_secret', env('CRON_SECRET', 'landingcraft-free-cron'));
+        $provided = $request->query('secret') ?: $request->header('X-Cron-Secret') ?: $request->input('secret');
+
+        if ($provided !== $secret && $provided !== config('app.key')) {
+            return response()->json(['error' => 'Unauthorized cron access'], 401);
+        }
+
+        $hours = $request->integer('hours', 1);
+        $count = $service->sendDraftRemindersToAll($hours);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Draft reminders dispatched to {$count} creators",
+            'sent_count' => $count,
+            'timestamp' => now()->toIso8601String(),
+        ]);
+    });
+
     // Authenticated API (Sanctum)
     Route::middleware('auth:sanctum')->group(function () {
 

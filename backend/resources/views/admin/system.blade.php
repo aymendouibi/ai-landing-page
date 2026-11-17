@@ -168,5 +168,64 @@
             </div>
         </div>
     </div>
+
+    <!-- Web Console & Artisan Runner (Free Shell Alternative) -->
+    <div class="mt-6 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
+            <div>
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Web Terminal & Artisan Console
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Run maintenance and notification commands directly without Render Pro or paid Shell</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                100% Free • No CLI Required
+            </span>
+        </div>
+
+        <form action="{{ route('admin.system.run_artisan') }}" method="POST" class="mt-4 space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select or Type Artisan Command</label>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <select id="presetSelect" onchange="document.getElementById('cmdInput').value = this.value" class="bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-white focus:outline-none transition sm:w-72">
+                        <option value="notifications:remind-drafts">⚡ notifications:remind-drafts (Send reminders)</option>
+                        <option value="migrate:status">📋 migrate:status (Check DB migrations)</option>
+                        <option value="migrate">🚀 migrate (Run pending migrations)</option>
+                        <option value="cache:clear">🧹 cache:clear (Clear cache)</option>
+                        <option value="config:clear">⚙️ config:clear (Clear config cache)</option>
+                        <option value="route:list">🗺️ route:list (List API routes)</option>
+                        <option value="about">ℹ️ about (Environment summary)</option>
+                    </select>
+
+                    <div class="flex-1 relative">
+                        <input type="text" name="command" id="cmdInput" value="{{ session('command_run', 'notifications:remind-drafts') }}" required placeholder="e.g. notifications:remind-drafts" class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl pl-8 pr-4 py-2 text-xs text-white font-mono focus:outline-none transition">
+                        <span class="absolute left-3 top-2 text-slate-500 font-mono text-xs">&gt;</span>
+                    </div>
+
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-1.5 shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Run Command</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Command Execution Output Terminal -->
+        @if(session('command_output') || session('command_error'))
+            <div class="mt-4 pt-4 border-t border-slate-800/80">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider font-mono">
+                        Output: $ php artisan {{ session('command_run') }}
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded {{ session('command_error') ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300' }} font-bold">
+                        {{ session('command_error') ? 'FAILED' : 'SUCCESS' }}
+                    </span>
+                </div>
+                <pre class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-[11px] font-mono text-slate-200 overflow-x-auto max-h-96 leading-relaxed">{{ session('command_error') ?: session('command_output') }}</pre>
+            </div>
+        @endif
+    </div>
 @endsection
 

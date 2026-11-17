@@ -61,5 +61,55 @@ class AdminSystemController extends Controller
 
         return view('admin.system', compact('systemInfo'));
     }
+
+    /**
+     * Run an Artisan command directly from the admin panel (Free Shell alternative).
+     */
+    public function runArtisan(Request $request)
+    {
+        $validated = $request->validate([
+            'command' => ['required', 'string'],
+        ]);
+
+        $cmd = trim($validated['command']);
+
+        // Safe allowed commands
+        $allowedPrefixes = [
+            'notifications:remind-drafts',
+            'migrate:status',
+            'migrate',
+            'cache:clear',
+            'config:clear',
+            'route:list',
+            'about',
+            'view:clear',
+            'queue:failed',
+        ];
+
+        $isAllowed = false;
+        foreach ($allowedPrefixes as $prefix) {
+            if ($cmd === $prefix || str_starts_with($cmd, $prefix . ' ')) {
+                $isAllowed = true;
+                break;
+            }
+        }
+
+        if (!$isAllowed) {
+            return back()->with('error', 'Command not allowed. Please choose an authorized command.');
+        }
+
+        try {
+            \Illuminate\Support\Facades\Artisan::call($cmd);
+            $output = \Illuminate\Support\Facades\Artisan::output();
+
+            return back()
+                ->with('command_run', $cmd)
+                ->with('command_output', $output ?: 'Command executed successfully (no text output returned).');
+        } catch (\Throwable $e) {
+            return back()
+                ->with('command_run', $cmd)
+                ->with('command_error', $e->getMessage());
+        }
+    }
 }
 

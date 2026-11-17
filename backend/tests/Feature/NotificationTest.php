@@ -195,4 +195,40 @@ class NotificationTest extends TestCase
             'title' => 'Welcome Alice',
         ]);
     }
+
+    public function test_free_cron_webhook_dispatches_draft_reminders_with_valid_secret(): void
+    {
+        $user = User::factory()->create(['preferences' => ['locale' => 'fr']]);
+        $site = $this->createWebsite($user, 'Boulangerie Lyon', WebsiteStatus::Draft);
+        Website::where('id', $site->id)->update(['updated_at' => now()->subHours(2)]);
+
+        $response = $this->postJson('/api/v1/cron/remind-drafts?secret=landingcraft-free-cron');
+        $response->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('sent_count', 1);
+
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $user->id,
+            'type' => 'draft_reminder',
+            'locale' => 'fr',
+        ]);
+    }
+
+    public function test_free_cron_webhook_rejects_unauthorized_request(): void
+    {
+        $response = $this->postJson('/api/v1/cron/remind-drafts?secret=wrong-secret');
+        $response->assertStatus(401);
+    }
+
+    public function test_admin_can_run_artisan_command_from_web_console(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $res = $this->actingAs($admin)->post(route('admin.system.run_artisan'), [
+            'command' => 'migrate:status',
+        ]);
+
+        $res->assertRedirect();
+        $this->assertNotNull(session('command_output'));
+    }
 }

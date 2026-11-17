@@ -115,6 +115,7 @@ Route::prefix('admin')->middleware(['web', 'admin'])->group(function () {
 
     // System Health & Diagnostics
     Route::get('/system', [AdminSystemController::class, 'index'])->name('admin.system.index');
+    Route::post('/system/run-artisan', [AdminSystemController::class, 'runArtisan'])->name('admin.system.run_artisan');
 });
 
 // 1. Subdomain delivery: https://{subdomain}.our-domain.com/{path?}

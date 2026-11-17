@@ -1,0 +1,17 @@
+name: Scheduled Draft Reminders
+
+on:
+  schedule:
+    # Runs everyday at 10:00 AM UTC (100% Free via GitHub Actions)
+    - cron: '0 10 * * *'
+  workflow_dispatch: # Allows manual trigger anytime from GitHub Actions tab
+
+jobs:
+  remind-drafts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Free Draft Reminder Campaign
+        run: |
+          echo "Dispatching draft reminders webhook to API..."
+          RESPONSE=$(curl -fsS -X POST "https://api.ai-landing-page.xyz/api/v1/cron/remind-drafts?secret=landingcraft-free-cron" || echo "FAILED")
+          echo "Response: $RESPONSE"
