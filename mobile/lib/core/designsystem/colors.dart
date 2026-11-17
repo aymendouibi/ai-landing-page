@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Light mode colors
-  static const background = Color(0xFFF4F5FA);
+  static const background = Color(0xFFF8FAFC);
   static const surface = Color(0xFFFFFFFF);
   static const surfaceMuted = Color(0xFFECEEF4);
   static const surfaceNeutral = Color(0xFFF1F1F1);
@@ -24,7 +24,7 @@ class AppColors {
   static const aiCardWashEnd = Color(0xFFEFF8FF);
 
   // Dark mode colors
-  static const darkBackground = Color(0xFF0B0F17);
+  static const darkBackground = Color(0xFF090D16);
   static const darkSurface = Color(0xFF161E2E);
   static const darkSurfaceMuted = Color(0xFF1E293B);
   static const darkSurfaceNeutral = Color(0xFF243046);

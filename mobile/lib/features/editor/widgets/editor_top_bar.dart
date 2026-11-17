@@ -402,6 +402,10 @@ class EditorRotateButton extends StatelessWidget {
       key: controller.showcaseRotateKey,
       title: 'editor_rotate_screen'.tr,
       description: 'showcase_rotate_desc'.tr,
+      targetPadding: const EdgeInsets.all(4),
+      targetShapeBorder: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Obx(
         () => Container(
           decoration: BoxDecoration(
@@ -457,6 +461,8 @@ class EditorPublishButton extends StatelessWidget {
       key: controller.showcasePublishKey,
       title: 'editor_publish_live'.tr,
       description: 'showcase_publish_desc'.tr,
+      targetPadding: const EdgeInsets.all(2),
+      targetShapeBorder: const StadiumBorder(),
       child: Obx(
         () => ElevatedButton(
           onPressed: controller.isPublishing.value

@@ -8,6 +8,9 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/designsystem/app_snackbar.dart';
+import '../../core/storage/session_manager.dart';
+import '../../core/services/ad_service.dart';
+import '../../core/services/notification_service.dart';
 import '../../core/models/uploaded_image.dart';
 import '../../core/services/media_asset_service.dart';
 import '../../core/network/api_client.dart';
@@ -417,6 +420,7 @@ class EditorController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    AdService.instance.preloadAll(adTag: 'editor');
     final args = Get.arguments as Map<String, dynamic>?;
     websiteId = args?['websiteId'] ?? '';
     // Landscape view by default as requested
@@ -561,6 +565,9 @@ class EditorController extends GetxController {
     syncDocumentToWebView();
   }
 
+  @visibleForTesting
+  void autoSelectInitialElement() => _autoSelectInitialElement();
+
   void _autoSelectInitialElement() {
     final doc = document.value;
     if (doc == null) return;
@@ -588,7 +595,11 @@ class EditorController extends GetxController {
         aiPromptPlaceholder.value = 'Ask AI about this ${comp.toLowerCase()}';
       } else {
         selectedTab.value = 0;
-        isPanelOpen.value = true;
+        SessionManager.hasSeenEditorShowcase().then((seen) {
+          if (seen) {
+            isPanelOpen.value = true;
+          }
+        });
         aiPromptPlaceholder.value = 'Ask AI to change your site';
       }
     }
@@ -1040,6 +1051,15 @@ class EditorController extends GetxController {
       'editor_saved_ai_version'.tr,
       title: 'editor_saved_changes_title'.tr,
     );
+    try {
+      final doc = document.value;
+      final siteName = doc != null ? (doc['site']?['name']?.toString() ?? 'Your website') : 'Your website';
+      NotificationService.instance.showAiModificationNotification(
+        siteName: siteName,
+        summary: 'Changes applied to canvas',
+      );
+    } catch (_) {}
+    AdService.instance.showInterstitialAd(adTag: 'ai_proposal_applied');
   }
 
   String getPaletteNameForDoc(Map<String, dynamic>? doc) {
@@ -3052,6 +3072,17 @@ class EditorController extends GetxController {
       if (Get.isRegistered<DashboardController>()) {
         Get.find<DashboardController>().loadData();
       }
+
+      try {
+        final doc = document.value;
+        final siteName = doc != null ? (doc['site']?['name']?.toString() ?? 'Your website') : 'Your website';
+        NotificationService.instance.showSiteLiveNotification(
+          siteName: siteName,
+          url: liveUrl,
+        );
+      } catch (_) {}
+
+      AdService.instance.showVideoAd(adTag: 'editor_publish_website');
 
       Get.dialog(
         AlertDialog(

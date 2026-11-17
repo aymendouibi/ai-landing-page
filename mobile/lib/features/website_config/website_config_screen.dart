@@ -32,7 +32,7 @@ class WebsiteConfigScreen extends StatelessWidget {
     final isDark = AppColors.isDark(context);
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0C0E14) : const Color(0xFFF7F8FC),
+      backgroundColor: AppColors.backgroundOf(context),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(
@@ -62,7 +62,7 @@ class WebsiteConfigScreen extends StatelessWidget {
                         : [
                             const Color(0xFFBAE6FD).withValues(alpha: 0.50),
                             const Color(0xFFE9D5FF).withValues(alpha: 0.45),
-                            const Color(0xFFF7F8FC).withValues(alpha: 0.0),
+                            const Color(0xFFF8FAFC).withValues(alpha: 0.0),
                           ],
                   ),
                 ),

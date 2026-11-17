@@ -4,6 +4,7 @@ import '../../core/designsystem/app_snackbar.dart';
 import '../../core/network/api_client.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/services/ad_service.dart';
+import '../../core/services/notification_service.dart';
 import '../../core/storage/session_manager.dart';
 import '../dashboard/dashboard_controller.dart';
 import '../subscription/subscription_view.dart';
@@ -30,6 +31,12 @@ class AiCreationController extends GetxController {
           dc.aiGenerationsUsed.value >= dc.aiGenerationsMonthly.value;
     }
     return false;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    AdService.instance.preloadVideoAd(adTag: 'ai_website_created');
   }
 
   void setIndustry(String industry) {
@@ -82,8 +89,16 @@ class AiCreationController extends GetxController {
 
       AppSnackbar.success('ai_creator_generated_success'.tr);
 
+      try {
+        final siteName = res['website']?['name']?.toString() ?? 'Your website';
+        NotificationService.instance.showAiModificationNotification(
+          siteName: siteName,
+          summary: 'New website generated with AI',
+        );
+      } catch (_) {}
+
       await SessionManager.recordRecentWebsite(websiteId);
-      AdService.instance.showInterstitialAd(adTag: 'ai_website_generated');
+      AdService.instance.showVideoAd(adTag: 'ai_website_created');
       Get.offNamed(AppRoutes.editor, arguments: {'websiteId': websiteId});
     } catch (e) {
       if (ApiClient.isSubscriptionLimitError(e)) {

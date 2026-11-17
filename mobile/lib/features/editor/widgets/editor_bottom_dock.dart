@@ -27,6 +27,10 @@ class EditorFloatingBottomDock extends StatelessWidget {
             key: controller.showcaseDockKey,
             title: 'showcase_toolkit_title'.tr,
             description: 'showcase_toolkit_desc'.tr,
+            targetPadding: const EdgeInsets.all(4),
+            targetShapeBorder: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
             child: Container(
               height: 64,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -117,6 +121,10 @@ class EditorLandscapeFloatingDock extends StatelessWidget {
                 key: controller.showcaseDockKey,
                 title: 'showcase_toolkit_title'.tr,
                 description: 'showcase_toolkit_desc'.tr,
+                targetPadding: const EdgeInsets.all(4),
+                targetShapeBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Container(
                   height: 40,
                   padding: const EdgeInsets.symmetric(

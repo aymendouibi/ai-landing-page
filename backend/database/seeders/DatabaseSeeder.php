@@ -138,6 +138,10 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Professional Services', 'slug' => 'professional-services', 'icon' => 'check-circle', 'sort_order' => 11],
             ['name' => 'Events', 'slug' => 'events', 'icon' => 'calendar', 'sort_order' => 12],
             ['name' => 'Education', 'slug' => 'education', 'icon' => 'book-open', 'sort_order' => 13],
+            ['name' => 'Weddings', 'slug' => 'weddings', 'icon' => 'heart', 'sort_order' => 14],
+            ['name' => 'Startups', 'slug' => 'startups', 'icon' => 'zap', 'sort_order' => 15],
+            ['name' => 'Personal', 'slug' => 'personal', 'icon' => 'user', 'sort_order' => 16],
+            ['name' => 'Business', 'slug' => 'business', 'icon' => 'briefcase', 'sort_order' => 17],
         ];
 
         $categoryModels = [];

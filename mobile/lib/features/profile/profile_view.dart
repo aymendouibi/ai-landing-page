@@ -40,10 +40,10 @@ class ProfileView extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: isDark
                     ? [
-                        const Color(0xFF0F172A),
+                        const Color(0xFF090D16),
                         const Color(0xFF1E1B4B).withValues(alpha: 0.5),
                         const Color(0xFF1E293B).withValues(alpha: 0.4),
-                        const Color(0xFF0F172A),
+                        const Color(0xFF090D16),
                       ]
                     : [
                         const Color(0xFFE0F2FE).withValues(alpha: 0.8),

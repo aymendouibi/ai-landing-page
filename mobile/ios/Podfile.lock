@@ -66,6 +66,10 @@ PODS:
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
+  - startapp_sdk (1.0.1):
+    - Flutter
+    - StartAppSDK (~> 4.10)
+  - StartAppSDK (4.15.0)
   - Stripe (23.27.6):
     - StripeApplePay (= 23.27.6)
     - StripeCore (= 23.27.6)
@@ -114,6 +118,7 @@ DEPENDENCIES:
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
+  - startapp_sdk (from `.symlinks/plugins/startapp_sdk/ios`)
   - stripe_ios (from `.symlinks/plugins/stripe_ios/ios`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
 
@@ -131,6 +136,7 @@ SPEC REPOS:
     - PromisesObjC
     - PromisesSwift
     - RecaptchaInterop
+    - StartAppSDK
     - Stripe
     - StripeApplePay
     - StripeCore
@@ -155,6 +161,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sign_in_with_apple/ios"
   sqflite_darwin:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
+  startapp_sdk:
+    :path: ".symlinks/plugins/startapp_sdk/ios"
   stripe_ios:
     :path: ".symlinks/plugins/stripe_ios/ios"
   webview_flutter_wkwebview:
@@ -180,6 +188,8 @@ SPEC CHECKSUMS:
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   sign_in_with_apple: c5dcc141574c8c54d5ac99dd2163c0c72ad22418
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
+  startapp_sdk: f79c320cffbb6c9886e18ca640fb8f5b69fadfea
+  StartAppSDK: 8158d8c2672a22fb48e29f59ad0a612a5abff352
   Stripe: 9fec845645e39f371e6898926d096fd9c2feb5a5
   stripe_ios: 5accba1ff472f89300e1676c351166f29dc93ced
   StripeApplePay: 5f017e8dfe259fafbab70137776189deef754bb2

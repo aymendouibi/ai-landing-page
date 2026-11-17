@@ -41,10 +41,6 @@ class EditorCanvasView extends StatelessWidget {
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
         width: _calculateCanvasWidth(context),
-        margin: EdgeInsets.symmetric(
-          horizontal: isLandscape ? 8 : 12,
-          vertical: isLandscape ? 6 : 10,
-        ),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(

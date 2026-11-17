@@ -7,6 +7,7 @@ import '../../core/models/user_site_info.dart';
 import '../../core/network/api_client.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/services/media_asset_service.dart';
+import '../../core/services/ad_service.dart';
 import '../../core/storage/session_manager.dart';
 import '../dashboard/components/recent_project_card.dart';
 
@@ -257,6 +258,7 @@ class AssetsController extends GetxController {
 
     if (newAsset != null) {
       loadSites();
+      AdService.instance.showInterstitialAd(adTag: 'asset_uploaded');
       _showSnackbar(
         'Asset Uploaded',
         'Added "${newAsset.filename}" to your library (${mediaService.uploadedImages.length}/${MediaAssetService.maxImageUploadLimit}).',

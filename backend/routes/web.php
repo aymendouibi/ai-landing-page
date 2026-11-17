@@ -94,6 +94,12 @@ Route::prefix('admin')->middleware(['web', 'admin'])->group(function () {
     Route::patch('/feedback/{feedback}', [AdminFeedbackController::class, 'updateStatus'])->name('admin.feedback.update_status');
     Route::delete('/feedback/{feedback}', [AdminFeedbackController::class, 'destroy'])->name('admin.feedback.destroy');
 
+    // Notifications Center (Send & View Notifications)
+    Route::get('/notifications', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'index'])->name('admin.notifications.index');
+    Route::post('/notifications/send', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'send'])->name('admin.notifications.send');
+    Route::post('/notifications/remind-drafts', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'triggerDraftReminders'])->name('admin.notifications.remind_drafts');
+    Route::delete('/notifications/{notification}', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'destroy'])->name('admin.notifications.destroy');
+
     // Logs & Error Monitoring (Payments, AI, System)
     Route::get('/logs', [AdminLogController::class, 'index'])->name('admin.logs.index');
     Route::post('/logs/clear', [AdminLogController::class, 'clear'])->name('admin.logs.clear');

@@ -56,7 +56,7 @@ class TemplatesView extends StatelessWidget {
                         const Color(0xFFE0E7FF).withValues(alpha: 0.65),
                         const Color(0xFFFCE7F3).withValues(alpha: 0.55),
                         const Color(0xFFE0F2FE).withValues(alpha: 0.5),
-                        const Color(0xFFFAFAFA),
+                        const Color(0xFFF8FAFC),
                       ],
                 stops: const [0.0, 0.45, 0.75, 1.0],
               ),
@@ -145,18 +145,33 @@ class TemplatesView extends StatelessWidget {
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final template = list[index];
                         final isLocked = controller.isTemplateLocked(template);
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 28),
-                          child: TemplateCard(
-                            template: template,
-                            isLocked: isLocked,
-                            onPreview: () => _showPreviewSheet(
-                              context,
-                              template,
-                              controller,
+                        final showInFeedAd = (index > 0 && index % 3 == 0);
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (showInFeedAd)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 28),
+                                child: AdBannerWidget(
+                                  adTag: 'templates_infeed_$index',
+                                  margin: EdgeInsets.zero,
+                                ),
+                              ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 28),
+                              child: TemplateCard(
+                                template: template,
+                                isLocked: isLocked,
+                                onPreview: () => _showPreviewSheet(
+                                  context,
+                                  template,
+                                  controller,
+                                ),
+                                onUse: () => controller.useTemplate(template),
+                              ),
                             ),
-                            onUse: () => controller.useTemplate(template),
-                          ),
+                          ],
                         );
                       }, childCount: list.length),
                     ),

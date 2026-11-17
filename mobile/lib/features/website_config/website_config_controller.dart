@@ -6,6 +6,7 @@ import '../../core/designsystem/app_snackbar.dart';
 import '../../core/models/website.dart';
 import '../../core/network/api_client.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/services/ad_service.dart';
 import '../../core/services/project_export_service.dart';
 import '../../core/storage/session_manager.dart';
 import '../dashboard/dashboard_controller.dart';
@@ -287,6 +288,7 @@ class WebsiteConfigController extends GetxController {
       if (Get.isRegistered<DashboardController>()) {
         Get.find<DashboardController>().loadData();
       }
+      AdService.instance.showVideoAd(adTag: 'config_publish_website');
       return true;
     } catch (e) {
       if (ApiClient.isSubscriptionLimitError(e)) {
@@ -683,6 +685,7 @@ export default function ${title.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}Page() {
       );
 
       if (result.success) {
+        AdService.instance.showInterstitialAd(adTag: 'export_project_zip');
         AppSnackbar.success(
           'site_settings_export_zip_saved'.trParams({
             'name': result.fileName ?? 'archive.zip',

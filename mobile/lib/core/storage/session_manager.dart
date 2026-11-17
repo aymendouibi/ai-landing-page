@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../localization/supported_locales.dart';
 
 class SessionManager {
   static const _tokenKey = 'auth_token';
@@ -10,6 +11,7 @@ class SessionManager {
   static const _localeKey = 'app_locale';
   static const _dashboardShowcaseKey = 'has_seen_dashboard_showcase';
   static const _editorShowcaseKey = 'has_seen_editor_showcase';
+  static const _newWebsiteShowcaseKey = 'has_seen_new_website_showcase';
 
   static Future<void> saveSession({
     required String token,
@@ -76,16 +78,46 @@ class SessionManager {
     return ThemeMode.system;
   }
 
+  static Future<bool> isUsingSystemTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final mode = prefs.getString(_themeModeKey);
+    return mode == null || mode.isEmpty || mode == 'system';
+  }
+
   static Future<void> saveLocale(Locale locale) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_localeKey, '${locale.languageCode}_${locale.countryCode ?? ''}');
   }
 
+  static Future<void> setUseSystemLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_localeKey, 'system');
+  }
+
+  static Future<bool> isUsingSystemLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    final str = prefs.getString(_localeKey);
+    return str == null || str.isEmpty || str == 'system';
+  }
+
+  static Locale getSystemDeviceLocale() {
+    try {
+      final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
+      final match = AppLocales.languages.firstWhere(
+        (l) => l.languageCode == deviceLocale.languageCode,
+        orElse: () => AppLocales.languages.first,
+      );
+      return match.locale;
+    } catch (_) {
+      return AppLocales.fallbackLocale;
+    }
+  }
+
   static Future<Locale> getLocale() async {
     final prefs = await SharedPreferences.getInstance();
     final str = prefs.getString(_localeKey);
-    if (str == null || str.isEmpty) {
-      return const Locale('en', 'US');
+    if (str == null || str.isEmpty || str == 'system') {
+      return getSystemDeviceLocale();
     }
     final parts = str.split('_');
     if (parts.length >= 2 && parts[1].isNotEmpty) {
@@ -114,10 +146,21 @@ class SessionManager {
     await prefs.setBool(_editorShowcaseKey, seen);
   }
 
+  static Future<bool> hasSeenNewWebsiteShowcase() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_newWebsiteShowcaseKey) ?? false;
+  }
+
+  static Future<void> setNewWebsiteShowcaseSeen([bool seen = true]) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_newWebsiteShowcaseKey, seen);
+  }
+
   static Future<void> resetShowcases() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_dashboardShowcaseKey);
     await prefs.remove(_editorShowcaseKey);
+    await prefs.remove(_newWebsiteShowcaseKey);
   }
 
   static const _keyDeletedWebsites = 'deleted_website_ids';

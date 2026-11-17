@@ -59,13 +59,26 @@ class _NewWebsiteBottomSheetState extends State<NewWebsiteBottomSheet> {
   final _blankKey = GlobalKey();
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!Platform.environment.containsKey('FLUTTER_TEST') && !Get.testMode) {
-        AppShowcase.start(context, [_aiLandingKey, _blankKey]);
+      if (mounted) {
+        AppShowcase.checkAndStartNewWebsiteShowcase(
+          context,
+          [_aiLandingKey, _blankKey],
+        );
       }
     });
+  }
 
+  @override
+  void dispose() {
+    AppShowcase.dismiss();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),

@@ -65,4 +65,12 @@ void main() {
     expect(find.text('SPONSORED'), findsOneWidget);
     expect(find.text('No Ads'), findsOneWidget);
   });
+
+  test('AdService methods execute safely without throwing in test environment', () async {
+    expect(await AdService.instance.showVideoAd(adTag: 'test_create_website'), isFalse);
+    expect(await AdService.instance.showInterstitialAd(adTag: 'test_action'), isFalse);
+    expect(() => AdService.instance.preloadVideoAd(adTag: 'test_video'), returnsNormally);
+    expect(() => AdService.instance.preloadInterstitialAd(adTag: 'test_interstitial'), returnsNormally);
+    expect(() => AdService.instance.preloadAll(adTag: 'test_all'), returnsNormally);
+  });
 }

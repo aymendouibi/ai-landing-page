@@ -76,6 +76,30 @@ class AppShowcase {
     register();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
+        if (onFinish != null) {
+          late final VoidCallback finishCb;
+          late final OnDismissCallback dismissCb;
+
+          void cleanup() {
+            try {
+              ShowcaseView.get().removeOnFinishCallback(finishCb);
+              ShowcaseView.get().removeOnDismissCallback(dismissCb);
+            } catch (_) {}
+          }
+
+          finishCb = () {
+            cleanup();
+            onFinish();
+          };
+
+          dismissCb = (key) {
+            cleanup();
+            onFinish();
+          };
+
+          ShowcaseView.get().addOnFinishCallback(finishCb);
+          ShowcaseView.get().addOnDismissCallback(dismissCb);
+        }
         ShowcaseView.get().startShowCase(keys);
       } catch (e) {
         debugPrint('Showcase start notice: $e');
@@ -83,11 +107,19 @@ class AppShowcase {
     });
   }
 
+  /// Safely dismisses any active showcase tour.
+  static void dismiss() {
+    try {
+      ShowcaseView.get().dismiss();
+    } catch (_) {}
+  }
+
   /// Checks if dashboard showcase has been seen, and starts it if not.
   static Future<void> checkAndStartDashboardShowcase(
     BuildContext context,
-    List<GlobalKey> keys,
-  ) async {
+    List<GlobalKey> keys, {
+    VoidCallback? onFinish,
+  }) async {
     if (Get.testMode || Platform.environment.containsKey('FLUTTER_TEST')) {
       return;
     }
@@ -95,15 +127,16 @@ class AppShowcase {
     if (!seen) {
       await SessionManager.setDashboardShowcaseSeen(true);
       if (!context.mounted) return;
-      start(context, keys);
+      start(context, keys, onFinish: onFinish);
     }
   }
 
   /// Checks if editor showcase has been seen, and starts it if not.
   static Future<void> checkAndStartEditorShowcase(
     BuildContext context,
-    List<GlobalKey> keys,
-  ) async {
+    List<GlobalKey> keys, {
+    VoidCallback? onFinish,
+  }) async {
     if (Get.testMode || Platform.environment.containsKey('FLUTTER_TEST')) {
       return;
     }
@@ -111,7 +144,24 @@ class AppShowcase {
     if (!seen) {
       await SessionManager.setEditorShowcaseSeen(true);
       if (!context.mounted) return;
-      start(context, keys);
+      start(context, keys, onFinish: onFinish);
+    }
+  }
+
+  /// Checks if new website bottom sheet showcase has been seen, and starts it if not.
+  static Future<void> checkAndStartNewWebsiteShowcase(
+    BuildContext context,
+    List<GlobalKey> keys, {
+    VoidCallback? onFinish,
+  }) async {
+    if (Get.testMode || Platform.environment.containsKey('FLUTTER_TEST')) {
+      return;
+    }
+    final seen = await SessionManager.hasSeenNewWebsiteShowcase();
+    if (!seen) {
+      await SessionManager.setNewWebsiteShowcaseSeen(true);
+      if (!context.mounted) return;
+      start(context, keys, onFinish: onFinish);
     }
   }
 }

@@ -18,6 +18,8 @@ class EditorScreen extends StatefulWidget {
 
 class _EditorScreenState extends State<EditorScreen> {
   late final EditorController controller;
+  bool _showcaseTourInitiated = false;
+  Worker? _loadingWorker;
 
   @override
   void initState() {
@@ -25,10 +27,58 @@ class _EditorScreenState extends State<EditorScreen> {
     controller = Get.isRegistered<EditorController>()
         ? Get.find<EditorController>()
         : Get.put(EditorController());
+
+    _loadingWorker = ever(controller.isLoading, (bool loading) {
+      if (!loading && !_showcaseTourInitiated && mounted) {
+        _scheduleShowcaseTour();
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!controller.isLoading.value && !_showcaseTourInitiated && mounted) {
+        _scheduleShowcaseTour();
+      }
+    });
+  }
+
+  void _scheduleShowcaseTour() {
+    if (_showcaseTourInitiated) return;
+    _showcaseTourInitiated = true;
+
+    // Allow orientation animation and initial layout to fully settle before computing showcase bounds
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (!mounted) return;
+      // Close side panel if it was opened prematurely so canvas and bottom dock are fully visible
+      controller.isPanelOpen.value = false;
+
+      AppShowcase.checkAndStartEditorShowcase(
+        context,
+        [
+          controller.showcaseCanvasKey,
+          controller.showcaseRotateKey,
+          controller.showcaseDockKey,
+          controller.showcasePublishKey,
+        ],
+        onFinish: () {
+          if (!mounted) return;
+          final doc = controller.document.value;
+          final pages = doc?['pages'] as List?;
+          final sections = pages != null && pages.isNotEmpty
+              ? pages[0]['sections'] as List?
+              : null;
+          if (sections == null || sections.isEmpty) {
+            controller.selectedTab.value = 0;
+            controller.isPanelOpen.value = true;
+          }
+        },
+      );
+    });
   }
 
   @override
   void dispose() {
+    _loadingWorker?.dispose();
+    AppShowcase.dismiss();
     // Force portrait orientation immediately when leaving the editor
     OrientationRouteObserver.lockPortrait();
     super.dispose();
@@ -42,17 +92,9 @@ class _EditorScreenState extends State<EditorScreen> {
     if (controller.isLandscape.value != isLandscape) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.isLandscape.value = isLandscape;
+        AppShowcase.dismiss();
       });
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      AppShowcase.checkAndStartEditorShowcase(context, [
-        controller.showcaseCanvasKey,
-        controller.showcaseRotateKey,
-        controller.showcaseDockKey,
-        controller.showcasePublishKey,
-      ]);
-    });
 
     return PopScope(
       canPop: true,
@@ -60,9 +102,7 @@ class _EditorScreenState extends State<EditorScreen> {
         OrientationRouteObserver.lockPortrait();
       },
       child: Scaffold(
-        backgroundColor: AppColors.isDark(context)
-            ? const Color(0xFF0F172A)
-            : const Color(0xFFEDF2F7),
+        backgroundColor: AppColors.backgroundOf(context),
         body: SafeArea(
           child: isLandscape
               ? Column(
@@ -90,13 +130,22 @@ class _EditorScreenState extends State<EditorScreen> {
           child: Obx(
             () => Padding(
               padding: EdgeInsets.only(
+                top: 10,
                 bottom: controller.isPanelOpen.value ? 500 : 130,
+                left: 12,
+                right: 12,
               ),
               child: Center(
                 child: AppShowcase.item(
                   key: controller.showcaseCanvasKey,
                   title: 'editor_live_canvas'.tr,
                   description: 'showcase_canvas_desc'.tr,
+                  targetPadding: EdgeInsets.zero,
+                  targetShapeBorder: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      controller.viewport.value == ViewportMode.desktop ? 14 : 24,
+                    ),
+                  ),
                   child: EditorCanvasView(
                     controller: controller,
                     isLandscape: false,
@@ -169,13 +218,22 @@ class _EditorScreenState extends State<EditorScreen> {
                 child: Obx(
                   () => Padding(
                     padding: EdgeInsets.only(
+                      top: 6,
                       bottom: controller.isPanelOpen.value ? 8 : 60,
+                      left: 8,
+                      right: 8,
                     ),
                     child: Center(
                       child: AppShowcase.item(
                         key: controller.showcaseCanvasKey,
                         title: 'editor_live_canvas'.tr,
                         description: 'showcase_canvas_desc'.tr,
+                        targetPadding: EdgeInsets.zero,
+                        targetShapeBorder: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            controller.viewport.value == ViewportMode.desktop ? 14 : 24,
+                          ),
+                        ),
                         child: EditorCanvasView(
                           controller: controller,
                           isLandscape: true,

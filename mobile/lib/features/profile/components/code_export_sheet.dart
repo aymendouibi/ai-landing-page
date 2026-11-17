@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/app_snackbar.dart';
 import '../../../core/designsystem/colors.dart';
 import '../../../core/services/project_export_service.dart';
+import '../../../core/services/ad_service.dart';
 import '../../dashboard/dashboard_controller.dart';
 import '../../subscription/subscription_view.dart';
 
@@ -82,6 +83,7 @@ class _CodeExportSheetState extends State<CodeExportSheet> {
       if (mounted) {
         Navigator.pop(context);
         if (result.success) {
+          AdService.instance.showInterstitialAd(adTag: 'export_project_zip');
           AppSnackbar.success(
             'Project exported successfully to ${result.fileName}',
             title: 'ZIP Export Complete',
@@ -103,6 +105,7 @@ class _CodeExportSheetState extends State<CodeExportSheet> {
   void _handleCopyCode() {
     Clipboard.setData(ClipboardData(text: _getFormatTemplate(_selectedFormat)));
     Navigator.pop(context);
+    AdService.instance.showInterstitialAd(adTag: 'copy_export_code');
     AppSnackbar.copied(
       message: 'Snippet copied to clipboard. ZIP download requires Premium.',
       context: context,

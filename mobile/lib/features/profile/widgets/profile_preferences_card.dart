@@ -122,13 +122,18 @@ class ProfilePreferencesCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        'profile_dark_theme_desc'.tr,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          color: AppColors.inkMutedOf(context),
-                        ),
-                      ),
+                      Obx(() {
+                        final isAuto = controller.isUsingSystemTheme.value;
+                        return Text(
+                          isAuto
+                              ? 'theme_system_desc'.tr
+                              : 'profile_dark_theme_desc'.tr,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: AppColors.inkMutedOf(context),
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),

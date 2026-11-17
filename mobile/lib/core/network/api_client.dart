@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import '../models/app_notification.dart';
 import '../models/website.dart';
 import '../storage/session_manager.dart';
 
@@ -1499,6 +1500,93 @@ CRITICAL RULES:
         }),
       );
 
+      return response.statusCode >= 200 && response.statusCode < 300;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Get notifications for the authenticated user
+  static Future<Map<String, dynamic>> getNotifications({int page = 1}) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/v1/notifications?page=$page'),
+        headers: await _headers(),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final rawList = data['data'] as List<dynamic>? ?? [];
+        final notifications = rawList
+            .map((item) => AppNotification.fromJson(item as Map<String, dynamic>))
+            .toList();
+
+        return {
+          'notifications': notifications,
+          'unread_count': data['unread_count'] as int? ?? 0,
+        };
+      }
+      return {'notifications': <AppNotification>[], 'unread_count': 0};
+    } catch (_) {
+      return {'notifications': <AppNotification>[], 'unread_count': 0};
+    }
+  }
+
+  /// Mark single notification as read
+  static Future<bool> markNotificationAsRead(String id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/notifications/$id/read'),
+        headers: await _headers(),
+      );
+      return response.statusCode >= 200 && response.statusCode < 300;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Mark all notifications as read
+  static Future<bool> markAllNotificationsAsRead() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/notifications/read-all'),
+        headers: await _headers(),
+      );
+      return response.statusCode >= 200 && response.statusCode < 300;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Delete notification
+  static Future<bool> deleteNotification(String id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/api/v1/notifications/$id'),
+        headers: await _headers(),
+      );
+      return response.statusCode >= 200 && response.statusCode < 300;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Sync notification & system preferences (locale, theme, device token)
+  static Future<bool> syncNotificationPreferences({
+    String? locale,
+    String? themeMode,
+    String? deviceToken,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/v1/notifications/preferences'),
+        headers: await _headers(),
+        body: jsonEncode({
+          if (locale != null) 'locale': locale,
+          if (themeMode != null) 'theme_mode': themeMode,
+          if (deviceToken != null) 'device_token': deviceToken,
+        }),
+      );
       return response.statusCode >= 200 && response.statusCode < 300;
     } catch (_) {
       return false;

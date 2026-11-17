@@ -70,7 +70,9 @@ void main() {
     testWidgets('TemplatesCategoryTabs translation helper returns translated tab strings', (tester) async {
       await tester.pumpWidget(buildTestWidget(const SizedBox()));
       expect(TemplatesCategoryTabs.getTabTranslation('For you'), equals('For you'));
+      expect(TemplatesCategoryTabs.getTabTranslation('Startups'), equals('Startups'));
       expect(TemplatesCategoryTabs.getTabTranslation('Business'), equals('Business'));
+      expect(TemplatesCategoryTabs.getTabTranslation('Weddings'), equals('Weddings'));
       expect(TemplatesCategoryTabs.getTabTranslation('Creative'), equals('Creative'));
       expect(TemplatesCategoryTabs.getTabTranslation('Personal'), equals('Personal'));
       expect(TemplatesCategoryTabs.getTabTranslation('Community'), equals('Community'));
@@ -144,13 +146,62 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('For you'), findsOneWidget);
+      expect(find.text('Startups'), findsOneWidget);
       expect(find.text('Business'), findsOneWidget);
+      expect(find.text('Weddings'), findsOneWidget);
       expect(find.text('Creative'), findsOneWidget);
+      expect(find.text('Personal'), findsOneWidget);
 
-      await tester.tap(find.text('Business'));
+      await tester.tap(find.text('Weddings'));
       await tester.pumpAndSettle();
 
-      expect(templatesController.activeTab.value, equals('Business'));
+      expect(templatesController.activeTab.value, equals('Weddings'));
+
+      await tester.tap(find.text('Startups'));
+      await tester.pumpAndSettle();
+
+      expect(templatesController.activeTab.value, equals('Startups'));
+    });
+
+    testWidgets('TemplatesController filters templates accurately across all requested categories', (tester) async {
+      final templates = TemplatesController.fallbackTemplates;
+      templatesController.templates.assignAll(templates);
+
+      // 1. Weddings tab
+      templatesController.setTab('Weddings');
+      final weddingTemplates = templatesController.filteredTemplates;
+      expect(weddingTemplates, isNotEmpty);
+      expect(weddingTemplates.any((t) => t['name'] == 'Ana & Teo'), isTrue);
+      expect(weddingTemplates.any((t) => t['name'] == 'Elysian Vows'), isTrue);
+      expect(weddingTemplates.any((t) => t['name'] == 'Botanical Romance'), isTrue);
+
+      // 2. Startups tab
+      templatesController.setTab('Startups');
+      final startupTemplates = templatesController.filteredTemplates;
+      expect(startupTemplates, isNotEmpty);
+      expect(startupTemplates.any((t) => t['name'] == 'Nexus AI'), isTrue);
+      expect(startupTemplates.any((t) => t['name'] == 'DevFlow Cloud'), isTrue);
+      expect(startupTemplates.any((t) => t['name'] == 'Pulse Health AI'), isTrue);
+      expect(startupTemplates.any((t) => t['name'] == 'VaultPay'), isTrue);
+
+      // 3. Personal tab
+      templatesController.setTab('Personal');
+      final personalTemplates = templatesController.filteredTemplates;
+      expect(personalTemplates, isNotEmpty);
+      expect(personalTemplates.any((t) => t['name'] == 'Dr. Marcus Vance'), isTrue);
+      expect(personalTemplates.any((t) => t['name'] == 'Elena Rostova'), isTrue);
+      expect(personalTemplates.any((t) => t['name'] == 'Kai Thorne'), isTrue);
+      expect(personalTemplates.any((t) => t['name'] == 'Kite Yoga'), isTrue);
+
+      // 4. Business tab
+      templatesController.setTab('Business');
+      final businessTemplates = templatesController.filteredTemplates;
+      expect(businessTemplates, isNotEmpty);
+      expect(businessTemplates.any((t) => t['name'] == 'Apex Capital Partners'), isTrue);
+      expect(businessTemplates.any((t) => t['name'] == 'Nordic Craft Roasters'), isTrue);
+      expect(businessTemplates.any((t) => t['name'] == 'Lumen Coffee'), isTrue);
+      expect(businessTemplates.any((t) => t['name'] == 'Aura Botanicals'), isTrue);
+      expect(businessTemplates.any((t) => t['name'] == 'Solstice Fine Dining'), isTrue);
     });
 
     testWidgets('TemplatesSectionHeader renders curated edit title and count text', (tester) async {

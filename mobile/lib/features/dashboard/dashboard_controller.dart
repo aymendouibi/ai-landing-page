@@ -4,9 +4,11 @@ import 'package:get/get.dart';
 import '../../core/designsystem/app_snackbar.dart';
 import '../../core/localization/supported_locales.dart';
 import '../../core/models/website.dart';
+import '../../core/models/app_notification.dart';
 import '../../core/network/api_client.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/services/ad_service.dart';
+import '../../core/services/notification_service.dart';
 import '../../core/storage/session_manager.dart';
 import '../templates/templates_controller.dart';
 import '../assets/assets_controller.dart';
@@ -23,6 +25,10 @@ class DashboardController extends GetxController {
   final isLoading = true.obs;
   final themeMode = ThemeMode.system.obs;
   final currentLocale = AppLocales.fallbackLocale.obs;
+  final notifications = <AppNotification>[].obs;
+  final unreadNotificationsCount = 0.obs;
+  final isUsingSystemLocale = true.obs;
+  final isUsingSystemTheme = true.obs;
 
   // Showcase keys for onboarding tour
   final showcaseAddButtonKey = GlobalKey();
@@ -50,30 +56,90 @@ class DashboardController extends GetxController {
     super.onInit();
     _loadThemeMode();
     _loadLocale();
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      loadNotifications();
+      NotificationService.instance.syncPreferences();
+    }
     loadData();
   }
 
   Future<void> _loadThemeMode() async {
     themeMode.value = await SessionManager.getThemeMode();
+    isUsingSystemTheme.value = await SessionManager.isUsingSystemTheme();
   }
 
   Future<void> _loadLocale() async {
     currentLocale.value = await SessionManager.getLocale();
+    isUsingSystemLocale.value = await SessionManager.isUsingSystemLocale();
   }
 
   void setLocale(Locale locale) {
     currentLocale.value = locale;
+    isUsingSystemLocale.value = false;
     Get.updateLocale(locale);
     SessionManager.saveLocale(locale);
+    NotificationService.instance.syncPreferences(locale: locale);
+  }
+
+  void setUseSystemLocale() {
+    final systemLocale = SessionManager.getSystemDeviceLocale();
+    currentLocale.value = systemLocale;
+    isUsingSystemLocale.value = true;
+    Get.updateLocale(systemLocale);
+    SessionManager.setUseSystemLocale();
+    NotificationService.instance.syncPreferences(locale: systemLocale);
   }
 
   void setThemeMode(ThemeMode mode) {
     themeMode.value = mode;
+    isUsingSystemTheme.value = mode == ThemeMode.system;
     Get.changeThemeMode(mode);
     final str = mode == ThemeMode.dark
         ? 'dark'
         : (mode == ThemeMode.light ? 'light' : 'system');
     SessionManager.saveThemeMode(str);
+    NotificationService.instance.syncPreferences(themeMode: mode);
+  }
+
+  Future<void> loadNotifications() async {
+    try {
+      final res = await ApiClient.getNotifications();
+      final list = res['notifications'] as List<AppNotification>? ?? [];
+      final unread = res['unread_count'] as int? ?? 0;
+      if (!Platform.environment.containsKey('FLUTTER_TEST') || list.isNotEmpty) {
+        notifications.assignAll(list);
+        unreadNotificationsCount.value = unread;
+      }
+    } catch (_) {}
+  }
+
+  Future<void> markNotificationAsRead(String id) async {
+    final idx = notifications.indexWhere((n) => n.id == id);
+    if (idx != -1) {
+      notifications[idx] = notifications[idx].copyWith(readAt: DateTime.now());
+      if (unreadNotificationsCount.value > 0) {
+        unreadNotificationsCount.value--;
+      }
+    }
+    await ApiClient.markNotificationAsRead(id);
+  }
+
+  Future<void> markAllNotificationsAsRead() async {
+    final updated = notifications
+        .map((n) => n.copyWith(readAt: DateTime.now()))
+        .toList();
+    notifications.assignAll(updated);
+    unreadNotificationsCount.value = 0;
+    await ApiClient.markAllNotificationsAsRead();
+  }
+
+  void onNotificationTapped(AppNotification notif) {
+    if (!notif.isRead) {
+      markNotificationAsRead(notif.id);
+    }
+    if (notif.websiteId != null && notif.websiteId!.isNotEmpty) {
+      openWebsite(notif.websiteId!);
+    }
   }
 
   Future<void> updateProfile({
@@ -187,6 +253,7 @@ class DashboardController extends GetxController {
 
       if (hasAds.value && !isPro) {
         AdService.instance.preloadInterstitialAd(adTag: 'dashboard_general');
+        AdService.instance.preloadAll(adTag: 'dashboard');
       }
     } catch (_) {}
   }
@@ -484,6 +551,7 @@ class DashboardController extends GetxController {
       );
       await SessionManager.recordRecentWebsite(newSite.id);
       await loadData();
+      AdService.instance.showVideoAd(adTag: 'create_blank_website');
       openWebsite(newSite.id);
     } catch (e) {
       if (ApiClient.isSubscriptionLimitError(e)) {

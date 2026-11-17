@@ -8,6 +8,7 @@ use App\Models\Deployment;
 use App\Models\Website;
 use App\Services\Billing\SubscriptionEntitlementService;
 use App\Services\Hosting\CloudflareHostingService;
+use App\Services\NotificationService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,8 +18,11 @@ class PublishingController extends Controller
 {
     public function __construct(
         protected CloudflareHostingService $hostingService,
-        protected SubscriptionEntitlementService $entitlementService
-    ) {}
+        protected SubscriptionEntitlementService $entitlementService,
+        protected ?NotificationService $notificationService = null
+    ) {
+        $this->notificationService = $notificationService ?? app(NotificationService::class);
+    }
 
     /**
      * Publish website to independent CDN hosting.
@@ -41,6 +45,19 @@ class PublishingController extends Controller
                 : "{$appUrl}/{$website->subdomain}";
             $pathUrl = "{$appUrl}/{$website->subdomain}";
             $sitesUrl = "{$appUrl}/sites/{$website->subdomain}";
+
+            // Send notification to user that site is now live
+            if ($request->user()) {
+                try {
+                    $this->notificationService?->sendSiteLive(
+                        $request->user(),
+                        $website->fresh(),
+                        $sitesUrl
+                    );
+                } catch (\Throwable $e) {
+                    // Non-blocking notification dispatch
+                }
+            }
 
             return response()->json([
                 'message' => 'Website successfully published to global CDN.',

@@ -19,6 +19,7 @@ use App\Services\AI\Prompts\StructuredEditPrompt;
 use App\Services\AI\Prompts\WebsitePlanPrompt;
 use App\Services\AI\StructuredAiEditor;
 use App\Services\Billing\SubscriptionEntitlementService;
+use App\Services\NotificationService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,8 +33,11 @@ class AiController extends Controller
         protected StructuredAiEditor $editor,
         protected OpenRouterClient $client,
         protected ModelSelector $modelSelector,
-        protected SubscriptionEntitlementService $entitlementService
-    ) {}
+        protected SubscriptionEntitlementService $entitlementService,
+        protected ?NotificationService $notificationService = null
+    ) {
+        $this->notificationService = $notificationService ?? app(NotificationService::class);
+    }
 
     /**
      * Plan a website without full document generation.
@@ -244,6 +248,18 @@ class AiController extends Controller
 
             if ($request->user()) {
                 $this->entitlementService->recordUsage($request->user(), 'ai_edits');
+
+                if ($website) {
+                    try {
+                        $this->notificationService?->sendAiModification(
+                            $request->user(),
+                            $updatedWebsite ?? $website,
+                            $summary
+                        );
+                    } catch (\Throwable $e) {
+                        // Non-blocking notification dispatch
+                    }
+                }
             }
 
             return response()->json([

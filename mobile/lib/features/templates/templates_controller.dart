@@ -4,6 +4,7 @@ import '../../core/designsystem/app_snackbar.dart';
 import '../../core/models/website.dart';
 import '../../core/network/api_client.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/services/ad_service.dart';
 import '../../core/storage/session_manager.dart';
 import '../dashboard/dashboard_controller.dart';
 import '../profile/components/subscription_plan_sheet.dart';
@@ -14,7 +15,14 @@ class TemplatesController extends GetxController {
   final isLoading = true.obs;
 
   final activeTab = 'For you'.obs;
-  final tabs = ['For you', 'Business', 'Creative', 'Personal'];
+  final tabs = [
+    'For you',
+    'Startups',
+    'Business',
+    'Weddings',
+    'Personal',
+    'Creative',
+  ];
 
   final searchController = TextEditingController();
   final scrollController = ScrollController();
@@ -38,6 +46,7 @@ class TemplatesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    AdService.instance.preloadVideoAd(adTag: 'create_template_website');
     searchController.addListener(() {
       searchQuery.value = searchController.text.trim();
     });
@@ -58,7 +67,20 @@ class TemplatesController extends GetxController {
     try {
       final list = await ApiClient.getTemplates();
       if (list.isNotEmpty) {
-        templates.assignAll(list);
+        final combined = <Map<String, dynamic>>[...list];
+        for (final fallback in fallbackTemplates) {
+          final id = fallback['id']?.toString() ?? '';
+          final slug = fallback['slug']?.toString() ?? '';
+          final name = (fallback['name'] ?? '').toString().toLowerCase();
+          final exists = combined.any((t) =>
+              t['id']?.toString() == id ||
+              t['slug']?.toString() == slug ||
+              (t['name'] ?? '').toString().toLowerCase() == name);
+          if (!exists) {
+            combined.add(fallback);
+          }
+        }
+        templates.assignAll(combined);
       } else {
         templates.assignAll(fallbackTemplates);
       }
@@ -92,14 +114,23 @@ class TemplatesController extends GetxController {
     if (tab == 'For you' && query.isEmpty) {
       final curatedSlugs = [
         'nexus-ai',
-        'aura-botanicals',
+        'elysian-vows',
+        'devflow',
+        'marcus-vance',
+        'apex-capital',
+        'botanical-vows',
+        'pulse-health',
+        'elena-rostova',
+        'nordic-craft',
+        'ana-teo',
+        'kai-thorne',
         'lumen-coffee',
+        'aura-botanicals',
         'studio-marlow',
         'vaultpay',
         'mono-studio',
         'solstice-culinary',
         'kite-yoga',
-        'ana-teo',
       ];
       final curated = <Map<String, dynamic>>[];
       for (final slug in curatedSlugs) {
@@ -121,37 +152,75 @@ class TemplatesController extends GetxController {
           .where((t) => !curated.any((c) => c['id'] == t['id']))
           .toList();
       return [...curated, ...remaining];
+    } else if (tab == 'Startups') {
+      list = list.where((t) {
+        final ind = (t['industry'] ?? '').toString().toLowerCase();
+        final cat = (t['category']?['slug'] ?? '').toString().toLowerCase();
+        final name = (t['name'] ?? '').toString().toLowerCase();
+        return ind.contains('startup') ||
+            ind.contains('saas') ||
+            ind.contains('tech') ||
+            ind.contains('ai') ||
+            ind.contains('dev') ||
+            ind.contains('cloud') ||
+            ind.contains('fintech') ||
+            ind.contains('healthtech') ||
+            ind.contains('app') ||
+            cat.contains('saas') ||
+            cat.contains('startups') ||
+            name.contains('nexus') ||
+            name.contains('devflow') ||
+            name.contains('pulse') ||
+            name.contains('vault');
+      }).toList();
     } else if (tab == 'Business') {
       list = list.where((t) {
         final ind = (t['industry'] ?? '').toString().toLowerCase();
         final cat = (t['category']?['slug'] ?? '').toString().toLowerCase();
         final name = (t['name'] ?? '').toString().toLowerCase();
-        return ind.contains('food') ||
+        return ind.contains('business') ||
+            ind.contains('capital') ||
+            ind.contains('advisory') ||
+            ind.contains('finance') ||
+            ind.contains('food') ||
             ind.contains('drink') ||
+            ind.contains('coffee') ||
+            ind.contains('roast') ||
             ind.contains('café') ||
             ind.contains('restaurant') ||
             ind.contains('hospitality') ||
-            ind.contains('business') ||
-            ind.contains('saas') ||
-            ind.contains('tech') ||
-            ind.contains('ai') ||
-            ind.contains('app') ||
-            ind.contains('fintech') ||
-            ind.contains('banking') ||
-            ind.contains('beauty') ||
-            ind.contains('e-commerce') ||
-            ind.contains('landing') ||
-            cat.contains('restaurant') ||
+            ind.contains('skincare') ||
+            ind.contains('dining') ||
+            ind.contains('retail') ||
             cat.contains('business') ||
-            cat.contains('saas') ||
+            cat.contains('restaurants') ||
+            cat.contains('local-business') ||
             cat.contains('ecommerce') ||
-            name.contains('nexus') ||
-            name.contains('vault') ||
-            name.contains('aura') ||
-            name.contains('badgey') ||
-            name.contains('apex') ||
             name.contains('lumen') ||
-            name.contains('solstice');
+            name.contains('aura') ||
+            name.contains('apex') ||
+            name.contains('solstice') ||
+            name.contains('nordic') ||
+            name.contains('bistro');
+      }).toList();
+    } else if (tab == 'Weddings') {
+      list = list.where((t) {
+        final ind = (t['industry'] ?? '').toString().toLowerCase();
+        final cat = (t['category']?['slug'] ?? '').toString().toLowerCase();
+        final name = (t['name'] ?? '').toString().toLowerCase();
+        final desc = (t['description'] ?? '').toString().toLowerCase();
+        return ind.contains('wedding') ||
+            ind.contains('vow') ||
+            ind.contains('celebration') ||
+            ind.contains('ceremony') ||
+            ind.contains('bridal') ||
+            cat.contains('weddings') ||
+            cat.contains('wedding') ||
+            desc.contains('wedding') ||
+            name.contains('ana') ||
+            name.contains('elysian') ||
+            name.contains('botanical') ||
+            name.contains('vows');
       }).toList();
     } else if (tab == 'Creative') {
       list = list.where((t) {
@@ -164,10 +233,12 @@ class TemplatesController extends GetxController {
             ind.contains('creative') ||
             ind.contains('agency') ||
             ind.contains('studio') ||
-            ind.contains('beauty') ||
-            cat.contains('portfolio') ||
+            ind.contains('photography') ||
+            ind.contains('editorial') ||
+            ind.contains('identity') ||
+            cat.contains('portfolios') ||
             cat.contains('agencies') ||
-            cat.contains('beauty') ||
+            cat.contains('photography') ||
             name.contains('mono') ||
             name.contains('kroma') ||
             name.contains('aura') ||
@@ -179,20 +250,24 @@ class TemplatesController extends GetxController {
         final ind = (t['industry'] ?? '').toString().toLowerCase();
         final cat = (t['category']?['slug'] ?? '').toString().toLowerCase();
         final name = (t['name'] ?? '').toString().toLowerCase();
-        return ind.contains('wellness') ||
-            ind.contains('weddings') ||
-            ind.contains('wedding') ||
+        return ind.contains('personal') ||
+            ind.contains('portfolio') ||
+            ind.contains('author') ||
+            ind.contains('thought') ||
+            ind.contains('leadership') ||
+            ind.contains('speaker') ||
+            ind.contains('engineer') ||
+            ind.contains('creator') ||
+            ind.contains('wellness') ||
             ind.contains('yoga') ||
-            ind.contains('personal') ||
-            ind.contains('events') ||
-            ind.contains('hospitality') ||
-            ind.contains('restaurant') ||
+            ind.contains('coach') ||
+            cat.contains('portfolios') ||
             cat.contains('fitness') ||
-            cat.contains('events') ||
-            name.contains('kite') ||
-            name.contains('ana') ||
-            name.contains('solstice') ||
-            name.contains('marlow');
+            cat.contains('personal') ||
+            name.contains('marcus') ||
+            name.contains('elena') ||
+            name.contains('kai') ||
+            name.contains('kite');
       }).toList();
     }
 
@@ -252,6 +327,7 @@ class TemplatesController extends GetxController {
       AppSnackbar.success('templates_created_success'.tr);
 
       await SessionManager.recordRecentWebsite(site.id);
+      AdService.instance.showVideoAd(adTag: 'create_template_website');
       Get.offNamed(AppRoutes.editor, arguments: {'websiteId': site.id});
     } catch (e) {
       if (ApiClient.isSubscriptionLimitError(e)) {
@@ -2072,6 +2148,1442 @@ class TemplatesController extends GetxController {
                       'Ana & Teo · June 12–14, 2026 · Fiesole, Tuscany. With love.',
                 },
                 'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-elysian-vows',
+      'slug': 'elysian-vows',
+      'name': 'Elysian Vows',
+      'industry': 'Weddings & Celebrations',
+      'badge': '✦ EDITORIAL ROMANCE',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Warm candlelight, lakeside terraces, and an intimate celebration layout on Lake Como.',
+      'headline': 'Two Lives.\nOne Timeless Evening.',
+      'subheadline':
+          'Join Sophia & Julian as we exchange vows under the wisteria pergolas of Villa Balbianello, Lake Como.',
+      'ctaText': 'RSVP by May 1',
+      'primaryColor': '#B38E5D',
+      'bgColor': '#FAF8F5',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Sophia & Julian',
+          'theme': {
+            'colors': {
+              'primary': '#B38E5D',
+              'secondary': '#786C5E',
+              'accent': '#D4AF37',
+              'background': '#FAF8F5',
+              'surface': '#FFFFFF',
+              'text': {
+                'primary': '#24211E',
+                'secondary': '#6B635B',
+                'inverse': '#FFFFFF',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Playfair Display',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Sophia & Julian'},
+          'items': [
+            {'label': 'Our Story', 'href': '#story'},
+            {'label': 'Schedule', 'href': '#schedule'},
+            {'label': 'Travel', 'href': '#travel'},
+            {'label': 'RSVP', 'href': '#rsvp', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_elysian_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': 'SEPTEMBER 18–20, 2026 · VILLA BALBIANELLO, LAKE COMO',
+                  'headline': 'Two Lives.\nOne Timeless Evening.',
+                  'subheadline':
+                      'We invite our nearest and dearest to join us along the shores of Lake Como to celebrate love, family, and lifelong devotion.',
+                  'ctaText': 'RSVP by May 1',
+                  'ctaLink': '#rsvp',
+                  'secondaryCtaText': 'Our Story ↗',
+                  'secondaryCtaLink': '#story',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Sophia and Julian at Lake Como',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_elysian_schedule',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'Celebration Itinerary',
+                  'subtitle':
+                      'A three-day gathering among the historic gardens and waters of Como.',
+                  'items': [
+                    {
+                      'icon': '✦',
+                      'title': 'Friday Welcome Prosecco',
+                      'description':
+                          'Sept 18, 6:00 PM · Grand Hotel Tremezzo Terrace. Sunset cocktails, antipasti, and lakeside jazz.',
+                    },
+                    {
+                      'icon': '✦',
+                      'title': 'Saturday Vows & Gala',
+                      'description':
+                          'Sept 19, 4:30 PM · Villa Balbianello. Garden ceremony overlooking the lake followed by banquet dinner and dancing.',
+                    },
+                    {
+                      'icon': '✦',
+                      'title': 'Sunday Lakeside Brunch',
+                      'description':
+                          'Sept 20, 11:00 AM · Bellagio Pier. Fresh pastries, espresso, and private wooden boat excursions.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_elysian_story',
+                'component': 'about',
+                'order': 2,
+                'props': {
+                  'title': 'How We Met',
+                  'subtitle':
+                      'Seven years of laughter, shared passports, and endless coffee.',
+                  'body':
+                      'From our first spontaneous encounter in a sunlit Montmartre gallery to building a life together across three cities, every milestone has brought us closer. We cannot wait to begin this sacred next chapter surrounded by the people who mean the world to us.',
+                  'image':
+                      'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=80',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_elysian_travel',
+                'component': 'visit',
+                'order': 3,
+                'props': {
+                  'title': 'Travel & Accommodations',
+                  'subtitle': 'Villa Balbianello, Lenno, Lake Como, Italy',
+                  'address': 'Via Guido Monzino 1, 22016 Tremezzina CO, Italy',
+                  'hours':
+                      'Milan Malpensa Airport (MXP) is 60 minutes away. Private ferry shuttles depart every hour from Como San Giovanni station.',
+                  'ctaText': 'View Room Blocks',
+                  'ctaLink': '#rooms',
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_elysian_rsvp',
+                'component': 'cta',
+                'order': 4,
+                'props': {
+                  'headline': 'Kindly RSVP by May 1, 2026',
+                  'description':
+                      'Please let us know if you can celebrate with us and provide dietary requirements or song requests.',
+                  'buttonText': 'Confirm Attendance',
+                  'buttonLink': '#rsvp',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_elysian_footer',
+                'component': 'footer',
+                'order': 5,
+                'props': {
+                  'copyright':
+                      'Sophia & Julian · September 2026 · Lake Como, Italy. With love.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-botanical-vows',
+      'slug': 'botanical-vows',
+      'name': 'Botanical Romance',
+      'industry': 'Weddings & Celebrations',
+      'badge': '✦ WILDFLOWER GARDEN',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Sunlit coastal redwoods, organic wildflower florals, and outdoor dinner celebration in Big Sur.',
+      'headline': 'Under the Stars,\nSurrounded by Nature.',
+      'subheadline':
+          'Join Maya & Liam in the coastal highlands of Big Sur for a weekend of vows, acoustic melodies, and woodland feast.',
+      'ctaText': 'RSVP by June 15',
+      'primaryColor': '#2D4739',
+      'bgColor': '#F6F7F3',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Maya & Liam',
+          'theme': {
+            'colors': {
+              'primary': '#2D4739',
+              'secondary': '#4A6B56',
+              'accent': '#D97706',
+              'background': '#F6F7F3',
+              'surface': '#FFFFFF',
+              'text': {
+                'primary': '#1A241E',
+                'secondary': '#4D5E53',
+                'inverse': '#FFFFFF',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Playfair Display',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Maya & Liam'},
+          'items': [
+            {'label': 'Schedule', 'href': '#schedule'},
+            {'label': 'Our Story', 'href': '#story'},
+            {'label': 'Guest FAQ', 'href': '#faq'},
+            {'label': 'RSVP', 'href': '#rsvp', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_botanical_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': 'AUGUST 14–16, 2026 · BIG SUR, CALIFORNIA',
+                  'headline': 'Under the Stars,\nSurrounded by Nature.',
+                  'subheadline':
+                      'Two paths intertwining beneath the ancient redwoods. Come share music, wine, and warm memories with us on the Pacific ridge.',
+                  'ctaText': 'RSVP by June 15',
+                  'ctaLink': '#rsvp',
+                  'secondaryCtaText': 'Weekend Schedule ↗',
+                  'secondaryCtaLink': '#schedule',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Maya and Liam outdoor wedding',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_botanical_schedule',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'Weekend Gatherings',
+                  'subtitle': 'A rustic coastal celebration from dawn till dusk.',
+                  'items': [
+                    {
+                      'icon': '🌿',
+                      'title': 'Friday Bonfire & Tacos',
+                      'description':
+                          'Aug 14, 7:00 PM · Redwood Glade. Local Baja-style tacos, local craft cider, and acoustic guitar by the firepit.',
+                    },
+                    {
+                      'icon': '🌸',
+                      'title': 'Saturday Forest Ceremony',
+                      'description':
+                          'Aug 15, 3:30 PM · The Cathedral Grove. Exchange of vows followed by family-style farm dinner under twinkle lights.',
+                    },
+                    {
+                      'icon': '☀️',
+                      'title': 'Sunday Morning Coffee & Pastries',
+                      'description':
+                          'Aug 16, 9:30 AM · The Overlook Deck. Pour-over bar, fresh pastries, and warm hugs before journeying home.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_botanical_story',
+                'component': 'about',
+                'order': 2,
+                'props': {
+                  'title': 'Our Journey Together',
+                  'subtitle':
+                      'From trail runs in Marin to building our dream homestead.',
+                  'body':
+                      'We met at a trail race in 2019, both reaching for the same post-run orange slice. Six years, countless mountain peaks, and one rambunctious golden retriever later, we are overjoyed to say "I do" in the place where we feel most at home: outdoors.',
+                  'image':
+                      'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_botanical_faq',
+                'component': 'faq',
+                'order': 3,
+                'props': {
+                  'title': 'Guest Information & FAQ',
+                  'subtitle':
+                      'Everything you need to know for our mountain weekend.',
+                  'items': [
+                    {
+                      'question': 'What is the dress code?',
+                      'answer':
+                          'Garden cocktail attire. Please note that the ceremony and dinner are on grassy terrain, so wedges, block heels, or flats are strongly recommended.',
+                    },
+                    {
+                      'question': 'How do we get to the venue?',
+                      'answer':
+                          'We are providing shuttles from Carmel Valley hotels. Mountain parking is limited, so we encourage taking the group shuttles.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_botanical_rsvp',
+                'component': 'cta',
+                'order': 4,
+                'props': {
+                  'headline': 'Will You Join Our Celebration?',
+                  'description':
+                      'Please let us know your RSVP by June 15, 2026 so we can finalize our farm-to-table banquet seats.',
+                  'buttonText': 'Confirm Attendance',
+                  'buttonLink': '#rsvp',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_botanical_footer',
+                'component': 'footer',
+                'order': 5,
+                'props': {
+                  'copyright':
+                      'Maya & Liam · August 2026 · Big Sur, California. Forever.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-devflow',
+      'slug': 'devflow',
+      'name': 'DevFlow Cloud',
+      'industry': 'Startups & Developer Tools',
+      'badge': '✦ NEXT-GEN DEVOPS',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Instant preview branches, zero-config staging environments, and edge CI/CD for high-velocity engineering teams.',
+      'headline': 'Instant Preview Branches\nfor Every Git Commit.',
+      'subheadline':
+          'Spin up isolated full-stack preview branches in 200ms with branched Postgres databases, ephemeral DNS, and automated synthetic tests.',
+      'ctaText': 'Deploy Free with GitHub',
+      'primaryColor': '#10B981',
+      'bgColor': '#0A0F1D',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'DevFlow Cloud',
+          'theme': {
+            'colors': {
+              'primary': '#10B981',
+              'secondary': '#34D399',
+              'accent': '#6EE7B7',
+              'background': '#0A0F1D',
+              'surface': '#131B2E',
+              'text': {
+                'primary': '#F8FAFC',
+                'secondary': '#94A3B8',
+                'inverse': '#0A0F1D',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Plus Jakarta Sans',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'DevFlow Cloud'},
+          'items': [
+            {'label': 'Features', 'href': '#features'},
+            {'label': 'Metrics', 'href': '#metrics'},
+            {'label': 'Pricing', 'href': '#pricing'},
+            {'label': 'Start Free', 'href': '#cta', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_devflow_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ YC S25 LAUNCH · 200MS COLD STARTS',
+                  'headline': 'Instant Preview Branches\nfor Every Git Commit.',
+                  'subheadline':
+                      'Zero Kubernetes config. Zero staging bottlenecks. Deploy production-identical branch environments with isolated database copies in seconds.',
+                  'ctaText': 'Deploy Free with GitHub',
+                  'ctaLink': '#cta',
+                  'secondaryCtaText': 'View Live Interactive Demo ↗',
+                  'secondaryCtaLink': '#features',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'DevFlow Cloud Terminal & Preview Interface',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_devflow_features',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'Engineered for High-Velocity Engineering',
+                  'subtitle':
+                      'Eliminate staging bottlenecks and merge conflicts permanently.',
+                  'items': [
+                    {
+                      'icon': '⚡',
+                      'title': 'Branched Postgres Databases',
+                      'description':
+                          'Copy-on-write database clones with real anonymized schemas and instant rollbacks.',
+                    },
+                    {
+                      'icon': '🌐',
+                      'title': 'Global Anycast Edge CDN',
+                      'description':
+                          'Sub-15ms TTFB routing across 180 global regions with automatic SSL provisioning.',
+                    },
+                    {
+                      'icon': '🔒',
+                      'title': 'SOC-2 Type II Certified',
+                      'description':
+                          'Enterprise-grade security, automated secrets injection, and fine-grained RBAC.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_devflow_stats',
+                'component': 'statistics',
+                'order': 2,
+                'props': {
+                  'title': 'Battle-Tested at Scale',
+                  'subtitle': 'Trusted by the world\'s fastest-growing developer teams.',
+                  'items': [
+                    {'value': '200ms', 'label': 'Average Cold Start'},
+                    {'value': '4.2M+', 'label': 'Preview Branches Deployed'},
+                    {'value': '99.999%', 'label': 'Production SLA Uptime'},
+                  ],
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_devflow_pricing',
+                'component': 'pricing',
+                'order': 3,
+                'props': {
+                  'title': 'Predictable Pricing for Fast Teams',
+                  'subtitle': 'Start free on hobby branches. Scale with your engineering roadmap.',
+                  'items': [
+                    {
+                      'name': 'Hobby',
+                      'price': '\$0 / month',
+                      'description': 'For solo creators and side projects.',
+                      'badge': 'FREE FOREVER',
+                      'buttonText': 'Start Free',
+                      'features': [
+                        'Up to 5 active preview branches',
+                        'Community Discord support',
+                        'Shared compute resources',
+                      ],
+                    },
+                    {
+                      'name': 'Startup Pro',
+                      'price': '\$49 / month',
+                      'description': 'For high-velocity startups and scaling teams.',
+                      'badge': 'MOST POPULAR',
+                      'buttonText': 'Start 14-Day Trial',
+                      'features': [
+                        'Unlimited preview branches',
+                        'Isolated copy-on-write databases',
+                        'Priority edge deployment',
+                        'GitHub & GitLab PR bot integrations',
+                      ],
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_devflow_cta',
+                'component': 'cta',
+                'order': 4,
+                'props': {
+                  'headline': 'Ship Software 4x Faster Today',
+                  'description':
+                      'Connect your GitHub repository and have your first preview branch live in under 60 seconds.',
+                  'buttonText': 'Get Started Free',
+                  'buttonLink': '#start',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_devflow_footer',
+                'component': 'footer',
+                'order': 5,
+                'props': {
+                  'copyright': '© 2026 DevFlow Cloud, Inc. Built for developers.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-pulse-health',
+      'slug': 'pulse-health',
+      'name': 'Pulse Health AI',
+      'industry': 'Startups & HealthTech',
+      'badge': '✦ BIOMETRIC INTELLIGENCE',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Continuous biosensing paired with autonomous intelligence to optimize metabolic energy and daily cognitive focus.',
+      'headline': 'Metabolic Intelligence\nfor Peak Daily Focus.',
+      'subheadline':
+          'Real-time biomarker telemetry meets predictive AI to optimize your focus windows, nutrition, and cardiovascular recovery.',
+      'ctaText': 'Order Sensor Kit',
+      'primaryColor': '#0EA5E9',
+      'bgColor': '#080C14',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Pulse Health AI',
+          'theme': {
+            'colors': {
+              'primary': '#0EA5E9',
+              'secondary': '#14B8A6',
+              'accent': '#38BDF8',
+              'background': '#080C14',
+              'surface': '#0F172A',
+              'text': {
+                'primary': '#F8FAFC',
+                'secondary': '#94A3B8',
+                'inverse': '#080C14',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Plus Jakarta Sans',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Pulse Health AI'},
+          'items': [
+            {'label': 'Science', 'href': '#science'},
+            {'label': 'Features', 'href': '#features'},
+            {'label': 'Kit', 'href': '#pricing'},
+            {'label': 'Order Now', 'href': '#cta', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_pulse_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ CLINICAL METABOLIC INTELLIGENCE',
+                  'headline': 'Metabolic Intelligence\nfor Peak Daily Focus.',
+                  'subheadline':
+                      'Continuous interstitial glucose and autonomic biomarker sensing paired with personalized algorithmic insights to prevent energy slumps and maximize daily output.',
+                  'ctaText': 'Order Sensor Kit',
+                  'ctaLink': '#cta',
+                  'secondaryCtaText': 'Read Clinical Studies ↗',
+                  'secondaryCtaLink': '#science',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Pulse Biosensor & Live Mobile App',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_pulse_features',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'Precision Biology Meets Machine Learning',
+                  'subtitle': 'Transform complex physiological signals into simple daily decisions.',
+                  'items': [
+                    {
+                      'icon': '🧬',
+                      'title': 'Real-Time Glycemic Tracking',
+                      'description':
+                          'Understand your unique insulin sensitivity and avoid afternoon brain fog permanently.',
+                    },
+                    {
+                      'icon': '🧠',
+                      'title': 'Autonomic Focus Predictor',
+                      'description':
+                          'Algorithmic recommendations on when to tackle deep strategic work based on HRV stability.',
+                    },
+                    {
+                      'icon': '🌙',
+                      'title': 'Sleep Architecture Optimization',
+                      'description':
+                          'Targeted interventions to increase restorative slow-wave sleep and REM duration.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_pulse_stats',
+                'component': 'statistics',
+                'order': 2,
+                'props': {
+                  'title': 'Proven Clinical Outcomes',
+                  'subtitle': 'Validated across 12,000+ member clinical trials.',
+                  'items': [
+                    {'value': '89%', 'label': 'Reduced Daily Fatigue'},
+                    {'value': '3.4x', 'label': 'Sustained Morning Focus'},
+                    {'value': '14-Day', 'label': 'Continuous Sensor Life'},
+                  ],
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_pulse_cta',
+                'component': 'cta',
+                'order': 3,
+                'props': {
+                  'headline': 'Reclaim Your Biology Today',
+                  'description':
+                      'Join 45,000+ executives, athletes, and founders who optimize their health with Pulse Health AI.',
+                  'buttonText': 'Reserve Your Kit',
+                  'buttonLink': '#kit',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_pulse_footer',
+                'component': 'footer',
+                'order': 4,
+                'props': {
+                  'copyright': '© 2026 Pulse Health AI. Medical grade intelligence.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-marcus-vance',
+      'slug': 'marcus-vance',
+      'name': 'Dr. Marcus Vance',
+      'industry': 'Personal & Thought Leadership',
+      'badge': '✦ NYT BESTSELLING AUTHOR',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Stanford neuroscientist, keynote speaker, and author of "The Focused Mind" exploring high-performance cognition.',
+      'headline': 'Demystifying High-Performance\nCognition & Focus.',
+      'subheadline':
+          'Keynote lectures, executive briefings, and evidence-backed neurobiology research for leaders shaping the future.',
+      'ctaText': 'Book Keynote Lecture',
+      'primaryColor': '#8B5E3C',
+      'bgColor': '#FAF6F0',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Dr. Marcus Vance',
+          'theme': {
+            'colors': {
+              'primary': '#8B5E3C',
+              'secondary': '#60432C',
+              'accent': '#C99757',
+              'background': '#FAF6F0',
+              'surface': '#FFFFFF',
+              'text': {
+                'primary': '#1E1A17',
+                'secondary': '#5E544B',
+                'inverse': '#FFFFFF',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Playfair Display',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Dr. Marcus Vance'},
+          'items': [
+            {'label': 'Books', 'href': '#books'},
+            {'label': 'Keynotes', 'href': '#keynotes'},
+            {'label': 'Research', 'href': '#about'},
+            {'label': 'Inquire', 'href': '#contact', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_marcus_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ STANFORD NEUROSCIENCE · NYT BESTSELLER',
+                  'headline': 'Demystifying High-Performance\nCognition & Focus.',
+                  'subheadline':
+                      'Bridging molecular neuroscience and executive leadership. Author of the international bestseller "The Focused Mind" read by over 500,000 decision makers.',
+                  'ctaText': 'Book Keynote Lecture',
+                  'ctaLink': '#contact',
+                  'secondaryCtaText': 'Explore Essays & Books ↗',
+                  'secondaryCtaLink': '#books',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Dr. Marcus Vance',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_marcus_keynotes',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'Signature Keynote Lectures',
+                  'subtitle': 'Equipping global audiences with practical cognitive frameworks.',
+                  'items': [
+                    {
+                      'icon': '🎯',
+                      'title': 'Architectures of Focus',
+                      'description':
+                          'How attentional circuits function in the modern distractible world, and actionable protocols to trigger deep work flow states.',
+                    },
+                    {
+                      'icon': '⚖️',
+                      'title': 'The Biology of High-Stakes Decisions',
+                      'description':
+                          'Understanding cognitive fatigue, dopamine dynamics, and emotional resilience under sustained volatility.',
+                    },
+                    {
+                      'icon': '💡',
+                      'title': 'Neuroplasticity for Organizations',
+                      'description':
+                          'Cultivating cultures of rapid learning, psychological safety, and collective intelligence in distributed teams.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_marcus_about',
+                'component': 'about',
+                'order': 2,
+                'props': {
+                  'title': 'About Dr. Vance',
+                  'subtitle': 'Over fifteen years investigating attentional mechanics.',
+                  'body':
+                      'Marcus Vance holds a Ph.D. in Cognitive Neurobiology from Oxford and currently directs research initiatives at Stanford. His essays have appeared in Nature, Harvard Business Review, and The Atlantic. He consults regularly with Fortune 100 executives and top-tier athletics programs on human potential.',
+                  'image':
+                      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_marcus_cta',
+                'component': 'cta',
+                'order': 3,
+                'props': {
+                  'headline': 'Bring Dr. Vance to Your Next Event',
+                  'description':
+                      'Inquire about keynote availability, executive retreats, or advisory engagements for 2026/2027.',
+                  'buttonText': 'Submit Speaker Inquiry',
+                  'buttonLink': '#contact',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_marcus_footer',
+                'component': 'footer',
+                'order': 4,
+                'props': {
+                  'copyright': '© 2026 Dr. Marcus Vance. All rights reserved.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-elena-rostova',
+      'slug': 'elena-rostova',
+      'name': 'Elena Rostova',
+      'industry': 'Personal & Architecture Portfolio',
+      'badge': '✦ AD100 ARCHITECT',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Bespoke residential pavilions, private sanctuaries, and minimalist interior architecture across Kyoto and Zurich.',
+      'headline': 'Form, Silence,\nand Natural Light.',
+      'subheadline':
+          'Sculpting spaces that endure. Bespoke architectural commissions focusing on tactile materials, monolithic concrete, and sacred geometries.',
+      'ctaText': 'View Selected Works',
+      'primaryColor': '#1C1917',
+      'bgColor': '#FAFAF9',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Elena Rostova Architect',
+          'theme': {
+            'colors': {
+              'primary': '#1C1917',
+              'secondary': '#57534E',
+              'accent': '#A8A29E',
+              'background': '#FAFAF9',
+              'surface': '#FFFFFF',
+              'text': {
+                'primary': '#1C1917',
+                'secondary': '#78716C',
+                'inverse': '#FAFAF9',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Space Grotesk',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Elena Rostova'},
+          'items': [
+            {'label': 'Projects', 'href': '#projects'},
+            {'label': 'Philosophy', 'href': '#philosophy'},
+            {'label': 'Awards', 'href': '#awards'},
+            {'label': 'Inquire', 'href': '#contact', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_elena_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ AD100 2026 · ARCHITECTURAL DESIGN & INTERIORS',
+                  'headline': 'Form, Silence,\nand Natural Light.',
+                  'subheadline':
+                      'Bespoke architectural commissions that honor natural materiality, raw concrete, and the sacred balance between interior and wild exterior landscapes.',
+                  'ctaText': 'Explore Works',
+                  'ctaLink': '#projects',
+                  'secondaryCtaText': 'Design Philosophy ↗',
+                  'secondaryCtaLink': '#philosophy',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Villa Kanso in Kyoto by Elena Rostova',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_elena_projects',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'Selected Architectural Works',
+                  'subtitle': 'Monolithic residential sanctuaries completed across Europe and Asia.',
+                  'items': [
+                    {
+                      'icon': '🏛️',
+                      'title': 'Villa Kanso · Kyoto',
+                      'description':
+                          'Charred cedar yakisugi facade paired with basalt stone courtyard gardens and hidden subterranean tea chamber.',
+                    },
+                    {
+                      'icon': '🏔️',
+                      'title': 'Alpine Glass Sanctuary · Vals',
+                      'description':
+                          'Cantilevered board-formed concrete pavilion embedded into the Swiss granite slopes with 360-degree panoramic glazing.',
+                    },
+                    {
+                      'icon': '🌊',
+                      'title': 'Pavilion VII · Stockholm Archipelago',
+                      'description':
+                          'Zero-carbon timber dwelling featuring thermal bedrock heating and private natural harbor jetty.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_elena_philosophy',
+                'component': 'about',
+                'order': 2,
+                'props': {
+                  'title': 'Architectural Manifesto',
+                  'subtitle': 'A dialogue between permanence and ephemeral daylight.',
+                  'body':
+                      'Architecture should not compete with nature; it should serve as a quiet frame through which the changes of season, wind, and sky are felt deeply. We work with an intentional palette of raw stone, unvarnished timber, and shadow to craft spaces that inspire reverence.',
+                  'image':
+                      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_elena_cta',
+                'component': 'cta',
+                'order': 3,
+                'props': {
+                  'headline': 'Initiate a Private Commission',
+                  'description':
+                      'We accept a select number of residential and cultural architectural commissions each year.',
+                  'buttonText': 'Contact the Studio',
+                  'buttonLink': '#contact',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_elena_footer',
+                'component': 'footer',
+                'order': 4,
+                'props': {
+                  'copyright': '© 2026 Elena Rostova Studio. Zurich · Kyoto.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-kai-thorne',
+      'slug': 'kai-thorne',
+      'name': 'Kai Thorne',
+      'industry': 'Personal & Software Engineer',
+      'badge': '✦ INDIE CREATOR',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Staff engineer turned independent maker. Building high-performance developer tools, terminal utilities, and open source libraries in Rust.',
+      'headline': 'High-Performance Systems\nand Open Source Tools.',
+      'subheadline':
+          'Creator of open source devtools used by over 250,000 developers worldwide. Writing about systems programming, memory safety, and terminal UI.',
+      'ctaText': 'Explore GitHub Tools',
+      'primaryColor': '#10B981',
+      'bgColor': '#121316',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Kai Thorne',
+          'theme': {
+            'colors': {
+              'primary': '#10B981',
+              'secondary': '#34D399',
+              'accent': '#6EE7B7',
+              'background': '#121316',
+              'surface': '#1A1D24',
+              'text': {
+                'primary': '#F1F5F9',
+                'secondary': '#94A3B8',
+                'inverse': '#121316',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Inter',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'kai.thorne.dev'},
+          'items': [
+            {'label': 'Projects', 'href': '#projects'},
+            {'label': 'Articles', 'href': '#articles'},
+            {'label': 'Stack', 'href': '#stack'},
+            {'label': 'GitHub ↗', 'href': 'https://github.com', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_kai_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ STAFF ENGINEER · OPEN SOURCE CREATOR',
+                  'headline': 'High-Performance Systems\nand Open Source Tools.',
+                  'subheadline':
+                      'Ex-systems architect crafting developer-first terminal tools, high-throughput network engines, and CLI utilities in Rust and Go.',
+                  'ctaText': 'Explore GitHub Tools',
+                  'ctaLink': '#projects',
+                  'secondaryCtaText': 'Read Technical Essays ↗',
+                  'secondaryCtaLink': '#articles',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Kai Thorne coding in terminal',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_kai_projects',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'Featured Open Source Projects',
+                  'subtitle': 'Downloaded over 2.4 million times across crates.io and homebrew.',
+                  'items': [
+                    {
+                      'icon': '⚡',
+                      'title': 'TurboTrace · Rust',
+                      'description':
+                          'Zero-overhead distributed tracing daemon with sub-microsecond latency and eBPF kernel hooks.',
+                    },
+                    {
+                      'icon': '📦',
+                      'title': 'BytePack · Go',
+                      'description':
+                          'High-throughput columnar binary serialization protocol designed for edge database replication.',
+                    },
+                    {
+                      'icon': '🖥️',
+                      'title': 'HyperQuery · Terminal TUI',
+                      'description':
+                          'Modern 60fps terminal query explorer with vim bindings, fuzzy regex matching, and instant charts.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_kai_stats',
+                'component': 'statistics',
+                'order': 2,
+                'props': {
+                  'title': 'Community Impact',
+                  'subtitle': 'Building in public with full open source transparency.',
+                  'items': [
+                    {'value': '250K+', 'label': 'Active Developers'},
+                    {'value': '14.8K', 'label': 'GitHub Stars'},
+                    {'value': '100%', 'label': 'Open Source MIT'},
+                  ],
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_kai_cta',
+                'component': 'cta',
+                'order': 3,
+                'props': {
+                  'headline': 'Sponsor or Collaborate',
+                  'description':
+                      'Have an interesting systems challenge or want to support my open source tools? Reach out or sponsor via GitHub.',
+                  'buttonText': 'Get in Touch',
+                  'buttonLink': '#contact',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_kai_footer',
+                'component': 'footer',
+                'order': 4,
+                'props': {
+                  'copyright': '© 2026 Kai Thorne. Open source software for all.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-apex-capital',
+      'slug': 'apex-capital',
+      'name': 'Apex Capital Partners',
+      'industry': 'Business & Wealth Advisory',
+      'badge': '✦ INSTITUTIONAL EXCELLENCE',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Disciplined private equity and multi-generational wealth advisory managing \$4.8B across North America and Europe.',
+      'headline': 'Disciplined Capital.\nMulti-Generational Growth.',
+      'subheadline':
+          'Managing \$4.8B in private equity, sovereign wealth, and family office assets with rigorous governance and long-term partnership.',
+      'ctaText': 'Schedule Advisory Consultation',
+      'primaryColor': '#0F2027',
+      'bgColor': '#F8FAFC',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Apex Capital Partners',
+          'theme': {
+            'colors': {
+              'primary': '#0F2027',
+              'secondary': '#203A43',
+              'accent': '#D4AF37',
+              'background': '#F8FAFC',
+              'surface': '#FFFFFF',
+              'text': {
+                'primary': '#0F172A',
+                'secondary': '#475569',
+                'inverse': '#FFFFFF',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Playfair Display',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Apex Capital Partners'},
+          'items': [
+            {'label': 'Practices', 'href': '#practices'},
+            {'label': 'Track Record', 'href': '#track-record'},
+            {'label': 'Team', 'href': '#team'},
+            {'label': 'Contact', 'href': '#contact', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_apex_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ \$4.8B AUM · PRIVATE EQUITY & WEALTH ADVISORY',
+                  'headline': 'Disciplined Capital.\nMulti-Generational Growth.',
+                  'subheadline':
+                      'Institutional private equity and family office fiduciary advisory. Partnering with visionary founders and institutional funds to compound generational wealth.',
+                  'ctaText': 'Schedule Advisory Consultation',
+                  'ctaLink': '#contact',
+                  'secondaryCtaText': 'Our Investment Focus ↗',
+                  'secondaryCtaLink': '#practices',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Apex Capital Partners Corporate Headquarters',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_apex_practices',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'Core Investment Practices',
+                  'subtitle': 'Decades of disciplined capital deployment across asymmetric market cycles.',
+                  'items': [
+                    {
+                      'icon': '📊',
+                      'title': 'Growth Private Equity',
+                      'description':
+                          'Minority and control equity investments into cash-flow positive enterprise software and tech-enabled logistics.',
+                    },
+                    {
+                      'icon': '🌐',
+                      'title': 'Global Real Assets',
+                      'description':
+                          'Core-plus real estate, data center infrastructure, and sustainable energy projects with direct inflation hedging.',
+                    },
+                    {
+                      'icon': '🏛️',
+                      'title': 'Family Office Fiduciary',
+                      'description':
+                          'Multi-generational wealth succession planning, tax optimization, and bespoke liquidity management structures.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_apex_stats',
+                'component': 'statistics',
+                'order': 2,
+                'props': {
+                  'title': 'Proven Track Record',
+                  'subtitle': 'Demonstrated risk-adjusted performance across 18 consecutive years.',
+                  'items': [
+                    {'value': '\$4.8B+', 'label': 'Assets Under Management'},
+                    {'value': '22.4%', 'label': 'Historical Net IRR'},
+                    {'value': '18 Years', 'label': 'Continuous Stewardship'},
+                  ],
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_apex_cta',
+                'component': 'cta',
+                'order': 3,
+                'props': {
+                  'headline': 'Schedule a Confidential Briefing',
+                  'description':
+                      'Our managing partners welcome inquiries from institutional allocators, single-family offices, and qualified purchasers.',
+                  'buttonText': 'Inquire for Consultation',
+                  'buttonLink': '#contact',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_apex_footer',
+                'component': 'footer',
+                'order': 4,
+                'props': {
+                  'copyright': '© 2026 Apex Capital Partners LLP. Member FINRA / SIPC.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-nordic-craft',
+      'slug': 'nordic-craft',
+      'name': 'Nordic Craft Roasters',
+      'industry': 'Business & Specialty Coffee',
+      'badge': '✦ DIRECT TRADE ORIGIN',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Direct-trade Scandinavian light roasts sourced from ethical smallholder cooperatives across Ethiopia and Colombia.',
+      'headline': 'Precision Roasting.\nUncompromised Purity.',
+      'subheadline':
+          'Supplying single-origin specialty coffees to Michelin-starred restaurants, boutique hotels, and coffee connoisseurs worldwide.',
+      'ctaText': 'Explore Wholesale & Retail',
+      'primaryColor': '#2C1810',
+      'bgColor': '#F5F2EB',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Nordic Craft Roasters',
+          'theme': {
+            'colors': {
+              'primary': '#2C1810',
+              'secondary': '#5E3A2B',
+              'accent': '#C5A880',
+              'background': '#F5F2EB',
+              'surface': '#FFFFFF',
+              'text': {
+                'primary': '#2C1810',
+                'secondary': '#6B5448',
+                'inverse': '#FFFFFF',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Playfair Display',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Nordic Craft Roasters'},
+          'items': [
+            {'label': 'Coffee', 'href': '#products'},
+            {'label': 'Sourcing', 'href': '#about'},
+            {'label': 'Café & Tasting', 'href': '#visit'},
+            {'label': 'Wholesale', 'href': '#wholesale', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_nordic_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ COPENHAGEN MICRO-ROASTERY · DIRECT TRADE',
+                  'headline': 'Precision Roasting.\nUncompromised Purity.',
+                  'subheadline':
+                      'Light, expressive Scandinavian roast profiles designed to preserve floral sweetness, vibrant citrus acidity, and authentic terroir from farm to cup.',
+                  'ctaText': 'Explore Coffee Offerings',
+                  'ctaLink': '#products',
+                  'secondaryCtaText': 'Visit Our Tasting Room ↗',
+                  'secondaryCtaLink': '#visit',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Nordic Craft Specialty Coffee Roasters',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_nordic_products',
+                'component': 'products',
+                'order': 1,
+                'props': {
+                  'title': 'Seasonal Single-Origin Selections',
+                  'subtitle': 'Small-batch roasted every Tuesday on our zero-emission Loring S35.',
+                  'items': [
+                    {
+                      'name': 'Guji Natural · Ethiopia',
+                      'price': '€19.50',
+                      'description': 'Jasmine blossom, wild strawberry, and bergamot finish.',
+                      'badge': 'LIMITED HARVEST',
+                    },
+                    {
+                      'name': 'Huila Pink Bourbon · Colombia',
+                      'price': '€22.00',
+                      'description': 'Crisp white peach, sugarcane syrup, and honeysuckle aroma.',
+                      'badge': 'MICR-LOT',
+                    },
+                    {
+                      'name': 'Nordic Winter Espresso',
+                      'price': '€17.00',
+                      'description': 'Milk chocolate ganache, candied orange, and smooth body.',
+                      'badge': 'HOUSE BLEND',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_nordic_visit',
+                'component': 'visit',
+                'order': 2,
+                'props': {
+                  'title': 'Copenhagen Tasting Room',
+                  'subtitle': 'Vesterbrogade 44, 1620 København V, Denmark',
+                  'address': 'Vesterbrogade 44, 1620 København V, Denmark',
+                  'hours':
+                      'Monday – Friday: 07:30 – 17:00\nSaturday – Sunday: 08:30 – 18:00\nPublic cuppings every Saturday at 11:00 AM.',
+                  'ctaText': 'Get Directions',
+                  'ctaLink': '#directions',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_nordic_cta',
+                'component': 'cta',
+                'order': 3,
+                'props': {
+                  'headline': 'Wholesale & Michelin Partner Program',
+                  'description':
+                      'We provide bespoke roast profiles, commercial La Marzocco equipment, and barista training to world-class hospitality venues.',
+                  'buttonText': 'Inquire for Wholesale',
+                  'buttonLink': '#wholesale',
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_nordic_footer',
+                'component': 'footer',
+                'order': 4,
+                'props': {
+                  'copyright': '© 2026 Nordic Craft Roasters ApS. Copenhagen, Denmark.',
+                },
+                'styles': {'background': 'background'},
               },
             ],
           },

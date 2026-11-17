@@ -58,9 +58,13 @@ class TemplateCard extends StatelessWidget {
     final bgColorHex =
         template['bgColor'] ?? doc?['site']?['theme']?['colors']?['background'];
 
-    final isAna =
+    final isWedding =
         name.toString().toLowerCase().contains('ana') ||
-        name.toString().toLowerCase().contains('wedding');
+        name.toString().toLowerCase().contains('wedding') ||
+        name.toString().toLowerCase().contains('elysian') ||
+        name.toString().toLowerCase().contains('botanical') ||
+        name.toString().toLowerCase().contains('vows') ||
+        industry.toString().toLowerCase().contains('wedding');
     final isLumen = name.toString().toLowerCase().contains('lumen');
     final isMarlow = name.toString().toLowerCase().contains('marlow');
     final isYoga = name.toString().toLowerCase().contains('yoga');
@@ -77,7 +81,7 @@ class TemplateCard extends StatelessWidget {
       canvasBg = const Color(0xFFFAF8F5);
     } else if (isYoga) {
       canvasBg = const Color(0xFFFAF8F4);
-    } else if (isAna) {
+    } else if (isWedding) {
       canvasBg = const Color(0xFFFAF5F5);
     } else {
       canvasBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFFAF6EE);
@@ -203,10 +207,10 @@ class TemplateCard extends StatelessWidget {
                   // Mini Website Hero Headline (Editorial Serif Typography)
                   Container(
                     width: double.infinity,
-                    alignment: isAna ? Alignment.center : Alignment.centerLeft,
+                    alignment: isWedding ? Alignment.center : Alignment.centerLeft,
                     child: Text(
                       headline,
-                      textAlign: isAna ? TextAlign.center : TextAlign.left,
+                      textAlign: isWedding ? TextAlign.center : TextAlign.left,
                       style: TextStyle(
                         fontFamily: 'Georgia',
                         fontSize: 22,
@@ -215,7 +219,7 @@ class TemplateCard extends StatelessWidget {
                         letterSpacing: -0.4,
                         color: isCardDark
                             ? Colors.white
-                            : (isAna
+                            : (isWedding
                                   ? const Color(0xFF2D1F23)
                                   : (isLumen
                                         ? const Color(0xFF2C241E)
@@ -228,7 +232,7 @@ class TemplateCard extends StatelessWidget {
 
                   // Mini Website Hero Image
                   ClipRRect(
-                    borderRadius: isAna
+                    borderRadius: isWedding
                         ? const BorderRadius.only(
                             topLeft: Radius.circular(88),
                             topRight: Radius.circular(88),
@@ -259,7 +263,7 @@ class TemplateCard extends StatelessWidget {
 
                   // Mini Website CTA Pill Button
                   Align(
-                    alignment: isAna ? Alignment.center : Alignment.centerLeft,
+                    alignment: isWedding ? Alignment.center : Alignment.centerLeft,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 18,

@@ -8,7 +8,14 @@ import '../../features/dashboard/dashboard_controller.dart';
 import '../../features/profile/components/subscription_plan_sheet.dart';
 
 class AdBannerWidget extends StatefulWidget {
-  const AdBannerWidget({super.key});
+  final String? adTag;
+  final EdgeInsetsGeometry? margin;
+
+  const AdBannerWidget({
+    super.key,
+    this.adTag,
+    this.margin,
+  });
 
   @override
   State<AdBannerWidget> createState() => _AdBannerWidgetState();
@@ -65,7 +72,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
       // If native Start.io banner is loaded, render it inside container
       if (_bannerAd != null) {
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          margin: widget.margin ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
@@ -84,7 +91,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
 
       // Fallback / Loading placeholder with upgrade to Pro CTA
       return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        margin: widget.margin ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isDark

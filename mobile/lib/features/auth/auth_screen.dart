@@ -13,20 +13,23 @@ class AuthScreen extends StatelessWidget {
     final controller = Get.isRegistered<AuthController>()
         ? Get.find<AuthController>()
         : Get.put(AuthController());
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor:
+          isDark ? const Color(0xFF090D16) : const Color(0xFFF8FAFC),
       body: Stack(
         children: [
           // Ambient atmospheric mesh gradient background
-          const _AtmosphericAuthBackground(),
+          _AtmosphericAuthBackground(isDark: isDark),
 
           // Foreground Content
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                 child: Obx(() {
                   final isRegister = controller.isRegisterMode.value;
 
@@ -38,11 +41,13 @@ class AuthScreen extends StatelessWidget {
                       // Brand Overline
                       Text(
                         'auth_category'.tr,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.2,
-                          color: Color(0xFF5B45E0),
+                          color: isDark
+                              ? const Color(0xFF818CF8)
+                              : const Color(0xFF5B45E0),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -52,10 +57,11 @@ class AuthScreen extends StatelessWidget {
                         isRegister
                             ? 'auth_register_title'.tr
                             : 'auth_welcome_title'.tr,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 34,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A),
+                          color:
+                              isDark ? Colors.white : const Color(0xFF0F172A),
                           letterSpacing: -0.8,
                           height: 1.15,
                         ),
@@ -67,10 +73,12 @@ class AuthScreen extends StatelessWidget {
                         isRegister
                             ? 'auth_register_subtitle'.tr
                             : 'auth_login_subtitle'.tr,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15.5,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF64748B),
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
                           letterSpacing: -0.2,
                         ),
                       ),
@@ -85,23 +93,34 @@ class AuthScreen extends StatelessWidget {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFEF2F2),
+                            color: isDark
+                                ? const Color(0xFF450A0A)
+                                    .withValues(alpha: 0.6)
+                                : const Color(0xFFFEF2F2),
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: const Color(0xFFFECACA)),
+                            border: Border.all(
+                              color: isDark
+                                  ? const Color(0xFF991B1B)
+                                  : const Color(0xFFFECACA),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 LucideIcons.circleAlert,
-                                color: Color(0xFFDC2626),
+                                color: isDark
+                                    ? const Color(0xFFF87171)
+                                    : const Color(0xFFDC2626),
                                 size: 18,
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
                                   controller.errorMessage.value!,
-                                  style: const TextStyle(
-                                    color: Color(0xFFB91C1C),
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? const Color(0xFFFCA5A5)
+                                        : const Color(0xFFB91C1C),
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -114,30 +133,41 @@ class AuthScreen extends StatelessWidget {
 
                       // Full name input (Register Mode only)
                       if (isRegister) ...[
-                        const _FieldLabel(textKey: 'auth_name_label'),
+                        _FieldLabel(
+                          textKey: 'auth_name_label',
+                          isDark: isDark,
+                        ),
                         const SizedBox(height: 8),
                         _InputField(
                           controller: controller.nameController,
                           hintText: 'auth_name_hint'.tr,
                           keyboardType: TextInputType.name,
                           textInputAction: TextInputAction.next,
+                          isDark: isDark,
                         ),
                         const SizedBox(height: 18),
                       ],
 
                       // Email input
-                      const _FieldLabel(textKey: 'auth_email_label'),
+                      _FieldLabel(
+                        textKey: 'auth_email_label',
+                        isDark: isDark,
+                      ),
                       const SizedBox(height: 8),
                       _InputField(
                         controller: controller.emailController,
                         hintText: 'auth_email_hint'.tr,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
+                        isDark: isDark,
                       ),
                       const SizedBox(height: 18),
 
                       // Password input
-                      const _FieldLabel(textKey: 'auth_password_label'),
+                      _FieldLabel(
+                        textKey: 'auth_password_label',
+                        isDark: isDark,
+                      ),
                       const SizedBox(height: 8),
                       _InputField(
                         controller: controller.passwordController,
@@ -145,13 +175,16 @@ class AuthScreen extends StatelessWidget {
                         obscureText: !controller.isPasswordVisible.value,
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => controller.submit(),
+                        isDark: isDark,
                         suffixIcon: IconButton(
                           icon: Icon(
                             controller.isPasswordVisible.value
                                 ? LucideIcons.eyeOff
                                 : LucideIcons.eye,
                             size: 20,
-                            color: const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
                           ),
                           onPressed: controller.togglePasswordVisibility,
                         ),
@@ -166,10 +199,12 @@ class AuthScreen extends StatelessWidget {
                             onTap: controller.forgotPassword,
                             child: Text(
                               'auth_forgot_password'.tr,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF5B45E0),
+                                color: isDark
+                                    ? const Color(0xFF818CF8)
+                                    : const Color(0xFF5B45E0),
                               ),
                             ),
                           ),
@@ -183,24 +218,31 @@ class AuthScreen extends StatelessWidget {
                         width: double.infinity,
                         height: 52,
                         child: ElevatedButton(
-                          onPressed:
-                              controller.isAnyLoading ? null : controller.submit,
+                          onPressed: controller.isAnyLoading
+                              ? null
+                              : controller.submit,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF181B26),
-                            foregroundColor: Colors.white,
-                            disabledBackgroundColor:
-                                const Color(0xFF181B26).withValues(alpha: 0.6),
+                            backgroundColor:
+                                isDark ? Colors.white : const Color(0xFF181B26),
+                            foregroundColor:
+                                isDark ? const Color(0xFF0F172A) : Colors.white,
+                            disabledBackgroundColor: isDark
+                                ? Colors.white.withValues(alpha: 0.5)
+                                : const Color(0xFF181B26)
+                                    .withValues(alpha: 0.6),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ),
                           child: controller.isLoading.value
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 22,
                                   height: 22,
                                   child: CircularProgressIndicator(
-                                    color: Colors.white,
+                                    color: isDark
+                                        ? const Color(0xFF0F172A)
+                                        : Colors.white,
                                     strokeWidth: 2,
                                   ),
                                 )
@@ -208,10 +250,12 @@ class AuthScreen extends StatelessWidget {
                                   isRegister
                                       ? 'auth_register_btn'.tr
                                       : 'auth_login_btn'.tr,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
-                                    color: Colors.white,
+                                    color: isDark
+                                        ? const Color(0xFF0F172A)
+                                        : Colors.white,
                                     letterSpacing: -0.2,
                                   ),
                                 ),
@@ -222,26 +266,33 @@ class AuthScreen extends StatelessWidget {
                       // Divider "or continue with"
                       Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Divider(
-                              color: Color(0xFFE2E8F0),
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFE2E8F0),
                               thickness: 1,
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 14),
                             child: Text(
                               'auth_or_continue_with'.tr,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF64748B),
+                                color: isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B),
                               ),
                             ),
                           ),
-                          const Expanded(
+                          Expanded(
                             child: Divider(
-                              color: Color(0xFFE2E8F0),
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFE2E8F0),
                               thickness: 1,
                             ),
                           ),
@@ -261,6 +312,7 @@ class AuthScreen extends StatelessWidget {
                           height: 22,
                         ),
                         label: 'auth_continue_google'.tr,
+                        isDark: isDark,
                       ),
                       const SizedBox(height: 12),
 
@@ -271,12 +323,15 @@ class AuthScreen extends StatelessWidget {
                               ? null
                               : controller.signInWithApple,
                           isLoading: controller.isLoadingApple.value,
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.apple,
-                            color: Color(0xFF0F172A),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                             size: 24,
                           ),
                           label: 'auth_continue_apple'.tr,
+                          isDark: isDark,
                         ),
                         const SizedBox(height: 12),
                       ],
@@ -301,9 +356,11 @@ class AuthScreen extends StatelessWidget {
                                   isRegister
                                       ? 'auth_already_have_account'.tr
                                       : 'auth_new_here'.tr,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14.5,
-                                    color: Color(0xFF64748B),
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B),
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),
@@ -312,9 +369,11 @@ class AuthScreen extends StatelessWidget {
                                   isRegister
                                       ? 'auth_log_in'.tr
                                       : 'auth_create_account'.tr,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14.5,
-                                    color: Color(0xFF5B45E0),
+                                    color: isDark
+                                        ? const Color(0xFF818CF8)
+                                        : const Color(0xFF5B45E0),
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -331,9 +390,11 @@ class AuthScreen extends StatelessWidget {
                           children: [
                             Text(
                               'auth_by_continuing'.tr,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: Color(0xFF94A3B8),
+                                color: isDark
+                                    ? const Color(0xFF64748B)
+                                    : const Color(0xFF94A3B8),
                               ),
                             ),
                             const SizedBox(height: 3),
@@ -342,7 +403,8 @@ class AuthScreen extends StatelessWidget {
                               children: [
                                 GestureDetector(
                                   key: const Key('auth_terms_button'),
-                                  onTap: () => TermsOfServiceSheet.show(context),
+                                  onTap: () =>
+                                      TermsOfServiceSheet.show(context),
                                   behavior: HitTestBehavior.opaque,
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -351,24 +413,29 @@ class AuthScreen extends StatelessWidget {
                                     ),
                                     child: Text(
                                       'auth_terms_of_service'.tr,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
-                                        color: Color(0xFF5B45E0),
+                                        color: isDark
+                                            ? const Color(0xFF818CF8)
+                                            : const Color(0xFF5B45E0),
                                       ),
                                     ),
                                   ),
                                 ),
-                                const Text(
+                                Text(
                                   ' · ',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Color(0xFF94A3B8),
+                                    color: isDark
+                                        ? const Color(0xFF64748B)
+                                        : const Color(0xFF94A3B8),
                                   ),
                                 ),
                                 GestureDetector(
                                   key: const Key('auth_privacy_button'),
-                                  onTap: () => PrivacyPolicySheet.show(context),
+                                  onTap: () =>
+                                      PrivacyPolicySheet.show(context),
                                   behavior: HitTestBehavior.opaque,
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -377,10 +444,12 @@ class AuthScreen extends StatelessWidget {
                                     ),
                                     child: Text(
                                       'auth_privacy_policy'.tr,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
-                                        color: Color(0xFF5B45E0),
+                                        color: isDark
+                                            ? const Color(0xFF818CF8)
+                                            : const Color(0xFF5B45E0),
                                       ),
                                     ),
                                   ),
@@ -405,7 +474,8 @@ class AuthScreen extends StatelessWidget {
 
 /// Atmospheric mesh background glow (soft cyan at top-left, lavender at top-right)
 class _AtmosphericAuthBackground extends StatelessWidget {
-  const _AtmosphericAuthBackground();
+  final bool isDark;
+  const _AtmosphericAuthBackground({this.isDark = false});
 
   @override
   Widget build(BuildContext context) {
@@ -423,11 +493,17 @@ class _AtmosphericAuthBackground extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFFBAE6FD).withValues(alpha: 0.60),
-                      const Color(0xFFE0F2FE).withValues(alpha: 0.25),
-                      Colors.transparent,
-                    ],
+                    colors: isDark
+                        ? [
+                            const Color(0xFF0284C7).withValues(alpha: 0.22),
+                            const Color(0xFF0369A1).withValues(alpha: 0.08),
+                            Colors.transparent,
+                          ]
+                        : [
+                            const Color(0xFFBAE6FD).withValues(alpha: 0.60),
+                            const Color(0xFFE0F2FE).withValues(alpha: 0.25),
+                            Colors.transparent,
+                          ],
                     stops: const [0.0, 0.55, 1.0],
                   ),
                 ),
@@ -444,11 +520,17 @@ class _AtmosphericAuthBackground extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFFDDD6FE).withValues(alpha: 0.65),
-                      const Color(0xFFEDE9FE).withValues(alpha: 0.25),
-                      Colors.transparent,
-                    ],
+                    colors: isDark
+                        ? [
+                            const Color(0xFF6366F1).withValues(alpha: 0.24),
+                            const Color(0xFF4F46E5).withValues(alpha: 0.09),
+                            Colors.transparent,
+                          ]
+                        : [
+                            const Color(0xFFDDD6FE).withValues(alpha: 0.65),
+                            const Color(0xFFEDE9FE).withValues(alpha: 0.25),
+                            Colors.transparent,
+                          ],
                     stops: const [0.0, 0.55, 1.0],
                   ),
                 ),
@@ -465,10 +547,15 @@ class _AtmosphericAuthBackground extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFFC4B5FD).withValues(alpha: 0.35),
-                      Colors.transparent,
-                    ],
+                    colors: isDark
+                        ? [
+                            const Color(0xFF7C3AED).withValues(alpha: 0.16),
+                            Colors.transparent,
+                          ]
+                        : [
+                            const Color(0xFFC4B5FD).withValues(alpha: 0.35),
+                            Colors.transparent,
+                          ],
                     stops: const [0.0, 1.0],
                   ),
                 ),
@@ -484,24 +571,25 @@ class _AtmosphericAuthBackground extends StatelessWidget {
 /// Bold field label placed outside above the input field
 class _FieldLabel extends StatelessWidget {
   final String textKey;
+  final bool isDark;
 
-  const _FieldLabel({required this.textKey});
+  const _FieldLabel({required this.textKey, this.isDark = false});
 
   @override
   Widget build(BuildContext context) {
     return Text(
       textKey.tr,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w700,
-        color: Color(0xFF0F172A),
+        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A),
         letterSpacing: -0.2,
       ),
     );
   }
 }
 
-/// Styled white card input field with subtle border & shadow matching the design
+/// Styled card input field with subtle border & shadow matching the design
 class _InputField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
@@ -510,6 +598,7 @@ class _InputField extends StatelessWidget {
   final TextInputAction textInputAction;
   final Widget? suffixIcon;
   final ValueChanged<String>? onSubmitted;
+  final bool isDark;
 
   const _InputField({
     required this.controller,
@@ -519,20 +608,26 @@ class _InputField extends StatelessWidget {
     this.textInputAction = TextInputAction.next,
     this.suffixIcon,
     this.onSubmitted,
+    this.isDark = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF161E2E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
-        boxShadow: const [
+        border: Border.all(
+          color: isDark ? const Color(0xFF243046) : const Color(0xFFE2E8F0),
+          width: 1.1,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x080F172A),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.25)
+                : const Color(0x080F172A),
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -542,15 +637,15 @@ class _InputField extends StatelessWidget {
         keyboardType: keyboardType,
         textInputAction: textInputAction,
         onSubmitted: onSubmitted,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w500,
-          color: Color(0xFF0F172A),
+          color: isDark ? Colors.white : const Color(0xFF0F172A),
         ),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(
-            color: Color(0xFF94A3B8),
+          hintStyle: TextStyle(
+            color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
             fontSize: 15,
             fontWeight: FontWeight.w400,
           ),
@@ -562,7 +657,11 @@ class _InputField extends StatelessWidget {
           enabledBorder: InputBorder.none,
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFF5B45E0), width: 1.8),
+            borderSide: BorderSide(
+              color:
+                  isDark ? const Color(0xFF818CF8) : const Color(0xFF5B45E0),
+              width: 1.8,
+            ),
           ),
           suffixIcon: suffixIcon,
         ),
@@ -571,18 +670,20 @@ class _InputField extends StatelessWidget {
   }
 }
 
-/// Clean white card social authentication button
+/// Clean card social authentication button
 class _SocialButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
   final Widget icon;
   final String label;
+  final bool isDark;
 
   const _SocialButton({
     required this.onPressed,
     required this.isLoading,
     required this.icon,
     required this.label,
+    this.isDark = false,
   });
 
   @override
@@ -591,14 +692,19 @@ class _SocialButton extends StatelessWidget {
       width: double.infinity,
       height: 52,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF161E2E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.1),
-        boxShadow: const [
+        border: Border.all(
+          color: isDark ? const Color(0xFF243046) : const Color(0xFFE2E8F0),
+          width: 1.1,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x060F172A),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.25)
+                : const Color(0x060F172A),
             blurRadius: 6,
-            offset: Offset(0, 1),
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -609,11 +715,11 @@ class _SocialButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           child: Center(
             child: isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                      color: Color(0xFF0F172A),
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                       strokeWidth: 2,
                     ),
                   )
@@ -624,10 +730,11 @@ class _SocialButton extends StatelessWidget {
                       const SizedBox(width: 10),
                       Text(
                         label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color:
+                              isDark ? Colors.white : const Color(0xFF0F172A),
                           letterSpacing: -0.2,
                         ),
                       ),

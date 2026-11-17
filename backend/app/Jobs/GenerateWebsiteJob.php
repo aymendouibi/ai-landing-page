@@ -93,6 +93,20 @@ class GenerateWebsiteJob implements ShouldQueue
                 tokensOut: 0
             );
 
+            // Send notification to user that AI website generation completed
+            try {
+                $user = \App\Models\User::find($aiJob->user_id);
+                if ($user) {
+                    app(\App\Services\NotificationService::class)->sendAiModification(
+                        $user,
+                        $website,
+                        'Initial website draft generated'
+                    );
+                }
+            } catch (\Throwable $e) {
+                // Non-blocking notification dispatch
+            }
+
         } catch (Exception $e) {
             $aiJob->markFailed($e->getMessage());
         }

@@ -180,4 +180,77 @@ void main() {
     expect(find.text('Privacy Policy'), findsWidgets);
     expect(find.text('1. Information We Collect'), findsOneWidget);
   });
+
+  testWidgets('AuthScreen renders correctly in dark theme (Login mode)', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    SocialAuthService.mockAppleSignInSupported = true;
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: ThemeData.dark(),
+        translations: AppTranslations(),
+        locale: const Locale('en', 'US'),
+        home: const AuthScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify dark Scaffold
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    expect(scaffold.backgroundColor, const Color(0xFF090D16));
+
+    // Verify content rendered in dark theme
+    expect(find.text('AI LANDING PAGE'), findsOneWidget);
+    expect(find.text('Welcome back.'), findsOneWidget);
+    expect(find.text('Sign in to bring your next idea to life.'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Forgot password?'), findsOneWidget);
+    expect(find.text('Log in'), findsWidgets);
+    expect(find.text('Continue with Google'), findsOneWidget);
+    expect(find.text('Continue with Apple'), findsOneWidget);
+  });
+
+  testWidgets('AuthScreen renders correctly in dark theme (Register mode)', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: ThemeData.dark(),
+        translations: AppTranslations(),
+        locale: const Locale('en', 'US'),
+        home: const AuthScreen(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Tap on "Create an account"
+    final toggleFinder = find.byKey(const Key('auth_mode_toggle'));
+    await tester.ensureVisible(toggleFinder);
+    await tester.tap(toggleFinder);
+    await tester.pumpAndSettle();
+
+    // Title should change
+    expect(find.text('Create account.'), findsWidgets);
+    expect(find.text('Sign up to bring your next idea to life.'), findsOneWidget);
+    expect(find.text('Full name'), findsOneWidget);
+
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    expect(scaffold.backgroundColor, const Color(0xFF090D16));
+  });
 }

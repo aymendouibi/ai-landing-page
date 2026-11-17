@@ -16,8 +16,12 @@ class TemplatesCategoryTabs extends StatelessWidget {
     switch (tab) {
       case 'For you':
         return 'tab_for_you'.tr;
+      case 'Startups':
+        return 'tab_startups'.tr;
       case 'Business':
         return 'tab_business'.tr;
+      case 'Weddings':
+        return 'tab_weddings'.tr;
       case 'Creative':
         return 'tab_creative'.tr;
       case 'Personal':

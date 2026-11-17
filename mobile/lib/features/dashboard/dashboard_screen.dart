@@ -20,7 +20,9 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(DashboardController());
+    final controller = Get.isRegistered<DashboardController>()
+        ? Get.find<DashboardController>()
+        : Get.put(DashboardController(), permanent: true);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppShowcase.checkAndStartDashboardShowcase(context, [

@@ -136,5 +136,14 @@ Route::prefix('v1')->group(function () {
 
         // Feedback / Reviews ("Envoyer les avis")
         Route::post('/feedback', [\App\Http\Controllers\Api\V1\FeedbackController::class, 'store']);
+
+        // In-App & Push Notifications
+        Route::prefix('notifications')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\V1\NotificationController::class, 'index']);
+            Route::post('/read-all', [\App\Http\Controllers\Api\V1\NotificationController::class, 'markAllAsRead']);
+            Route::post('/preferences', [\App\Http\Controllers\Api\V1\NotificationController::class, 'updatePreferences']);
+            Route::post('/{id}/read', [\App\Http\Controllers\Api\V1\NotificationController::class, 'markAsRead']);
+            Route::delete('/{id}', [\App\Http\Controllers\Api\V1\NotificationController::class, 'destroy']);
+        });
     });
 });

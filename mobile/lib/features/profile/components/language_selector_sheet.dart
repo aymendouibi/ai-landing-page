@@ -81,36 +81,34 @@ class LanguageSelectorSheet extends StatelessWidget {
             Flexible(
               child: Obx(() {
                 final selectedLocale = controller.currentLocale.value;
-                return ListView.builder(
+                final isSystem = controller.isUsingSystemLocale.value;
+
+                return ListView(
                   shrinkWrap: true,
-                  itemCount: AppLocales.languages.length,
-                  itemBuilder: (context, index) {
-                    final lang = AppLocales.languages[index];
-                    final isSelected =
-                        selectedLocale.languageCode == lang.languageCode;
-                    return ListTile(
+                  children: [
+                    // System Default (Follows Phone)
+                    ListTile(
                       dense: true,
-                      leading: Text(
-                        lang.flag,
-                        style: const TextStyle(fontSize: 22),
+                      leading: const Text(
+                        '📱',
+                        style: TextStyle(fontSize: 22),
                       ),
                       title: Text(
-                        lang.nativeName,
+                        'system_default_language'.tr,
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontWeight: isSystem ? FontWeight.bold : FontWeight.w500,
                           color: AppColors.inkOf(context),
                         ),
                       ),
                       subtitle: Text(
-                        lang.englishName,
+                        'system_default_language_desc'.tr,
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.inkMutedOf(context),
                         ),
                       ),
-                      trailing: isSelected
+                      trailing: isSystem
                           ? const Icon(
                               LucideIcons.check,
                               color: AppColors.atmosphereViolet,
@@ -118,11 +116,57 @@ class LanguageSelectorSheet extends StatelessWidget {
                             )
                           : null,
                       onTap: () {
-                        controller.setLocale(lang.locale);
+                        controller.setUseSystemLocale();
                         Navigator.pop(context);
                       },
-                    );
-                  },
+                    ),
+
+                    Divider(
+                      height: 1,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : const Color(0xFFF1F5F9),
+                    ),
+
+                    ...AppLocales.languages.map((lang) {
+                      final isSelected = !isSystem &&
+                          selectedLocale.languageCode == lang.languageCode;
+                      return ListTile(
+                        dense: true,
+                        leading: Text(
+                          lang.flag,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        title: Text(
+                          lang.nativeName,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.w500,
+                            color: AppColors.inkOf(context),
+                          ),
+                        ),
+                        subtitle: Text(
+                          lang.englishName,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.inkMutedOf(context),
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? const Icon(
+                                LucideIcons.check,
+                                color: AppColors.atmosphereViolet,
+                                size: 20,
+                              )
+                            : null,
+                        onTap: () {
+                          controller.setLocale(lang.locale);
+                          Navigator.pop(context);
+                        },
+                      );
+                    }),
+                  ],
                 );
               }),
             ),

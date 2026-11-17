@@ -89,9 +89,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
         : Get.put(DashboardController());
 
     return Scaffold(
-      backgroundColor: isDark
-          ? const Color(0xFF0F172A)
-          : const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.backgroundOf(context),
       body: Stack(
         children: [
           // Ethereal pastel gradient wash matching design mockup
@@ -103,10 +101,10 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                   end: Alignment.bottomRight,
                   colors: isDark
                       ? [
-                          const Color(0xFF0F172A),
+                          const Color(0xFF090D16),
                           const Color(0xFF1E1B4B).withValues(alpha: 0.5),
                           const Color(0xFF1E293B).withValues(alpha: 0.4),
-                          const Color(0xFF0F172A),
+                          const Color(0xFF090D16),
                         ]
                       : [
                           const Color(0xFFBAE6FD).withValues(alpha: 0.85),
