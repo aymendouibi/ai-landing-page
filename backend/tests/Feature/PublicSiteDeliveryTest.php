@@ -150,4 +150,11 @@ class PublicSiteDeliveryTest extends TestCase
         $this->assertStringContainsString('Seasonal Roasts', $html);
         $this->assertStringContainsString('Ethiopia Yirgacheffe', $html);
     }
+
+    public function test_app_ads_txt_route_serves_content(): void
+    {
+        $response = $this->get('/app-ads.txt');
+        $response->assertStatus(200);
+        $this->assertStringContainsString('start.io, 112660328, DIRECT', $response->getContent());
+    }
 }

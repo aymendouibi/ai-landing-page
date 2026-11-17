@@ -43,6 +43,17 @@ Route::get('/canvas', function () {
     abort(404, 'Editor canvas not found');
 });
 
+// App-ads.txt for Start.io and mobile ad network crawlers
+Route::get('/app-ads.txt', function () {
+    $file = public_path('app-ads.txt');
+    if (file_exists($file)) {
+        return response(file_get_contents($file), 200, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+        ]);
+    }
+    abort(404);
+});
+
 // Admin Guest Routes (Login, Dev Quick-Login)
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
@@ -119,6 +130,6 @@ Route::get('/sites/{subdomain}/{path?}', [PublicSiteController::class, 'serve'])
 
 // 3. Root path-based delivery: https://our-domain.com/{subdomain}/{path?}
 Route::get('/{subdomain}/{path?}', [PublicSiteController::class, 'serve'])
-    ->where('subdomain', '^(?!admin|api|sanctum|up|_ignition|storage|hosting|assets|favicon)[a-zA-Z0-9\-]+$')
+    ->where('subdomain', '^(?!admin|api|sanctum|up|_ignition|storage|hosting|assets|favicon|app-ads)[a-zA-Z0-9\-]+$')
     ->where('path', '.*')
     ->name('public.site.path');
