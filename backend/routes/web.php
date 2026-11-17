@@ -54,6 +54,17 @@ Route::get('/app-ads.txt', function () {
     abort(404);
 });
 
+// Android Digital Asset Links (App Links)
+Route::get('/.well-known/assetlinks.json', function () {
+    $file = public_path('.well-known/assetlinks.json');
+    if (file_exists($file)) {
+        return response(file_get_contents($file), 200, [
+            'Content-Type' => 'application/json',
+        ]);
+    }
+    abort(404);
+});
+
 // Admin Guest Routes (Login, Dev Quick-Login)
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');

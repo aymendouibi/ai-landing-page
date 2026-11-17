@@ -84,7 +84,7 @@ class BillingController extends Controller
     public function paymentIntent(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'interval' => ['nullable', 'string', 'in:monthly,yearly,annual'],
+            'interval' => ['nullable', 'string', 'in:monthly,yearly,annual,lifetime'],
         ]);
 
         try {
@@ -106,8 +106,8 @@ class BillingController extends Controller
     {
         $validated = $request->validate([
             'plan_slug' => ['required', 'string', 'in:free,pro'],
-            'interval' => ['nullable', 'string', 'in:monthly,yearly,annual'],
-            'provider' => ['nullable', 'string', 'in:stripe,google_play,in_app,manual'],
+            'interval' => ['nullable', 'string', 'in:monthly,yearly,annual,lifetime'],
+            'provider' => ['nullable', 'string', 'in:stripe,google_play,in_app,revenuecat,manual'],
             'payment_intent_id' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -123,9 +123,11 @@ class BillingController extends Controller
                 'cancelled_at' => now(),
             ]);
         } else {
-            $periodEnd = ($interval === 'yearly' || $interval === 'annual')
-                ? now()->addYear()
-                : now()->addMonth();
+            $periodEnd = match ($interval) {
+                'lifetime' => now()->addYears(100),
+                'yearly', 'annual' => now()->addYear(),
+                default => now()->addMonth(),
+            };
 
             \App\Models\Subscription::updateOrCreate(
                 ['user_id' => $user->id],
@@ -198,6 +200,29 @@ class BillingController extends Controller
 
         return response()->json([
             'history' => $history,
+        ]);
+    }
+
+    /**
+     * Instantly synchronize a RevenueCat purchase from the mobile client.
+     */
+    public function syncRevenueCat(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'is_pro' => ['required', 'boolean'],
+            'interval' => ['nullable', 'string', 'in:monthly,yearly,annual,lifetime'],
+            'transaction_id' => ['nullable', 'string', 'max:255'],
+            'expiration_at_ms' => ['nullable', 'integer'],
+        ]);
+
+        $this->billingService->syncRevenueCatSubscription(
+            user: $request->user(),
+            data: $validated
+        );
+
+        return response()->json([
+            'message' => 'RevenueCat subscription synchronized successfully.',
+            'summary' => $this->entitlementService->getSummary($request->user()),
         ]);
     }
 }

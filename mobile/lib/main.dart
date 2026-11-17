@@ -10,6 +10,7 @@ import 'core/localization/supported_locales.dart';
 import 'core/routes/app_pages.dart';
 import 'core/routes/app_routes.dart';
 import 'core/routes/orientation_route_observer.dart';
+import 'core/services/revenue_cat_service.dart';
 import 'core/services/stripe_service.dart';
 import 'core/storage/session_manager.dart';
 import 'core/widgets/app_showcase.dart';
@@ -36,6 +37,12 @@ void main() async {
       StripeService.instance.initStripe();
     } catch (e) {
       debugPrint('Stripe initialization notice: $e');
+    }
+
+    try {
+      RevenueCatService.instance.init();
+    } catch (e) {
+      debugPrint('RevenueCat initialization notice: $e');
     }
   }
 

@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "810241219942-lk87up6s8nm239mdbdp31p23v7vckr65.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.douibi.landing.ai",
+            "certificate_hash": "6c362495e5c18539f637d9ecaff1f01747392b3a"
+          }
+        },
+        {
           "client_id": "810241219942-mo6ne66u4221qokjcf4l1scutpmf39u7.apps.googleusercontent.com",
           "client_type": 3
         }

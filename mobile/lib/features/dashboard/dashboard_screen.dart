@@ -6,12 +6,14 @@ import '../../core/designsystem/gradients.dart';
 import '../../core/designsystem/typography.dart';
 import '../../core/widgets/ad_banner_widget.dart';
 import '../../core/widgets/app_showcase.dart';
+import '../../core/widgets/user_avatar_circle.dart';
 import '../templates/templates_view.dart';
 import '../assets/assets_view.dart';
 import '../profile/profile_view.dart';
 import 'components/continue_editing_hero_card.dart';
 import 'components/floating_bottom_bar.dart';
 import 'components/new_website_bottom_sheet.dart';
+import 'components/projects_shimmer_view.dart';
 import 'components/recent_project_card.dart';
 import 'dashboard_controller.dart';
 
@@ -147,153 +149,132 @@ class DashboardScreen extends StatelessWidget {
                   ),
 
                   // Circular Avatar
-                  GestureDetector(
+                  UserAvatarCircle(
+                    size: 40,
+                    isDark: Theme.of(context).brightness == Brightness.dark,
                     onTap: () => controller.onTabSelected('Profile'),
-                    child: Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: AppColors.inkOf(context),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Obx(
-                        () => Text(
-                          controller.userInitials.value,
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? Colors.black
-                                : Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),
 
               const SizedBox(height: 20),
 
-              Obx(
-                () => controller.isLoading.value
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4),
-                        child: LinearProgressIndicator(
-                          backgroundColor: Colors.transparent,
-                          color: AppColors.atmosphereViolet,
-                          minHeight: 2,
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-
-              // Continue Editing Hero Card
+              // Content or Shimmer Loading State
               Obx(() {
-                final heroSite = controller.heroWebsite;
-                return AppShowcase.item(
-                  key: controller.showcaseHeroCardKey,
-                  title: 'showcase_create_landing_page_title'.tr,
-                  description: 'showcase_create_landing_page_desc'.tr,
-                  child: ContinueEditingHeroCard(
-                    website: heroSite,
-                    onOpenClick: () {
-                      if (heroSite != null) {
-                        controller.openWebsite(heroSite.id);
-                      } else {
-                        NewWebsiteBottomSheet.show(
-                          context,
-                          onDescribeToAi: controller.openAiCreation,
-                          onStartFromTemplate: controller.openTemplates,
-                          onBlankWebsite: controller.createBlankWebsite,
-                        );
-                      }
-                    },
-                  ),
-                );
-              }),
-
-              const AdBannerWidget(),
-
-              const SizedBox(height: 18),
-
-              // "Recent" Section Title
-              Text(
-                'recent'.tr,
-                style: AppTypography.sectionHeading.copyWith(
-                  color: AppColors.inkOf(context),
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              // Horizontal Carousel of Website Previews or Clean Empty State
-              Obx(() {
-                final items = controller.previewItems;
-                if (items.isEmpty) {
-                  return Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 36,
-                      horizontal: 20,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceOf(context),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.borderSubtleOf(context),
-                        width: 1.0,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceMutedOf(context),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            LucideIcons.layoutTemplate,
-                            size: 22,
-                            color: AppColors.inkMutedOf(context),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No recent projects',
-                          style: AppTypography.itemTitleOf(context),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Websites you create or edit will appear here.',
-                          textAlign: TextAlign.center,
-                          style: AppTypography.helperOf(context),
-                        ),
-                      ],
-                    ),
-                  );
+                if (controller.isLoading.value && controller.websites.isEmpty) {
+                  return const ProjectsShimmerView();
                 }
 
-                return SizedBox(
-                  height: 355,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: items.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(width: 14),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      return RecentProjectCard(
-                        item: item,
-                        onClick: () => controller.openWebsite(item.id),
-                      );
-                    },
-                  ),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Continue Editing Hero Card
+                    AppShowcase.item(
+                      key: controller.showcaseHeroCardKey,
+                      title: 'showcase_create_landing_page_title'.tr,
+                      description: 'showcase_create_landing_page_desc'.tr,
+                      child: ContinueEditingHeroCard(
+                        website: controller.heroWebsite,
+                        onOpenClick: () {
+                          final heroSite = controller.heroWebsite;
+                          if (heroSite != null) {
+                            controller.openWebsite(heroSite.id);
+                          } else {
+                            NewWebsiteBottomSheet.show(
+                              context,
+                              onDescribeToAi: controller.openAiCreation,
+                              onStartFromTemplate: controller.openTemplates,
+                              onBlankWebsite: controller.createBlankWebsite,
+                            );
+                          }
+                        },
+                      ),
+                    ),
+
+                    const AdBannerWidget(),
+
+                    const SizedBox(height: 18),
+
+                    // "Recent" Section Title
+                    Text(
+                      'recent'.tr,
+                      style: AppTypography.sectionHeading.copyWith(
+                        color: AppColors.inkOf(context),
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // Horizontal Carousel of Website Previews or Clean Empty State
+                    Builder(
+                      builder: (context) {
+                        final items = controller.previewItems;
+                        if (items.isEmpty) {
+                          return Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 36,
+                              horizontal: 20,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceOf(context),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: AppColors.borderSubtleOf(context),
+                                width: 1.0,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceMutedOf(context),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    LucideIcons.layoutTemplate,
+                                    size: 22,
+                                    color: AppColors.inkMutedOf(context),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No recent projects',
+                                  style: AppTypography.itemTitleOf(context),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Websites you create or edit will appear here.',
+                                  textAlign: TextAlign.center,
+                                  style: AppTypography.helperOf(context),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return SizedBox(
+                          height: 355,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: items.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(width: 14),
+                            itemBuilder: (context, index) {
+                              final item = items[index];
+                              return RecentProjectCard(
+                                item: item,
+                                onClick: () => controller.openWebsite(item.id),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 );
               }),
             ],

@@ -113,6 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.9"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: ea36e500cbf0ec18361deabca755434f73e42fe53c5130021c7e2d6b5ebe1702
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -645,6 +653,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
+  purchases_flutter:
+    dependency: "direct main"
+    description:
+      name: purchases_flutter
+      sha256: "273a98e9fe3d6a763c9c23ef1fc466b055311d40c3c87b09aef605ec398fd85f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "11.0.3"
+  purchases_ui_flutter:
+    dependency: "direct main"
+    description:
+      name: purchases_ui_flutter
+      sha256: "9931ffb9729b61b667f41da213de299cff9993ecaf95f18e455aef78b02b17a8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "11.0.3"
   record_use:
     dependency: transitive
     description:

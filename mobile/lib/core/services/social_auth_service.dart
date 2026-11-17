@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../network/api_client.dart';
+import '../storage/session_manager.dart';
 
 class SocialAuthResult {
   final bool success;
@@ -65,6 +66,7 @@ class SocialAuthService {
           await GoogleSignIn.instance.authenticate();
 
       final String? idToken = account.authentication.idToken;
+      final String? googlePhotoUrl = account.photoUrl;
 
       if (idToken == null || idToken.isEmpty) {
         return SocialAuthResult.failure(
@@ -80,6 +82,10 @@ class SocialAuthService {
         idToken,
         deviceName: deviceName,
       );
+
+      if (googlePhotoUrl != null && googlePhotoUrl.isNotEmpty) {
+        await SessionManager.saveUserAvatarUrl(googlePhotoUrl);
+      }
 
       return SocialAuthResult.success(data);
     } on GoogleSignInException catch (e) {
@@ -189,6 +195,8 @@ class SocialAuthService {
       return mockAppleSignInSupported!;
     }
     if (kIsWeb) return false;
+    // Hide Apple Sign-In on Android
+    if (Platform.isAndroid) return false;
     if (Platform.isIOS || Platform.isMacOS) return true;
     try {
       return await SignInWithApple.isAvailable();

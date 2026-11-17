@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../localization/supported_locales.dart';
+import '../services/revenue_cat_service.dart';
 
 class SessionManager {
   static const _tokenKey = 'auth_token';
   static const _userIdKey = 'user_id';
   static const _userNameKey = 'user_name';
   static const _userEmailKey = 'user_email';
+  static const _userAvatarUrlKey = 'user_avatar_url';
   static const _themeModeKey = 'app_theme_mode';
   static const _localeKey = 'app_locale';
   static const _dashboardShowcaseKey = 'has_seen_dashboard_showcase';
@@ -18,17 +20,29 @@ class SessionManager {
     required String userId,
     required String name,
     required String email,
+    String? avatarUrl,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, token);
     await prefs.setString(_userIdKey, userId);
     await prefs.setString(_userNameKey, name);
     await prefs.setString(_userEmailKey, email);
+    if (avatarUrl != null && avatarUrl.isNotEmpty) {
+      await prefs.setString(_userAvatarUrlKey, avatarUrl);
+    }
+    try {
+      RevenueCatService.instance.logIn(userId);
+    } catch (_) {}
   }
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_tokenKey);
+  }
+
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userIdKey);
   }
 
   static Future<bool> isLoggedIn() async {
@@ -44,6 +58,20 @@ class SessionManager {
   static Future<String?> getUserEmail() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userEmailKey);
+  }
+
+  static Future<String?> getUserAvatarUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userAvatarUrlKey);
+  }
+
+  static Future<void> saveUserAvatarUrl(String? url) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (url != null && url.isNotEmpty) {
+      await prefs.setString(_userAvatarUrlKey, url);
+    } else {
+      await prefs.remove(_userAvatarUrlKey);
+    }
   }
 
   static Future<String> getUserInitials() async {
@@ -214,5 +242,8 @@ class SessionManager {
     await prefs.remove(_userEmailKey);
     await prefs.remove(_keyDeletedWebsites);
     await prefs.remove(_recentOpenedWebsitesKey);
+    try {
+      RevenueCatService.instance.logOut();
+    } catch (_) {}
   }
 }

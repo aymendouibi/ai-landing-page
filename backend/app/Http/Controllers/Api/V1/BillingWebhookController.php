@@ -37,5 +37,34 @@ class BillingWebhookController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
+
+    /**
+     * Handle incoming RevenueCat webhook notifications.
+     */
+    public function revenuecat(Request $request): JsonResponse
+    {
+        $expectedAuth = config('services.revenuecat.webhook_authorization');
+        $authHeader = $request->header('Authorization');
+
+        if (!empty($expectedAuth) && $authHeader !== $expectedAuth) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $payload = $request->all();
+
+        try {
+            $result = $this->billingService->handleRevenueCatWebhook($payload);
+            return response()->json($result);
+        } catch (Exception $e) {
+            Log::error('RevenueCat webhook processing error: ' . $e->getMessage(), ['payload' => $payload]);
+            \App\Models\AppErrorLog::logPaymentError(
+                'RevenueCat webhook processing exception: ' . $e->getMessage(),
+                ['payload' => $payload],
+                null,
+                $e
+            );
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
 }
 

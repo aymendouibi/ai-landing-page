@@ -49,6 +49,7 @@ Route::prefix('v1')->group(function () {
 
     // Public Billing Webhooks
     Route::post('/billing/webhook/stripe', [BillingWebhookController::class, 'stripe']);
+    Route::post('/billing/webhook/revenuecat', [BillingWebhookController::class, 'revenuecat']);
 
     // Public Scheduled Cron Webhook (Free forever: triggered via GitHub Actions, cron-job.org, or curl)
     Route::match(['get', 'post'], '/cron/remind-drafts', function (\Illuminate\Http\Request $request, \App\Services\NotificationService $service) {
@@ -152,6 +153,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/subscribe', [BillingController::class, 'subscribe']);
             Route::post('/portal', [BillingController::class, 'portal']);
             Route::post('/google-play/verify', [BillingController::class, 'verifyGooglePlay']);
+            Route::post('/revenuecat/sync', [BillingController::class, 'syncRevenueCat']);
         });
 
         // Feedback / Reviews ("Envoyer les avis")

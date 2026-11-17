@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/widgets/user_avatar_circle.dart';
 
 class TemplatesHeader extends StatelessWidget {
   final VoidCallback? onAvatarTap;
@@ -32,36 +33,11 @@ class TemplatesHeader extends StatelessWidget {
                   color: isDark ? Colors.white : const Color(0xFF090D16),
                 ),
               ),
-              // Circular Avatar Pill (MR / initials)
-              GestureDetector(
+              // Circular Avatar Pill
+              UserAvatarCircle(
+                size: 40,
+                isDark: isDark,
                 onTap: onAvatarTap,
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isDark
-                        ? const Color(0xFF334155)
-                        : const Color(0xFF18181B),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'MR',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ),
               ),
             ],
           ),

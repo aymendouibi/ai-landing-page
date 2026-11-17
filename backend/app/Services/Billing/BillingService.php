@@ -2,12 +2,14 @@
 
 namespace App\Services\Billing;
 
+use App\Enums\BillingProvider;
 use App\Enums\SubscriptionStatus;
 use App\Models\BillingCustomer;
 use App\Models\BillingEvent;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -111,7 +113,7 @@ class BillingService
      */
     public function createStripePaymentIntent(User $user, string $interval = 'monthly'): array
     {
-        $amount = ($interval === 'yearly' || $interval === 'annual') ? 5988 : 499;
+        $amount = ($interval === 'yearly' || $interval === 'annual') ? 4190 : 499;
         $stripeSecret = config('services.stripe.secret');
 
         // If Stripe secret is set, call real Stripe API via SDK or HTTP
@@ -546,7 +548,7 @@ class BillingService
                 $payload = $event->payload ?? [];
                 $interval = $payload['interval'] ?? $payload['plan'] ?? 'monthly';
                 $isYearly = ($interval === 'yearly' || $interval === 'annual');
-                $amount = $isYearly ? 59.88 : 4.99;
+                $amount = $isYearly ? 41.90 : 4.99;
                 $reference = $payload['payment_intent_id'] ?? $event->provider_event_id;
 
                 if ($reference) {
@@ -586,7 +588,7 @@ class BillingService
             if ($sub->plan && $sub->plan->slug !== 'free') {
                 $isYearly = $sub->current_period_end && $sub->current_period_start
                     && $sub->current_period_start->diffInDays($sub->current_period_end) > 60;
-                $amount = $isYearly ? 59.88 : 4.99;
+                $amount = $isYearly ? 41.90 : 4.99;
 
                 $history[] = [
                     'id' => $sub->id,
@@ -608,6 +610,186 @@ class BillingService
         }
 
         return $history;
+    }
+
+    /**
+     * Handle incoming RevenueCat webhook events (StoreKit / Google Play unified).
+     *
+     * @throws Exception
+     */
+    public function handleRevenueCatWebhook(array $payload): array
+    {
+        $event = $payload['event'] ?? $payload;
+        $eventId = $event['id'] ?? null;
+        $eventType = $event['type'] ?? 'unknown';
+        $appUserId = $event['app_user_id'] ?? $event['original_app_user_id'] ?? null;
+
+        if (!$eventId) {
+            throw new Exception('Missing event id in RevenueCat webhook payload.');
+        }
+
+        // Idempotency check
+        $existingEvent = BillingEvent::where('provider_event_id', $eventId)->first();
+        if ($existingEvent && $existingEvent->processed) {
+            return [
+                'status' => 'already_processed',
+                'event_id' => $eventId,
+            ];
+        }
+
+        if (!$appUserId) {
+            return [
+                'status' => 'ignored_missing_app_user_id',
+                'event_id' => $eventId,
+            ];
+        }
+
+        $user = User::where('id', $appUserId)->first();
+        if (!$user) {
+            return [
+                'status' => 'ignored_unknown_user',
+                'app_user_id' => $appUserId,
+            ];
+        }
+
+        $customer = BillingCustomer::firstOrCreate(['user_id' => $user->id]);
+
+        $billingEvent = BillingEvent::updateOrCreate(
+            ['provider_event_id' => $eventId],
+            [
+                'billing_customer_id' => $customer->id,
+                'provider' => 'revenuecat',
+                'event_type' => $eventType,
+                'payload' => $payload,
+                'processed' => false,
+            ]
+        );
+
+        $proPlan = SubscriptionPlan::where('slug', 'pro')->first();
+
+        switch ($eventType) {
+            case 'INITIAL_PURCHASE':
+            case 'RENEWAL':
+            case 'PRODUCT_CHANGE':
+            case 'UNCANCELLATION':
+            case 'NON_RENEWING_PURCHASE':
+                if ($proPlan) {
+                    $start = isset($event['purchased_at_ms'])
+                        ? Carbon::createFromTimestampMs($event['purchased_at_ms'])
+                        : now();
+                    $end = isset($event['expiration_at_ms'])
+                        ? Carbon::createFromTimestampMs($event['expiration_at_ms'])
+                        : now()->addMonth();
+
+                    Subscription::updateOrCreate(
+                        ['user_id' => $user->id],
+                        [
+                            'plan_id' => $proPlan->id,
+                            'status' => SubscriptionStatus::Active,
+                            'provider' => BillingProvider::RevenueCat,
+                            'provider_subscription_id' => $event['transaction_id'] ?? $eventId,
+                            'current_period_start' => $start,
+                            'current_period_end' => $end,
+                            'cancelled_at' => null,
+                        ]
+                    );
+                }
+                break;
+
+            case 'CANCELLATION':
+                $sub = Subscription::where('user_id', $user->id)
+                    ->where('status', SubscriptionStatus::Active)
+                    ->first();
+                if ($sub) {
+                    $sub->update([
+                        'cancelled_at' => now(),
+                    ]);
+                }
+                break;
+
+            case 'EXPIRATION':
+                $sub = Subscription::where('user_id', $user->id)
+                    ->where('status', SubscriptionStatus::Active)
+                    ->first();
+                if ($sub) {
+                    $sub->update([
+                        'status' => SubscriptionStatus::Expired,
+                        'current_period_end' => now(),
+                    ]);
+                }
+                break;
+        }
+
+        $billingEvent->update(['processed' => true]);
+
+        return [
+            'status' => 'success',
+            'event_id' => $eventId,
+            'event_type' => $eventType,
+        ];
+    }
+
+    /**
+     * Instantly synchronize a RevenueCat purchase from the mobile client.
+     */
+    public function syncRevenueCatSubscription(User $user, array $data): Subscription
+    {
+        $isPro = $data['is_pro'] ?? true;
+        $interval = $data['interval'] ?? 'monthly';
+        $transactionId = $data['transaction_id'] ?? null;
+        $expirationMs = $data['expiration_at_ms'] ?? null;
+
+        $proPlan = SubscriptionPlan::where('slug', 'pro')->firstOrFail();
+
+        if ($isPro) {
+            $periodEnd = $expirationMs
+                ? Carbon::createFromTimestampMs($expirationMs)
+                : match ($interval) {
+                    'lifetime' => now()->addYears(100),
+                    'yearly', 'annual' => now()->addYear(),
+                    default => now()->addMonth(),
+                };
+
+            $subscription = Subscription::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'plan_id' => $proPlan->id,
+                    'status' => SubscriptionStatus::Active,
+                    'provider' => BillingProvider::RevenueCat,
+                    'provider_subscription_id' => $transactionId,
+                    'current_period_start' => now(),
+                    'current_period_end' => $periodEnd,
+                    'cancelled_at' => null,
+                ]
+            );
+
+            $customer = BillingCustomer::firstOrCreate(['user_id' => $user->id]);
+            BillingEvent::create([
+                'billing_customer_id' => $customer->id,
+                'provider' => 'revenuecat',
+                'event_type' => 'subscription.synced',
+                'provider_event_id' => $transactionId ?? ('rc_sync_' . Str::random(16)),
+                'payload' => $data,
+                'processed' => true,
+            ]);
+
+            return $subscription;
+        }
+
+        $subscription = Subscription::where('user_id', $user->id)->first();
+        if ($subscription) {
+            $subscription->update([
+                'status' => SubscriptionStatus::Cancelled,
+                'cancelled_at' => now(),
+            ]);
+        }
+
+        return $subscription ?? Subscription::create([
+            'user_id' => $user->id,
+            'plan_id' => SubscriptionPlan::where('slug', 'free')->first()?->id ?? $proPlan->id,
+            'status' => SubscriptionStatus::Cancelled,
+            'provider' => BillingProvider::RevenueCat,
+        ]);
     }
 }
 

@@ -20,6 +20,7 @@ class DashboardController extends GetxController {
   final userInitials = 'MR'.obs;
   final userName = RxnString('Morgan Reed');
   final userEmail = 'morgan.reed@gmail.com'.obs;
+  final userAvatarUrl = RxnString();
   final websites = <Website>[].obs;
   final previewItems = <WebsitePreviewItem>[].obs;
   final isLoading = true.obs;
@@ -169,6 +170,8 @@ class DashboardController extends GetxController {
     final initials = await SessionManager.getUserInitials();
     final name = await SessionManager.getUserName();
     final email = await SessionManager.getUserEmail();
+    final avatar = await SessionManager.getUserAvatarUrl();
+    userAvatarUrl.value = avatar;
     userInitials.value = (initials.isNotEmpty && initials != 'DC')
         ? initials
         : 'MR';

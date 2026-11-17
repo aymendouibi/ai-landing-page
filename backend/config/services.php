@@ -64,6 +64,11 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    'revenuecat' => [
+        'webhook_authorization' => env('REVENUECAT_WEBHOOK_AUTHORIZATION', ''),
+        'api_key' => env('REVENUECAT_API_KEY', ''),
+    ],
+
     'cloudflare' => [
         'api_token' => env('CLOUDFLARE_API_TOKEN'),
         'zone_id' => env('CLOUDFLARE_ZONE_ID'),

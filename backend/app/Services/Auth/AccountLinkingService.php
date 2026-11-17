@@ -114,7 +114,12 @@ class AccountLinkingService
                 if ($email && !$authProvider->provider_email) {
                     $authProvider->update(['provider_email' => $email]);
                 }
-                return $authProvider->user;
+                $user = $authProvider->user;
+                $newAvatar = $providerData['picture'] ?? $providerData['avatar'] ?? null;
+                if ($newAvatar && empty($user->avatar_url)) {
+                    $user->update(['avatar_url' => $newAvatar]);
+                }
+                return $user;
             }
 
             // 2. If the email is provided AND verified by the provider (e.g. Google or Apple verified),
@@ -130,6 +135,11 @@ class AccountLinkingService
                         'provider_email' => $email,
                         'provider_data' => $providerData,
                     ]);
+
+                    $newAvatar = $providerData['picture'] ?? $providerData['avatar'] ?? null;
+                    if ($newAvatar && empty($existingUser->avatar_url)) {
+                        $existingUser->update(['avatar_url' => $newAvatar]);
+                    }
 
                     return $existingUser;
                 }

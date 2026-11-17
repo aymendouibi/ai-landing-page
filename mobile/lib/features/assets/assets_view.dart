@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/designsystem/colors.dart';
+import '../../core/widgets/atmospheric_background.dart';
+import '../../core/widgets/user_avatar_circle.dart';
 import '../dashboard/components/recent_project_card.dart';
 import 'assets_controller.dart';
 import 'components/upload_project_card.dart';
@@ -18,11 +20,15 @@ class AssetsView extends StatelessWidget {
         : Get.put(AssetsController());
     final isDark = AppColors.isDark(context);
 
-    return Scaffold(
-      backgroundColor: AppColors.backgroundOf(context),
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
+    return Stack(
+      children: [
+        // Ambient atmospheric mesh gradient background (same as Login)
+        AtmosphericBackground(isDark: isDark),
+
+        // Foreground Content
+        SafeArea(
+          bottom: false,
+          child: RefreshIndicator(
           onRefresh: controller.loadSites,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(
@@ -45,36 +51,11 @@ class AssetsView extends StatelessWidget {
                     ),
                   ),
 
-                  // Circular Avatar Pill (MR)
-                  GestureDetector(
+                  // Circular Avatar Pill
+                  UserAvatarCircle(
+                    size: 40,
+                    isDark: isDark,
                     onTap: onAvatarTap,
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFF18181B),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.12),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      child: Obx(
-                        () => Text(
-                          controller.userInitials.value,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -221,8 +202,9 @@ class AssetsView extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ],
+  );
+}
 
   // Filter Pills: [All]   Pages · 4   Uploads · 4
   Widget _buildFilterPillsRow(BuildContext context, AssetsController controller) {

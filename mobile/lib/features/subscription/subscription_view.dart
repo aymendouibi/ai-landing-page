@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/designsystem/app_snackbar.dart';
 import '../../core/designsystem/colors.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/services/revenue_cat_service.dart';
 import '../../core/services/stripe_service.dart';
 import '../dashboard/dashboard_controller.dart';
 import 'past_subscriptions_view.dart';
@@ -32,6 +34,16 @@ class SubscriptionView extends StatefulWidget {
 class _SubscriptionViewState extends State<SubscriptionView> {
   bool isYearly = false;
   bool isProcessing = false;
+  // 'wallet' = Apple Pay (iOS) / Google Pay (Android) via RevenueCat
+  // 'card' = Credit / Debit Card via Stripe
+  late String selectedPaymentMethod;
+
+  @override
+  void initState() {
+    super.initState();
+    // Default to Credit Card (Stripe) as requested
+    selectedPaymentMethod = 'card';
+  }
 
   void _handleBack() {
     if (Navigator.of(context).canPop()) {
@@ -50,17 +62,87 @@ class _SubscriptionViewState extends State<SubscriptionView> {
   Future<void> _handleUpgrade(DashboardController controller) async {
     setState(() => isProcessing = true);
     try {
-      final success = await StripeService.instance.processPayment(
-        context: context,
-        isYearly: isYearly,
-        controller: controller,
-      );
+      bool success = false;
+      if (selectedPaymentMethod == 'card') {
+        debugPrint('💳 [PAYMENT] User selected Credit Card (Stripe)');
+        success = await StripeService.instance.processPayment(
+          context: context,
+          isYearly: isYearly,
+          controller: controller,
+        );
+      } else {
+        debugPrint('🍏 [PAYMENT] User selected Apple / Google Pay (RevenueCat)');
+        if (RevenueCatService.instance.hasValidKey) {
+          success = await RevenueCatService.instance.purchasePro(
+            interval: isYearly ? 'yearly' : 'monthly',
+            controller: controller,
+          );
+        } else {
+          // Fallback to Stripe in environments without in-app purchase credentials
+          debugPrint('⚠️ [PAYMENT] RevenueCat key unconfigured, falling back to Stripe');
+          success = await StripeService.instance.processPayment(
+            context: context,
+            isYearly: isYearly,
+            controller: controller,
+          );
+        }
+      }
 
       if (!mounted) return;
       if (success) {
         if (Navigator.of(context).canPop()) {
           Navigator.of(context).pop();
         }
+      }
+    } catch (e, stackTrace) {
+      debugPrint('======================================================');
+      debugPrint('🚨 [PAYMENT ERROR - SubscriptionView._handleUpgrade]');
+      debugPrint('   Error: $e');
+      debugPrint('   StackTrace:\n$stackTrace');
+      debugPrint('======================================================');
+      if (mounted) {
+        AppSnackbar.error(
+          e.toString().replaceAll('Exception: ', ''),
+          title: 'common_error'.tr,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isProcessing = false);
+    }
+  }
+
+  Future<void> _handleRestorePurchases(DashboardController controller) async {
+    setState(() => isProcessing = true);
+    try {
+      debugPrint('🔄 [PAYMENT] Initiating restore purchases...');
+      if (!RevenueCatService.instance.hasValidKey) {
+        debugPrint('⚠️ [PAYMENT] RevenueCat key is empty or invalid.');
+        AppSnackbar.info('sub_restore_empty'.tr, context: context);
+        return;
+      }
+
+      final restored = await RevenueCatService.instance.restorePurchases(
+        controller: controller,
+      );
+      debugPrint('🔄 [PAYMENT] Restore result: $restored');
+
+      if (!mounted) return;
+      if (restored) {
+        AppSnackbar.success('sub_restore_success'.tr, context: context);
+      } else {
+        AppSnackbar.info('sub_restore_empty'.tr, context: context);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('======================================================');
+      debugPrint('🚨 [PAYMENT ERROR - Restore Purchases]');
+      debugPrint('   Error: $e');
+      debugPrint('   StackTrace:\n$stackTrace');
+      debugPrint('======================================================');
+      if (mounted) {
+        AppSnackbar.error(
+          e.toString().replaceAll('Exception: ', ''),
+          title: 'common_error'.tr,
+        );
       }
     } finally {
       if (mounted) setState(() => isProcessing = false);
@@ -264,9 +346,14 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? const Color(0xFF1E293B)
+                        ? const Color(0xFF181528)
                         : const Color(0xFFEDE9FE).withValues(alpha: 0.70),
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : const Color(0xFFDDD6FE).withValues(alpha: 0.60),
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -282,17 +369,23 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                             decoration: BoxDecoration(
                               color: !isYearly
                                   ? (isDark
-                                        ? const Color(0xFF334155)
+                                        ? const Color(0xFF581C87)
                                         : Colors.white)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
+                              border: !isYearly && !isDark
+                                  ? Border.all(
+                                      color: const Color(0xFFE2E8F0),
+                                      width: 0.8,
+                                    )
+                                  : null,
                               boxShadow: !isYearly
                                   ? [
                                       BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: isDark ? 0.25 : 0.06,
-                                        ),
-                                        blurRadius: 6,
+                                        color: isDark
+                                            ? const Color(0xFF581C87).withValues(alpha: 0.40)
+                                            : Colors.black.withValues(alpha: 0.06),
+                                        blurRadius: isDark ? 8 : 6,
                                         offset: const Offset(0, 2),
                                       ),
                                     ]
@@ -306,9 +399,11 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                     ? FontWeight.w700
                                     : FontWeight.w600,
                                 color: !isYearly
-                                    ? const Color(0xFF6D28D9)
+                                    ? (isDark
+                                          ? Colors.white
+                                          : const Color(0xFF581C87))
                                     : (isDark
-                                          ? Colors.white60
+                                          ? const Color(0xFF94A3B8)
                                           : const Color(0xFF64748B)),
                               ),
                             ),
@@ -328,35 +423,76 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                             decoration: BoxDecoration(
                               color: isYearly
                                   ? (isDark
-                                        ? const Color(0xFF334155)
+                                        ? const Color(0xFF581C87)
                                         : Colors.white)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
+                              border: isYearly && !isDark
+                                  ? Border.all(
+                                      color: const Color(0xFFE2E8F0),
+                                      width: 0.8,
+                                    )
+                                  : null,
                               boxShadow: isYearly
                                   ? [
                                       BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: isDark ? 0.25 : 0.06,
-                                        ),
-                                        blurRadius: 6,
+                                        color: isDark
+                                            ? const Color(0xFF581C87).withValues(alpha: 0.40)
+                                            : Colors.black.withValues(alpha: 0.06),
+                                        blurRadius: isDark ? 8 : 6,
                                         offset: const Offset(0, 2),
                                       ),
                                     ]
                                   : null,
                             ),
-                            child: Text(
-                              'sub_yearly'.tr,
-                              style: TextStyle(
-                                fontSize: 14.5,
-                                fontWeight: isYearly
-                                    ? FontWeight.w700
-                                    : FontWeight.w600,
-                                color: isYearly
-                                    ? const Color(0xFF6D28D9)
-                                    : (isDark
-                                          ? Colors.white60
-                                          : const Color(0xFF64748B)),
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'sub_yearly'.tr,
+                                  style: TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: isYearly
+                                        ? FontWeight.w700
+                                        : FontWeight.w600,
+                                    color: isYearly
+                                        ? (isDark
+                                              ? Colors.white
+                                              : const Color(0xFF581C87))
+                                        : (isDark
+                                              ? const Color(0xFF94A3B8)
+                                              : const Color(0xFF64748B)),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(
+                                            0xFF10B981,
+                                          ).withValues(alpha: 0.22)
+                                        : const Color(
+                                            0xFF10B981,
+                                          ).withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    '-30%',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: isDark
+                                          ? const Color(0xFF34D399)
+                                          : const Color(0xFF059669),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -397,7 +533,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
-                            isYearly ? '€59.88' : '€4.99',
+                            isYearly ? '€41.90' : '€4.99',
                             style: TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
@@ -450,7 +586,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                       ),
                     ),
                     Text(
-                      isYearly ? '€59.88' : '€4.99',
+                      isYearly ? '€41.90' : '€4.99',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
@@ -470,7 +606,171 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                         : const Color(0xFF64748B),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
+
+                // Payment Method Selector (Apple Pay / Google Pay vs Credit Card)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'sub_payment_method'.tr,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        // Option 1: Apple Pay (iOS) or Google Pay (Android)
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => setState(() => selectedPaymentMethod = 'wallet'),
+                            borderRadius: BorderRadius.circular(16),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: selectedPaymentMethod == 'wallet'
+                                    ? (isDark
+                                        ? const Color(0xFF581C87).withValues(alpha: 0.25)
+                                        : const Color(0xFFEDE9FE))
+                                    : (isDark
+                                        ? const Color(0xFF1E293B)
+                                        : Colors.white),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: selectedPaymentMethod == 'wallet'
+                                      ? (isDark
+                                          ? const Color(0xFFA855F7)
+                                          : const Color(0xFF7C3AED))
+                                      : (isDark
+                                          ? Colors.white.withValues(alpha: 0.08)
+                                          : const Color(0xFFE2E8F0)),
+                                  width: selectedPaymentMethod == 'wallet' ? 1.8 : 1.0,
+                                ),
+                                boxShadow: selectedPaymentMethod == 'wallet'
+                                    ? [
+                                        BoxShadow(
+                                          color: isDark
+                                              ? const Color(0xFF581C87).withValues(alpha: 0.35)
+                                              : const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Platform.isIOS ? Icons.apple : LucideIcons.smartphone,
+                                    size: 20,
+                                    color: selectedPaymentMethod == 'wallet'
+                                        ? (isDark ? const Color(0xFFC4B5FD) : const Color(0xFF581C87))
+                                        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      Platform.isIOS ? 'sub_apple_pay'.tr : 'sub_google_pay'.tr,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: selectedPaymentMethod == 'wallet'
+                                            ? FontWeight.w700
+                                            : FontWeight.w600,
+                                        color: selectedPaymentMethod == 'wallet'
+                                            ? (isDark ? Colors.white : const Color(0xFF581C87))
+                                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+
+                        // Option 2: Credit Card
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => setState(() => selectedPaymentMethod = 'card'),
+                            borderRadius: BorderRadius.circular(16),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: selectedPaymentMethod == 'card'
+                                    ? (isDark
+                                        ? const Color(0xFF581C87).withValues(alpha: 0.25)
+                                        : const Color(0xFFEDE9FE))
+                                    : (isDark
+                                        ? const Color(0xFF1E293B)
+                                        : Colors.white),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: selectedPaymentMethod == 'card'
+                                      ? (isDark
+                                          ? const Color(0xFFA855F7)
+                                          : const Color(0xFF7C3AED))
+                                      : (isDark
+                                          ? Colors.white.withValues(alpha: 0.08)
+                                          : const Color(0xFFE2E8F0)),
+                                  width: selectedPaymentMethod == 'card' ? 1.8 : 1.0,
+                                ),
+                                boxShadow: selectedPaymentMethod == 'card'
+                                    ? [
+                                        BoxShadow(
+                                          color: isDark
+                                              ? const Color(0xFF581C87).withValues(alpha: 0.35)
+                                              : const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    LucideIcons.creditCard,
+                                    size: 18,
+                                    color: selectedPaymentMethod == 'card'
+                                        ? (isDark ? const Color(0xFFC4B5FD) : const Color(0xFF581C87))
+                                        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      'sub_credit_card'.tr,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: selectedPaymentMethod == 'card'
+                                            ? FontWeight.w700
+                                            : FontWeight.w600,
+                                        color: selectedPaymentMethod == 'card'
+                                            ? (isDark ? Colors.white : const Color(0xFF581C87))
+                                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
                 // Continue to payment Button / Upgrade Button
                 Obx(() {
@@ -479,7 +779,12 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                   final isUpgradingToYearly =
                       isAlreadyPro && currentInterval == 'monthly' && isYearly;
 
-                  String buttonLabel = 'sub_continue_payment'.tr;
+                  String buttonLabel = selectedPaymentMethod == 'card'
+                      ? 'sub_pay_with_card'.tr
+                      : (Platform.isIOS
+                          ? 'sub_pay_with_apple'.tr
+                          : 'sub_pay_with_google'.tr);
+
                   if (isUpgradingToYearly) {
                     buttonLabel = 'sub_upgrade_yearly'.tr;
                   } else if (isAlreadyPro &&
@@ -501,7 +806,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                               ? null
                               : () => _handleUpgrade(controller),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0F172A),
+                            backgroundColor: const Color(0xFF581C87),
                             foregroundColor: Colors.white,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -518,12 +823,29 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : Text(
-                                  buttonLabel,
-                                  style: const TextStyle(
-                                    fontSize: 15.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      isUpgradingToYearly
+                                          ? LucideIcons.sparkles
+                                          : (selectedPaymentMethod == 'card'
+                                              ? LucideIcons.creditCard
+                                              : (Platform.isIOS
+                                                  ? Icons.apple
+                                                  : LucideIcons.smartphone)),
+                                      size: 19,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      buttonLabel,
+                                      style: const TextStyle(
+                                        fontSize: 15.5,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                         ),
                       ),
@@ -544,52 +866,122 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                         ),
                       ),
 
-                      // View past subscriptions & billing history link
-                      const SizedBox(height: 18),
-                      InkWell(
-                        onTap: () => PastSubscriptionsView.open(context),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                LucideIcons.receipt,
-                                size: 15,
-                                color: isDark
-                                    ? Colors.white70
-                                    : const Color(0xFF475569),
+                      // Links: View Past Subscriptions & Restore Purchases
+                      const SizedBox(height: 14),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          InkWell(
+                            onTap: () => PastSubscriptionsView.open(context),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'sub_view_past'.tr,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark
-                                      ? Colors.white70
-                                      : const Color(0xFF475569),
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    LucideIcons.receipt,
+                                    size: 13,
+                                    color: isDark
+                                        ? Colors.white70
+                                        : const Color(0xFF475569),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    'sub_view_past'.tr,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark
+                                          ? Colors.white70
+                                          : const Color(0xFF475569),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                          Text(
+                            '•',
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.white38
+                                  : const Color(0xFF94A3B8),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: isProcessing
+                                ? null
+                                : () => _handleRestorePurchases(controller),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 4,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    LucideIcons.refreshCw,
+                                    size: 12,
+                                    color: isDark
+                                        ? Colors.white70
+                                        : const Color(0xFF475569),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    'sub_restore_purchases'.tr,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark
+                                          ? Colors.white70
+                                          : const Color(0xFF475569),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
 
-                      // If user is already Pro, offer cancel / switch to Free option
+                      // If user is already Pro, offer Customer Center (manage subscription) or cancel
                       if (isAlreadyPro) ...[
                         const SizedBox(height: 10),
+                        if (RevenueCatService.instance.hasValidKey) ...[
+                          TextButton.icon(
+                            onPressed: isProcessing
+                                ? null
+                                : () => RevenueCatService.instance
+                                      .presentCustomerCenter(
+                                        controller: controller,
+                                      ),
+                            icon: const Icon(LucideIcons.settings2, size: 14),
+                            label: const Text(
+                              'Manage Subscription',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                        ],
                         TextButton(
                           onPressed: isProcessing
                               ? null
                               : () => _handleDowngrade(controller),
                           child: Text(
                             'sub_switch_free'.tr,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFFEF4444),
                               fontSize: 13,
                               fontWeight: FontWeight.w600,

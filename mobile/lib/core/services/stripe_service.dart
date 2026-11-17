@@ -14,7 +14,7 @@ class StripeService extends GetxService {
   static const String merchantName = 'AI Landing Page';
 
   static const double monthlyPrice = 4.99;
-  static const double yearlyPrice = 59.88;
+  static const double yearlyPrice = 41.90;
 
   final RxBool isProcessing = false.obs;
 
@@ -98,7 +98,7 @@ class StripeService extends GetxService {
             ),
             content: Text(
               '${'stripe_sandbox_desc'.tr}\n\n'
-              '${isYearly ? "Yearly (€59.88 / year)" : "Monthly (€4.99 / month)"}\n\n'
+              '${isYearly ? "Yearly (€41.90 / year — 30% OFF!)" : "Monthly (€4.99 / month)"}\n\n'
               'Would you like to simulate successful payment and activate Premium?',
               style: TextStyle(
                 fontSize: 14,
@@ -140,7 +140,7 @@ class StripeService extends GetxService {
         if (context.mounted) {
           await PaymentResultDialog.showSuccess(
             context: context,
-            planTitle: isYearly ? 'Yearly Premium (€59.88)' : 'Monthly Premium (€4.99)',
+            planTitle: isYearly ? 'Yearly Premium (€41.90)' : 'Monthly Premium (€4.99)',
             interval: isYearly ? 'yearly' : 'monthly',
             endsAt: controller.subscriptionPeriodEnd.value,
           );
@@ -195,15 +195,16 @@ class StripeService extends GetxService {
       if (context.mounted) {
         await PaymentResultDialog.showSuccess(
           context: context,
-          planTitle: isYearly ? 'Yearly Premium (€59.88)' : 'Monthly Premium (€4.99)',
+          planTitle: isYearly ? 'Yearly Premium (€41.90)' : 'Monthly Premium (€4.99)',
           interval: isYearly ? 'yearly' : 'monthly',
           endsAt: controller.subscriptionPeriodEnd.value,
         );
       }
 
       return true;
-    } on StripeException catch (e) {
+    } on StripeException catch (e, stack) {
       if (e.error.code == FailureCode.Canceled) {
+        debugPrint('ℹ️ [Stripe] Payment was cancelled by the user.');
         if (context.mounted) {
           await PaymentResultDialog.showError(
             context: context,
@@ -212,6 +213,15 @@ class StripeService extends GetxService {
         }
         return false;
       }
+      debugPrint('======================================================');
+      debugPrint('🚨 [Stripe StripeException]');
+      debugPrint('   FailureCode: ${e.error.code}');
+      debugPrint('   Message: ${e.error.message}');
+      debugPrint('   LocalizedMessage: ${e.error.localizedMessage}');
+      debugPrint('   StripeErrorCode: ${e.error.stripeErrorCode}');
+      debugPrint('   DeclineCode: ${e.error.declineCode}');
+      debugPrint('   StackTrace:\n$stack');
+      debugPrint('======================================================');
       final msg = e.error.localizedMessage ?? e.error.message ?? 'Payment could not be completed.';
       if (context.mounted) {
         await PaymentResultDialog.showError(
@@ -220,7 +230,12 @@ class StripeService extends GetxService {
         );
       }
       return false;
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('======================================================');
+      debugPrint('🚨 [Stripe Unexpected Payment Error]');
+      debugPrint('   Error: $e');
+      debugPrint('   StackTrace:\n$stack');
+      debugPrint('======================================================');
       if (context.mounted) {
         await PaymentResultDialog.showError(
           context: context,

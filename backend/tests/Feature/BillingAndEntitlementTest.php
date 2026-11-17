@@ -416,5 +416,82 @@ class BillingAndEntitlementTest extends TestCase
         $content = file_get_contents($file->getPathname());
         $this->assertStringStartsWith("PK", $content);
     }
+
+    public function test_revenuecat_webhook_initial_purchase_activates_pro_subscription(): void
+    {
+        $payload = [
+            'api_version' => '1.0',
+            'event' => [
+                'id' => 'rc_evt_test_1001',
+                'type' => 'INITIAL_PURCHASE',
+                'app_user_id' => (string) $this->user->id,
+                'product_id' => 'com.douibi.landing.ai.pro.monthly',
+                'purchased_at_ms' => now()->getTimestampMs(),
+                'expiration_at_ms' => now()->addMonth()->getTimestampMs(),
+                'transaction_id' => 'rc_txn_1001',
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/billing/webhook/revenuecat', $payload);
+        $response->assertStatus(200)
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('event_id', 'rc_evt_test_1001');
+
+        $subscription = Subscription::where('user_id', $this->user->id)->first();
+        $this->assertNotNull($subscription);
+        $this->assertEquals('active', $subscription->status->value);
+        $this->assertEquals('revenuecat', $subscription->provider->value);
+        $this->assertEquals('rc_txn_1001', $subscription->provider_subscription_id);
+
+        $entitlementService = app(\App\Services\Billing\SubscriptionEntitlementService::class);
+        $this->assertEquals('pro', $entitlementService->getUserPlan($this->user)->slug);
+
+        // Test idempotency
+        $response2 = $this->postJson('/api/v1/billing/webhook/revenuecat', $payload);
+        $response2->assertStatus(200)
+            ->assertJsonPath('status', 'already_processed');
+    }
+
+    public function test_revenuecat_webhook_expiration_deactivates_pro_subscription(): void
+    {
+        // First activate
+        $this->test_revenuecat_webhook_initial_purchase_activates_pro_subscription();
+
+        $expirationPayload = [
+            'api_version' => '1.0',
+            'event' => [
+                'id' => 'rc_evt_test_1002',
+                'type' => 'EXPIRATION',
+                'app_user_id' => (string) $this->user->id,
+                'product_id' => 'com.douibi.landing.ai.pro.monthly',
+            ],
+        ];
+
+        $response = $this->postJson('/api/v1/billing/webhook/revenuecat', $expirationPayload);
+        $response->assertStatus(200)
+            ->assertJsonPath('status', 'success');
+
+        $subscription = Subscription::where('user_id', $this->user->id)->first();
+        $this->assertEquals('expired', $subscription->status->value);
+    }
+
+    public function test_revenuecat_sync_endpoint_activates_subscription_for_authenticated_user(): void
+    {
+        $response = $this->actingAs($this->user, 'sanctum')->postJson('/api/v1/billing/revenuecat/sync', [
+            'is_pro' => true,
+            'interval' => 'yearly',
+            'transaction_id' => 'rc_sync_txn_2002',
+            'expiration_at_ms' => now()->addYear()->getTimestampMs(),
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('message', 'RevenueCat subscription synchronized successfully.')
+            ->assertJsonPath('summary.plan.slug', 'pro');
+
+        $subscription = Subscription::where('user_id', $this->user->id)->first();
+        $this->assertNotNull($subscription);
+        $this->assertEquals('revenuecat', $subscription->provider->value);
+        $this->assertTrue($subscription->current_period_end->isAfter(now()->addMonths(11)));
+    }
 }
 

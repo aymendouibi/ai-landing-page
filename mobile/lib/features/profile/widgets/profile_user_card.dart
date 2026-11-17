@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
+import '../../../core/widgets/user_avatar_circle.dart';
 import '../../dashboard/dashboard_controller.dart';
 import '../components/edit_profile_sheet.dart';
 
@@ -52,35 +53,11 @@ class ProfileUserCard extends StatelessWidget {
               child: Row(
                 children: [
                   // Avatar Circle
-                  Container(
-                    width: 54,
-                    height: 54,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isPro
-                          ? const Color(0xFF262338)
-                          : (isDark
-                                ? const Color(0xFF334155)
-                                : const Color(0xFF181726)),
-                      border: isPro
-                          ? Border.all(
-                              color: const Color(
-                                0xFFA855F7,
-                              ).withValues(alpha: 0.8),
-                              width: 1.8,
-                            )
-                          : null,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      controller.userInitials.value,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
+                  UserAvatarCircle(
+                    size: 54,
+                    isDark: isCardDark,
+                    isPro: isPro,
+                    fontSize: 18,
                   ),
                   const SizedBox(width: 16),
 

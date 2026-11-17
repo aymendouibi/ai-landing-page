@@ -11,6 +11,7 @@ import 'widgets/templates_footer_quote.dart';
 import 'widgets/templates_header.dart';
 import 'widgets/templates_search_bar.dart';
 import 'widgets/templates_section_header.dart';
+import 'widgets/templates_shimmer_list.dart';
 
 export 'widgets/template_card.dart';
 export 'widgets/templates_category_tabs.dart';
@@ -124,12 +125,7 @@ class TemplatesView extends StatelessWidget {
                 // Template Cards List
                 Obx(() {
                   if (controller.isLoading.value) {
-                    return const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 40),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    );
+                    return TemplatesShimmerList(isDark: isDark);
                   }
 
                   final list = controller.filteredTemplates;

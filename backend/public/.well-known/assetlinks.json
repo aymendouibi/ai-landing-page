@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.douibi.landing.ai",
+      "sha256_cert_fingerprints": [
+        "45:E9:86:95:E9:3A:F2:6E:59:1F:B3:D2:FD:EC:0E:65:BB:38:3E:47:B1:74:6D:9C:CD:74:73:38:60:5E:B3:05"
+      ]
+    }
+  }
+]

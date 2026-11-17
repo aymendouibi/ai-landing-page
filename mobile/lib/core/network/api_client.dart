@@ -74,11 +74,13 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final user = data['user'] as Map<String, dynamic>;
       final token = data['token'] as String;
+      final avatarUrl = user['avatar_url'] as String?;
       await SessionManager.saveSession(
         token: token,
         userId: user['id'] as String,
         name: user['name'] as String,
         email: user['email'] as String,
+        avatarUrl: avatarUrl,
       );
       return data;
     } else {
@@ -110,11 +112,13 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final user = data['user'] as Map<String, dynamic>;
       final token = data['token'] as String;
+      final avatarUrl = user['avatar_url'] as String?;
       await SessionManager.saveSession(
         token: token,
         userId: user['id'] as String,
         name: user['name'] as String,
         email: user['email'] as String,
+        avatarUrl: avatarUrl,
       );
       return data;
     } else {
@@ -151,11 +155,13 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final user = data['user'] as Map<String, dynamic>;
       final token = data['token'] as String;
+      final avatarUrl = user['avatar_url'] as String?;
       await SessionManager.saveSession(
         token: token,
         userId: user['id'] as String,
         name: user['name'] as String? ?? 'Google User',
         email: user['email'] as String? ?? '',
+        avatarUrl: avatarUrl,
       );
       return data;
     } else {
@@ -187,6 +193,7 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final user = data['user'] as Map<String, dynamic>;
       final token = data['token'] as String;
+      final avatarUrl = user['avatar_url'] as String?;
       await SessionManager.saveSession(
         token: token,
         userId: user['id'] as String,
@@ -194,6 +201,7 @@ class ApiClient {
             ? user['name'] as String
             : (name?.isNotEmpty == true ? name! : 'Apple User'),
         email: user['email'] as String? ?? '',
+        avatarUrl: avatarUrl,
       );
       return data;
     } else {
@@ -1308,7 +1316,7 @@ CRITICAL RULES:
   }) async {
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
       final amount = (interval == 'yearly' || interval == 'annual')
-          ? 5988
+          ? 4190
           : 499;
       return {
         'paymentIntentId': 'pi_3Nz8y12eZvKYlo2C0VXYZ123',
@@ -1349,7 +1357,7 @@ CRITICAL RULES:
         'plan': {
           'name': isPro ? 'Premium' : 'Free',
           'slug': planSlug,
-          'price_monthly': isPro ? (interval == 'yearly' ? 59.88 : 4.99) : 0,
+          'price_monthly': isPro ? (interval == 'yearly' ? 41.90 : 4.99) : 0,
         },
         'entitlements': {
           'max_websites': isPro ? 15 : 3,
@@ -1381,7 +1389,8 @@ CRITICAL RULES:
       payload['payment_intent_id'] = paymentIntentId;
     }
     if (provider != null) {
-      payload['provider'] = provider;
+      // Map 'revenuecat' to 'in_app' for 100% compatibility with production backend validation
+      payload['provider'] = (provider == 'revenuecat') ? 'in_app' : provider;
     }
 
     final response = await http.post(
@@ -1397,6 +1406,56 @@ CRITICAL RULES:
       throw Exception(
         data['message'] ??
             'Failed to update subscription (${response.statusCode})',
+      );
+    }
+  }
+
+  static Future<Map<String, dynamic>> syncRevenueCat({
+    required bool isPro,
+    String? interval,
+    String? transactionId,
+    int? expirationAtMs,
+  }) async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      return subscribePlan(
+        isPro ? 'pro' : 'free',
+        interval: interval,
+        provider: 'revenuecat',
+        paymentIntentId: transactionId,
+      );
+    }
+
+    final payload = <String, dynamic>{
+      'is_pro': isPro,
+      if (interval != null) 'interval': interval,
+      if (transactionId != null) 'transaction_id': transactionId,
+      if (expirationAtMs != null) 'expiration_at_ms': expirationAtMs,
+    };
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/v1/billing/revenuecat/sync'),
+      headers: await _headers(),
+      body: jsonEncode(payload),
+    );
+
+    // If the endpoint is not yet deployed on the production server (404),
+    // gracefully fall back to the existing /api/v1/billing/subscribe endpoint.
+    if (response.statusCode == 404) {
+      return subscribePlan(
+        isPro ? 'pro' : 'free',
+        interval: interval,
+        provider: 'in_app',
+        paymentIntentId: transactionId,
+      );
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return data;
+    } else {
+      throw Exception(
+        data['message'] ??
+            'Failed to sync RevenueCat subscription (${response.statusCode})',
       );
     }
   }
@@ -1448,9 +1507,9 @@ CRITICAL RULES:
               'title': 'Premium · Yearly',
               'plan': 'Premium',
               'interval': 'yearly',
-              'amount': 59.88,
+              'amount': 41.90,
               'currency': 'EUR',
-              'formatted_amount': '€59.88',
+              'formatted_amount': '€41.90',
               'provider': 'stripe',
               'status': 'Expired',
               'reference': 'pi_2TzJC5CCKIK7McZ39UraIgiW',
