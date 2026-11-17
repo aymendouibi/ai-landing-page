@@ -1,12 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:startapp_sdk/startapp.dart';
 import '../designsystem/colors.dart';
+import '../services/ad_service.dart';
 import '../../features/dashboard/dashboard_controller.dart';
 import '../../features/profile/components/subscription_plan_sheet.dart';
 
-class AdBannerWidget extends StatelessWidget {
+class AdBannerWidget extends StatefulWidget {
   const AdBannerWidget({super.key});
+
+  @override
+  State<AdBannerWidget> createState() => _AdBannerWidgetState();
+}
+
+class _AdBannerWidgetState extends State<AdBannerWidget> {
+  StartAppBannerAd? _bannerAd;
+  bool _isLoadingAd = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStartAppBanner();
+  }
+
+  void _loadStartAppBanner() async {
+    if (!AdService.isSupported || _isLoadingAd) return;
+    _isLoadingAd = true;
+
+    final ad = await AdService.instance.loadBannerAd(
+      type: StartAppBannerType.BANNER,
+      adTag: 'dashboard_bottom',
+    );
+
+    if (mounted) {
+      setState(() {
+        _bannerAd = ad;
+        _isLoadingAd = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +57,32 @@ class AdBannerWidget extends StatelessWidget {
     final isDark = AppColors.isDark(context);
 
     return Obx(() {
-      if (!controller.hasAds.value) {
+      // Free users only: if user has upgraded to Pro, remove all ads
+      if (!controller.hasAds.value || controller.isPremium) {
         return const SizedBox.shrink();
       }
 
+      // If native Start.io banner is loaded, render it inside container
+      if (_bannerAd != null) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : const Color(0xFFE2E8F0),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: StartAppBanner(_bannerAd!),
+          ),
+        );
+      }
+
+      // Fallback / Loading placeholder with upgrade to Pro CTA
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         padding: const EdgeInsets.all(12),
@@ -112,4 +173,3 @@ class AdBannerWidget extends StatelessWidget {
     });
   }
 }
-

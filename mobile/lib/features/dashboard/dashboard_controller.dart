@@ -6,6 +6,7 @@ import '../../core/localization/supported_locales.dart';
 import '../../core/models/website.dart';
 import '../../core/network/api_client.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/services/ad_service.dart';
 import '../../core/storage/session_manager.dart';
 import '../templates/templates_controller.dart';
 import '../assets/assets_controller.dart';
@@ -40,6 +41,7 @@ class DashboardController extends GetxController {
   final deletedWebsiteIds = <String>{}.obs;
 
   bool get isPremium => planSlug.value == 'pro' || planSlug.value == 'business';
+  bool get isPro => isPremium;
 
   Website? get heroWebsite => websites.firstOrNull;
 
@@ -181,6 +183,10 @@ class DashboardController extends GetxController {
           subscriptionInterval.value =
               subscription['interval']?.toString() ?? 'monthly';
         }
+      }
+
+      if (hasAds.value && !isPro) {
+        AdService.instance.preloadInterstitialAd(adTag: 'dashboard_general');
       }
     } catch (_) {}
   }

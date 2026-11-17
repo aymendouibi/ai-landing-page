@@ -1,11 +1,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:label="AI Landing Page"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
+
+        <!-- Start.io (StartApp) SDK Configuration -->
+        <meta-data
+            android:name="com.startapp.sdk.APPLICATION_ID"
+            android:value="206224417" />
+        <meta-data
+            android:name="com.startapp.sdk.RETURN_ADS_ENABLED"
+            android:value="false" />
+        <meta-data
+            android:name="com.startapp.sdk.SPLASH_ADS_ENABLED"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
