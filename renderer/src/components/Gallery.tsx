@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSectionStyleProps, getHeadlineStyle } from '../styles/sectionStyles';
 
 interface GalleryItem {
   src: string;
@@ -10,13 +11,21 @@ interface GalleryProps {
   props: {
     title?: string;
     subtitle?: string;
+    headlineSize?: string;
     items?: GalleryItem[];
   };
   styles?: Record<string, any>;
 }
 
 export const Gallery: React.FC<GalleryProps> = ({ props, styles = {} }) => {
-  const bgClass = styles.background === 'surface' ? 'bg-surface' : 'bg-default';
+  const { bgClass, textAlign: rawAlign } = getSectionStyleProps(styles, props);
+  const textAlign = rawAlign !== 'inherit' ? rawAlign : 'center';
+  const headerMargin =
+    textAlign === 'left'
+      ? '0 auto 2rem 0'
+      : textAlign === 'right'
+      ? '0 0 2rem auto'
+      : '0 auto 2rem auto';
   const defaultItems: GalleryItem[] = [
     {
       src: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80',
@@ -41,8 +50,15 @@ export const Gallery: React.FC<GalleryProps> = ({ props, styles = {} }) => {
     <div className={`section ${bgClass}`}>
       <div className="container">
         {(props.title || props.subtitle) && (
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            {props.title && <h2 className="text-h2" style={{ marginBottom: '0.5rem' }}>{props.title}</h2>}
+          <div style={{ textAlign, marginBottom: '2rem', margin: headerMargin }}>
+            {props.title && (
+              <h2
+                className="text-h2"
+                style={{ marginBottom: '0.5rem', ...getHeadlineStyle(props.headlineSize, 'h2') }}
+              >
+                {props.title}
+              </h2>
+            )}
             {props.subtitle && <p className="text-lead">{props.subtitle}</p>}
           </div>
         )}

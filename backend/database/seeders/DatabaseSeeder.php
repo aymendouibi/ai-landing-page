@@ -95,7 +95,7 @@ class DatabaseSeeder extends Seeder
                     'code_export' => true,
                 ],
                 'price_monthly' => 4.99,
-                'price_annual' => 41.90,
+                'price_annual' => 39.90,
                 'is_active' => true,
                 'sort_order' => 1,
             ]

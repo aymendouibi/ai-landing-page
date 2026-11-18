@@ -65,8 +65,8 @@ img {
 }
 
 .section {
-  padding-top: var(--section-padding-y);
-  padding-bottom: var(--section-padding-y);
+  padding-top: var(--section-padding-y, 5rem);
+  padding-bottom: var(--section-padding-y, 5rem);
 }
 
 .bg-surface {
@@ -75,6 +75,95 @@ img {
 
 .bg-default {
   background-color: var(--color-bg);
+}
+
+.bg-dark {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+.bg-dark h1,
+.bg-dark h2,
+.bg-dark h3,
+.bg-dark h4,
+.bg-dark h5,
+.bg-dark h6 {
+  color: #f8fafc !important;
+}
+
+.bg-dark .text-body,
+.bg-dark .text-lead,
+.bg-dark p {
+  color: #94a3b8 !important;
+}
+
+.bg-dark .card {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+.bg-brand {
+  background-color: var(--color-primary) !important;
+  color: #ffffff !important;
+}
+
+.bg-brand h1,
+.bg-brand h2,
+.bg-brand h3,
+.bg-brand h4,
+.bg-brand h5,
+.bg-brand h6 {
+  color: #ffffff !important;
+}
+
+.bg-brand .text-body,
+.bg-brand .text-lead,
+.bg-brand p {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.bg-brand .card {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+
+/* Headline Size Modifiers */
+[data-headline-size="Small"] h1,
+[data-headline-size="small"] h1,
+.headline-small h1 {
+  font-size: clamp(1.6rem, 3.5vw, 2.35rem) !important;
+}
+
+[data-headline-size="Small"] h2,
+[data-headline-size="small"] h2,
+.headline-small h2 {
+  font-size: clamp(1.25rem, 2.5vw, 1.65rem) !important;
+}
+
+[data-headline-size="Medium"] h1,
+[data-headline-size="medium"] h1,
+.headline-medium h1 {
+  font-size: clamp(2.1rem, 4.3vw, 3.1rem) !important;
+}
+
+[data-headline-size="Medium"] h2,
+[data-headline-size="medium"] h2,
+.headline-medium h2 {
+  font-size: clamp(1.55rem, 3.2vw, 2.15rem) !important;
+}
+
+[data-headline-size="Large"] h1,
+[data-headline-size="large"] h1,
+.headline-large h1 {
+  font-size: clamp(2.5rem, 5.5vw, 4rem) !important;
+}
+
+[data-headline-size="Large"] h2,
+[data-headline-size="large"] h2,
+.headline-large h2 {
+  font-size: clamp(1.85rem, 3.8vw, 2.75rem) !important;
 }
 
 /* Typography Scale */

@@ -1,10 +1,12 @@
 import React from 'react';
+import { getSectionStyleProps, getHeadlineStyle } from '../styles/sectionStyles';
 
 interface AboutProps {
   variant?: string;
   props: {
     headline: string;
     description: string;
+    headlineSize?: string;
     highlights?: string[];
     image?: {
       src: string;
@@ -15,7 +17,8 @@ interface AboutProps {
 }
 
 export const About: React.FC<AboutProps> = ({ props, styles = {} }) => {
-  const bgClass = styles.background === 'surface' ? 'bg-surface' : 'bg-default';
+  const { bgClass, textAlign: rawAlign } = getSectionStyleProps(styles, props);
+  const textAlign = rawAlign !== 'inherit' ? rawAlign : 'left';
 
   return (
     <div className={`section ${bgClass}`}>
@@ -44,15 +47,26 @@ export const About: React.FC<AboutProps> = ({ props, styles = {} }) => {
               />
             </div>
           )}
-          <div>
-            <h2 className="text-h2" style={{ marginBottom: '1.5rem' }}>
+          <div style={{ textAlign }}>
+            <h2
+              className="text-h2"
+              style={{ marginBottom: '1.5rem', ...getHeadlineStyle(props.headlineSize, 'h2') }}
+            >
               {props.headline}
             </h2>
             <p className="text-body" style={{ fontSize: '1.1rem', marginBottom: '2rem' }}>
               {props.description}
             </p>
             {props.highlights && props.highlights.length > 0 && (
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <ul
+                style={{
+                  listStyle: 'none',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                  alignItems: textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start',
+                }}
+              >
                 {props.highlights.map((h, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 500 }}>
                     <span style={{ color: 'var(--color-primary)', fontSize: '1.25rem' }}>✓</span>

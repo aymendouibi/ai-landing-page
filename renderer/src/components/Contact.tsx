@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, CheckCircle } from 'lucide-react';
+import { getSectionStyleProps, getHeadlineStyle } from '../styles/sectionStyles';
 
 interface ContactProps {
   props: {
@@ -9,6 +10,7 @@ interface ContactProps {
     email?: string;
     phone?: string;
     address?: string;
+    headlineSize?: string;
   };
   styles?: Record<string, any>;
 }
@@ -17,7 +19,8 @@ export const Contact: React.FC<ContactProps> = ({ props, styles = {} }) => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'submitting' | 'submitted' | 'error'>('idle');
 
-  const bgClass = styles.background === 'surface' ? 'bg-surface' : 'bg-default';
+  const { bgClass, textAlign: rawAlign } = getSectionStyleProps(styles, props);
+  const textAlign = rawAlign !== 'inherit' ? rawAlign : 'left';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +58,11 @@ export const Contact: React.FC<ContactProps> = ({ props, styles = {} }) => {
           }}
         >
           {/* Info Side */}
-          <div>
-            <h2 className="text-h2" style={{ marginBottom: '1.25rem' }}>
+          <div style={{ textAlign }}>
+            <h2
+              className="text-h2"
+              style={{ marginBottom: '1.25rem', ...getHeadlineStyle(props.headlineSize, 'h2') }}
+            >
               {props.title || 'Get in Touch'}
             </h2>
             {props.description && (

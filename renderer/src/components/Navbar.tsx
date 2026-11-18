@@ -5,9 +5,22 @@ import { Menu, X } from 'lucide-react';
 interface NavbarProps {
   navigation?: NavigationConfig;
   siteName: string;
+  siteUrl?: string;
+  subdomain?: string;
+  isEditorMode?: boolean;
+  onSelect?: (id: string) => void;
+  onBrandClick?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ navigation, siteName }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  navigation,
+  siteName,
+  siteUrl,
+  subdomain,
+  isEditorMode = false,
+  onSelect,
+  onBrandClick,
+}) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (!navigation) return null;
@@ -15,10 +28,39 @@ export const Navbar: React.FC<NavbarProps> = ({ navigation, siteName }) => {
   const items = navigation.items || [];
   const logo = navigation.logo?.text || siteName;
   const isTransparent = navigation.style === 'transparent';
+  const brandHref =
+    siteUrl ||
+    (navigation.logo as any)?.href ||
+    (subdomain
+      ? `/sites/${subdomain}`
+      : siteName
+      ? `/sites/${encodeURIComponent(siteName.toLowerCase().replace(/[^a-z0-9]/g, ''))}`
+      : '#');
+
+  const handleHeaderClick = () => {
+    if (isEditorMode && onSelect) {
+      onSelect('sec_navigation');
+    }
+  };
+
+  const handleBrandClick = (e: React.MouseEvent) => {
+    if (isEditorMode) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (onBrandClick) {
+        onBrandClick();
+      } else if (onSelect) {
+        onSelect('sec_navigation');
+      }
+    }
+  };
 
   return (
     <header
       id="sec_navigation"
+      data-section-id="sec_navigation"
+      data-component="navigation"
+      onClick={handleHeaderClick}
       style={{
         position: 'sticky',
         top: 0,
@@ -27,6 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({ navigation, siteName }) => {
         backdropFilter: 'blur(8px)',
         borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
         transition: 'background-color 0.2s ease',
+        cursor: isEditorMode ? 'pointer' : 'default',
       }}
     >
       <div
@@ -40,7 +83,8 @@ export const Navbar: React.FC<NavbarProps> = ({ navigation, siteName }) => {
       >
         {/* Brand / Logo */}
         <a
-          href="/"
+          href={brandHref}
+          onClick={handleBrandClick}
           style={{
             fontSize: '1.25rem',
             fontWeight: 800,
@@ -49,7 +93,9 @@ export const Navbar: React.FC<NavbarProps> = ({ navigation, siteName }) => {
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
+            cursor: 'pointer',
           }}
+          title={isEditorMode ? 'Edit website title & logo' : undefined}
         >
           {navigation.logo?.src ? (
             <img src={navigation.logo.src} alt={logo} style={{ height: '2rem' }} />

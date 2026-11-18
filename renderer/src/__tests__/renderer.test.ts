@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateCssVariables, generateGoogleFontsUrl } from '../engine/theme';
+import { generateCssVariables, generateGoogleFontsUrl, getGoogleFontsForDocument } from '../engine/theme';
 import { compileStaticHtml } from '../engine/compiler';
 import { COMPONENT_MAP } from '../components/ComponentRegistry';
 import { WebsiteDocument } from '../types/schema';
@@ -62,6 +62,29 @@ describe('Website Renderer Engine', () => {
     expect(url).toContain('https://fonts.googleapis.com/css2?');
     expect(url).toContain('family=Inter');
     expect(url).toContain('family=Plus%20Jakarta%20Sans');
+  });
+
+  it('extracts Google Fonts directly from document typography if settings are empty', () => {
+    const docWithoutSettingsFonts: WebsiteDocument = {
+      ...mockDoc,
+      site: {
+        ...mockDoc.site,
+        settings: {},
+        theme: {
+          ...mockDoc.site.theme,
+          typography: {
+            headingFamily: 'Cinzel',
+            bodyFamily: 'Space Mono',
+          },
+        },
+      },
+    };
+    const fonts = getGoogleFontsForDocument(docWithoutSettingsFonts);
+    expect(fonts).toContain('Cinzel');
+    expect(fonts).toContain('Space Mono');
+    const url = generateGoogleFontsUrl(fonts);
+    expect(url).toContain('family=Cinzel');
+    expect(url).toContain('family=Space%20Mono');
   });
 
   it('compiles standalone production-ready static HTML', () => {

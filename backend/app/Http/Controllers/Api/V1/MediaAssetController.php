@@ -6,9 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\MediaAsset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MediaAssetController extends Controller
 {
+    /**
+     * Determine storage disk for user media uploads (defaults to Neon S3 when configured).
+     */
+    protected function storageDisk(): string
+    {
+        return config('filesystems.disks.s3.key') ? 's3' : 'public';
+    }
+
     /**
      * List user media assets.
      */
@@ -39,7 +48,7 @@ class MediaAssetController extends Controller
         $validated = $request->validate([
             'website_id' => 'nullable|uuid|exists:websites,id',
             'file' => 'nullable|file|max:20480',
-            'url' => 'nullable|url|max:2048',
+            'url' => 'nullable|string|max:10485760',
             'filename' => 'nullable|string|max:255',
             'mime_type' => 'nullable|string|max:100',
             'file_size' => 'nullable|integer',
@@ -47,14 +56,34 @@ class MediaAssetController extends Controller
         ]);
 
         $userId = $request->user()->id;
+        $diskName = $this->storageDisk();
+        $disk = Storage::disk($diskName);
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $originalFilename = $file->getClientOriginalName();
-            $path = $file->store("media/{$userId}", 'public');
-            $url = "/storage/{$path}";
+            $path = $file->store("media/{$userId}", $diskName);
+            $url = $disk->url($path);
             $mimeType = $file->getClientMimeType() ?? 'image/jpeg';
             $fileSize = $file->getSize();
+        } elseif (!empty($validated['url']) && str_starts_with($validated['url'], 'data:image/')) {
+            // Convert base64 data URLs to permanent object storage files
+            $dataUrl = $validated['url'];
+            preg_match('/^data:image\/(\w+);base64,/', $dataUrl, $matches);
+            $extension = $matches[1] ?? 'jpg';
+            if ($extension === 'jpeg') {
+                $extension = 'jpg';
+            }
+            $cleanData = preg_replace('/^data:image\/\w+;base64,/', '', $dataUrl);
+            $binary = base64_decode($cleanData);
+
+            $filename = $validated['filename'] ?? ('upload_' . time() . '.' . $extension);
+            $path = "media/{$userId}/" . uniqid() . '.' . $extension;
+            $disk->put($path, $binary);
+            $url = $disk->url($path);
+            $mimeType = $validated['mime_type'] ?? "image/{$extension}";
+            $fileSize = strlen($binary);
+            $originalFilename = $filename;
         } else {
             $url = $validated['url'] ?? '';
             $originalFilename = $validated['filename'] ?? (basename(parse_url($url, PHP_URL_PATH) ?? '') ?: 'asset.jpg');
@@ -71,7 +100,7 @@ class MediaAssetController extends Controller
             'mime_type' => $mimeType,
             'file_size' => $fileSize,
             'storage_path' => $path,
-            'storage_disk' => 'public',
+            'storage_disk' => $diskName,
             'url' => $url,
             'metadata' => $validated['metadata'] ?? [],
         ]);

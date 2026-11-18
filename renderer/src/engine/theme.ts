@@ -31,9 +31,42 @@ export function generateCssVariables(theme?: ThemeConfig): Record<string, string
   return vars;
 }
 
+export function getGoogleFontsForDocument(doc: { site?: { theme?: ThemeConfig; settings?: { googleFonts?: string[] } } }): string[] {
+  const fonts = new Set<string>();
+
+  // Settings fonts
+  if (doc?.site?.settings?.googleFonts && Array.isArray(doc.site.settings.googleFonts)) {
+    doc.site.settings.googleFonts.forEach(f => {
+      if (f && typeof f === 'string' && f.trim()) fonts.add(f.trim());
+    });
+  }
+
+  // Theme typography fonts
+  const headingFamily = doc?.site?.theme?.typography?.headingFamily;
+  if (headingFamily && typeof headingFamily === 'string' && headingFamily.trim()) {
+    fonts.add(headingFamily.trim());
+  }
+
+  const bodyFamily = doc?.site?.theme?.typography?.bodyFamily;
+  if (bodyFamily && typeof bodyFamily === 'string' && bodyFamily.trim()) {
+    fonts.add(bodyFamily.trim());
+  }
+
+  // Fallback default
+  if (fonts.size === 0) {
+    fonts.add('Inter');
+  }
+
+  return Array.from(fonts);
+}
+
 export function generateGoogleFontsUrl(fonts: string[]): string {
   if (!fonts || fonts.length === 0) return '';
-  const families = fonts.map(f => `family=${encodeURIComponent(f)}:wght@400;500;600;700`).join('&');
+  // Filter out system fallbacks if any passed
+  const systemFonts = ['sans-serif', 'serif', 'monospace', 'system-ui', '-apple-system', 'inherit'];
+  const validFamilies = fonts.filter(f => !systemFonts.includes(f.toLowerCase()));
+  if (validFamilies.length === 0) return '';
+  const families = validFamilies.map(f => `family=${encodeURIComponent(f)}:wght@400;500;600;700`).join('&');
   return `https://fonts.googleapis.com/css2?${families}&display=swap`;
 }
 

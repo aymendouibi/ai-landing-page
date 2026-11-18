@@ -59,6 +59,7 @@ class EditorController extends GetxController {
   }
 
   String websiteId = '';
+  String websiteSubdomain = '';
   WebViewController? webViewController;
 
   final websiteName = 'Untitled site'.obs;
@@ -214,6 +215,14 @@ class EditorController extends GetxController {
   String get siteDomain {
     final clean = websiteName.value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
     return clean.isEmpty ? 'lumencoffee.com' : '$clean.com';
+  }
+
+  String get liveSiteUrl {
+    final sub = websiteSubdomain.isNotEmpty
+        ? websiteSubdomain
+        : websiteName.value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    final clean = sub.isEmpty ? 'lumen-coffee' : sub;
+    return 'https://www.ai-landing-page.xyz/sites/$clean';
   }
 
   // Curated Design Presets (Screenshot from user)
@@ -485,6 +494,14 @@ class EditorController extends GetxController {
         )
         ..setNavigationDelegate(
           NavigationDelegate(
+            onNavigationRequest: (NavigationRequest request) {
+              if (request.url.contains('editor=true') || request.url.startsWith('about:blank')) {
+                return NavigationDecision.navigate;
+              }
+              Clipboard.setData(ClipboardData(text: request.url));
+              AppSnackbar.info('Website link copied: ${request.url}', title: 'Site Link');
+              return NavigationDecision.prevent;
+            },
             onPageFinished: (url) {
               syncDocumentToWebView();
             },
@@ -504,6 +521,10 @@ class EditorController extends GetxController {
       final currentRev = website['current_revision'] as Map<String, dynamic>?;
 
       websiteName.value = website['name'] ?? 'Untitled site';
+      final sub = (website['subdomain'] ?? website['slug'] ?? '').toString();
+      if (sub.isNotEmpty) {
+        websiteSubdomain = sub;
+      }
       revisionNumber.value = currentRev?['revision_number'] ?? (website['revision_number'] ?? 1);
       final rawDoc = (currentRev?['document'] as Map<String, dynamic>?) ??
           (website['document'] as Map<String, dynamic>?);
@@ -521,6 +542,7 @@ class EditorController extends GetxController {
 
   void _loadDefaultLumenCoffeeSite() {
     websiteName.value = 'Lumen Coffee';
+    websiteSubdomain = 'lumen-coffee';
     document.value = {
       'id': 'lumen-coffee-default',
       'site': {
@@ -609,7 +631,12 @@ class EditorController extends GetxController {
     final doc = document.value;
     if (doc == null || webViewController == null) return;
     try {
-      final jsonLiteral = jsonEncode(jsonEncode(doc));
+      final docCopy = Map<String, dynamic>.from(doc);
+      final siteMap = Map<String, dynamic>.from(docCopy['site'] as Map? ?? {});
+      siteMap['subdomain'] = websiteSubdomain;
+      siteMap['url'] = liveSiteUrl;
+      docCopy['site'] = siteMap;
+      final jsonLiteral = jsonEncode(jsonEncode(docCopy));
       webViewController!.runJavaScript(
         "if (window.updateDocument) { window.updateDocument($jsonLiteral); } try { window.postMessage(JSON.stringify({ type: 'UPDATE_DOCUMENT', document: JSON.parse($jsonLiteral) }), '*'); } catch(_) {}",
       );
@@ -681,6 +708,7 @@ class EditorController extends GetxController {
             selectedSectionBackground.value = styles['background']?.toString() ?? 'default';
             selectedSectionAlign.value = styles['textAlign']?.toString() ?? 'left';
             selectedSectionPadding.value = styles['padding']?.toString() ?? 'normal';
+            selectedElementSize.value = props['headlineSize']?.toString() ?? 'Large';
 
             // Universal / Custom Properties
             customProps.assignAll(props);
@@ -821,7 +849,7 @@ class EditorController extends GetxController {
               selectedElementKey.value = 'headline';
               textController.text = props['title'] ?? props['headline'] ?? '';
               subheadlineController.text = props['subtitle'] ?? props['subheadline'] ?? '';
-              selectedElementSize.value = 'Large';
+              selectedElementSize.value = props['headlineSize'] ?? 'Large';
 
               final items = props['items'] as List?;
               if (items != null && items.isNotEmpty && items[0] is Map) {
@@ -2544,6 +2572,13 @@ class EditorController extends GetxController {
     }
 
     document.value = docCopy;
+    if (webViewController != null) {
+      final safeSecId = jsonEncode(sectionId);
+      final safeStyles = jsonEncode({key: value});
+      webViewController!.runJavaScript(
+        "if (window.updateSectionStyles) { window.updateSectionStyles($safeSecId, $safeStyles); }",
+      );
+    }
     syncDocumentToWebView();
     _debounceSave();
   }
@@ -2618,6 +2653,25 @@ class EditorController extends GetxController {
   }
 
   // --- Navigation Layer Controls ---
+  Future<void> updateWebsiteTitle(String newTitle) async {
+    final trimmed = newTitle.trim();
+    if (trimmed.isEmpty) return;
+    updateNavLogo(text: trimmed);
+    navLogoTextController.text = trimmed;
+    if (webViewController != null) {
+      final safeTitle = jsonEncode(trimmed);
+      webViewController!.runJavaScript(
+        "if (window.updateWebsiteTitle) { window.updateWebsiteTitle($safeTitle); }",
+      );
+    }
+    if (websiteId.isNotEmpty) {
+      try {
+        await ApiClient.updateWebsiteMetadata(websiteId, name: trimmed);
+      } catch (_) {}
+    }
+    AppSnackbar.success('Website title updated!', title: 'Title');
+  }
+
   void updateNavLogo({String? text, String? src}) {
     final doc = document.value;
     if (doc == null) return;

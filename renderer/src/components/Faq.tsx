@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { getSectionStyleProps, getHeadlineStyle } from '../styles/sectionStyles';
 
 interface FaqItem {
   question: string;
@@ -10,6 +11,7 @@ interface FaqProps {
   props: {
     title?: string;
     subtitle?: string;
+    headlineSize?: string;
     items: FaqItem[];
   };
   styles?: Record<string, any>;
@@ -18,7 +20,14 @@ interface FaqProps {
 export const Faq: React.FC<FaqProps> = ({ props, styles = {} }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const items = props.items || [];
-  const bgClass = styles.background === 'surface' ? 'bg-surface' : 'bg-default';
+  const { bgClass, textAlign: rawAlign } = getSectionStyleProps(styles, props);
+  const textAlign = rawAlign !== 'inherit' ? rawAlign : 'center';
+  const headerMargin =
+    textAlign === 'left'
+      ? '0 auto 3.5rem 0'
+      : textAlign === 'right'
+      ? '0 0 3.5rem auto'
+      : '0 auto 3.5rem auto';
 
   const toggle = (idx: number) => {
     setOpenIndex(openIndex === idx ? null : idx);
@@ -28,8 +37,15 @@ export const Faq: React.FC<FaqProps> = ({ props, styles = {} }) => {
     <div className={`section ${bgClass}`}>
       <div className="container" style={{ maxWidth: '800px' }}>
         {(props.title || props.subtitle) && (
-          <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-            {props.title && <h2 className="text-h2" style={{ marginBottom: '1rem' }}>{props.title}</h2>}
+          <div style={{ textAlign, marginBottom: '3.5rem', margin: headerMargin }}>
+            {props.title && (
+              <h2
+                className="text-h2"
+                style={{ marginBottom: '1rem', ...getHeadlineStyle(props.headlineSize, 'h2') }}
+              >
+                {props.title}
+              </h2>
+            )}
             {props.subtitle && <p className="text-body">{props.subtitle}</p>}
           </div>
         )}
@@ -68,7 +84,7 @@ export const Faq: React.FC<FaqProps> = ({ props, styles = {} }) => {
                   {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
                 {isOpen && (
-                  <div style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}>
+                  <div style={{ padding: '0 1.5rem 1.5rem 1.5rem', textAlign: 'left' }}>
                     <p className="text-body">{item.answer}</p>
                   </div>
                 )}

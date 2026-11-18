@@ -1,5 +1,6 @@
 import React from 'react';
 import { SectionConfig } from '../types/schema';
+import { getSectionStyleProps } from '../styles/sectionStyles';
 
 interface SectionWrapperProps {
   section: SectionConfig;
@@ -28,6 +29,11 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({
     return null;
   }
 
+  const { bgClass, textAlign, paddingY, headlineSize } = getSectionStyleProps(
+    section.styles,
+    section.props
+  );
+
   const outlineStyle: React.CSSProperties = isEditorMode && isSelected
     ? {
         outline: '2px solid #2563EB',
@@ -43,12 +49,17 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({
       data-section-id={section.id}
       data-component={section.component}
       data-variant={section.variant}
+      data-headline-size={headlineSize}
       onClick={handleClick}
+      className={`section-wrapper ${bgClass}`}
       style={{
         ...outlineStyle,
         position: 'relative',
         opacity: isHidden ? 0.4 : 1,
         transition: 'outline 0.15s ease',
+        ['--section-padding-y' as any]: paddingY,
+        ['--section-text-align' as any]: textAlign,
+        textAlign: textAlign !== 'inherit' ? textAlign : undefined,
       }}
     >
       {isEditorMode && isSelected && (

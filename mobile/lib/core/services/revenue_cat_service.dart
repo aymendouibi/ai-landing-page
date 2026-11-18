@@ -9,6 +9,10 @@ import '../storage/session_manager.dart';
 import '../../features/dashboard/dashboard_controller.dart';
 
 class RevenueCatService extends GetxService {
+  /// Toggle to enable / disable RevenueCat throughout the app.
+  /// Set to false to completely hide RevenueCat and rely exclusively on Stripe.
+  static const bool isEnabled = false;
+
   /// RevenueCat API Key
   static const String apiKey = 'test_GaewqXEHwrnTFIWFpJtMNJylUWD';
   static const String appleApiKey = apiKey;
@@ -37,6 +41,7 @@ class RevenueCatService extends GetxService {
 
   /// Whether RevenueCat is running with a non-placeholder API key
   bool get hasValidKey {
+    if (!isEnabled) return false;
     final key = Platform.isIOS
         ? appleApiKey
         : (Platform.isAndroid ? googleApiKey : apiKey);
@@ -45,7 +50,7 @@ class RevenueCatService extends GetxService {
 
   /// Initialize the RevenueCat SDK
   Future<void> init() async {
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (!isEnabled || Platform.environment.containsKey('FLUTTER_TEST')) {
       return;
     }
 
@@ -225,6 +230,10 @@ class RevenueCatService extends GetxService {
     required String interval,
     required DashboardController controller,
   }) async {
+    if (!isEnabled) {
+      throw Exception('RevenueCat is currently disabled. Please use Stripe.');
+    }
+
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
       await controller.switchPlan(
         'pro',
@@ -313,6 +322,10 @@ class RevenueCatService extends GetxService {
 
   /// Restore existing In-App Purchases (Required by Apple App Store Guideline 3.1.1)
   Future<bool> restorePurchases({required DashboardController controller}) async {
+    if (!isEnabled) {
+      return false;
+    }
+
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
       return true;
     }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSectionStyleProps } from '../styles/sectionStyles';
 
 interface StatItem {
   value: string;
@@ -13,18 +14,19 @@ interface StatisticsProps {
 }
 
 export const Statistics: React.FC<StatisticsProps> = ({ props, styles = {} }) => {
-  const bgClass = styles.background === 'surface' ? 'bg-surface' : 'bg-default';
+  const { bgClass, textAlign: rawAlign, paddingY } = getSectionStyleProps(styles, props);
+  const textAlign = rawAlign !== 'inherit' ? rawAlign : 'center';
   const items = props.items || [];
 
   return (
-    <div className={`section ${bgClass}`} style={{ padding: '3.5rem 0' }}>
+    <div className={`section ${bgClass}`} style={{ padding: `${paddingY} 0` }}>
       <div className="container">
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))`,
             gap: '2rem',
-            textAlign: 'center',
+            textAlign,
           }}
         >
           {items.map((stat, idx) => (

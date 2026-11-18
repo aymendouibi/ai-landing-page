@@ -17,6 +17,8 @@ services:
         value: https://www.ai-landing-page.xyz
       - key: PLATFORM_DOMAIN
         value: ai-landing-page.xyz
+      - key: PLATFORM_CNAME_TARGET
+        value: ai-builder-api.onrender.com
       - key: DB_CONNECTION
         value: pgsql
       - key: SESSION_DRIVER
@@ -38,6 +40,8 @@ services:
       - key: STRIPE_KEY
         sync: false
       - key: STRIPE_SECRET
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
         sync: false
       - key: OPENROUTER_API_KEY
         sync: false

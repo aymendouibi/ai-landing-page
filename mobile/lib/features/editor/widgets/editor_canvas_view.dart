@@ -2,7 +2,9 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/designsystem/colors.dart';
 import '../editor_controller.dart';
@@ -150,21 +152,45 @@ class DesktopBrowserBar extends StatelessWidget {
           // Centered URL Pill (Screenshot 4 & 5: lumencoffee.com)
           Expanded(
             child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF0F172A) : Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(6),
+                onTap: () {
+                  final url = controller.liveSiteUrl;
+                  Clipboard.setData(ClipboardData(text: url));
+                  Get.snackbar(
+                    'editor_view_live_site'.tr,
+                    '${'editor_site_link_copied'.tr}: $url',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 3),
+                    backgroundColor: const Color(0xFF0F172A),
+                    colorText: Colors.white,
+                    margin: const EdgeInsets.all(16),
+                    borderRadius: 12,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    ),
                   ),
-                ),
-                child: Text(
-                  controller.siteDomain,
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                    fontWeight: FontWeight.w500,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(LucideIcons.globe, size: 11, color: Color(0xFF10B981)),
+                      const SizedBox(width: 5),
+                      Text(
+                        controller.siteDomain,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

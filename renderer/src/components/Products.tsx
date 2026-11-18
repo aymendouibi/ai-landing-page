@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSectionStyleProps, getHeadlineStyle } from '../styles/sectionStyles';
 
 interface ProductItem {
   name: string;
@@ -12,13 +13,21 @@ interface ProductsProps {
   props: {
     title?: string;
     subtitle?: string;
+    headlineSize?: string;
     items?: ProductItem[];
   };
   styles?: Record<string, any>;
 }
 
 export const Products: React.FC<ProductsProps> = ({ props, styles = {} }) => {
-  const bgClass = styles.background === 'surface' ? 'bg-surface' : 'bg-default';
+  const { bgClass, textAlign: rawAlign } = getSectionStyleProps(styles, props);
+  const textAlign = rawAlign !== 'inherit' ? rawAlign : 'center';
+  const headerMargin =
+    textAlign === 'left'
+      ? '0 auto 2.5rem 0'
+      : textAlign === 'right'
+      ? '0 0 2.5rem auto'
+      : '0 auto 2.5rem auto';
   const defaultItems: ProductItem[] = [
     {
       name: 'Ethiopia Yirgacheffe',
@@ -46,9 +55,23 @@ export const Products: React.FC<ProductsProps> = ({ props, styles = {} }) => {
     <div className={`section ${bgClass}`}>
       <div className="container">
         {(props.title || props.subtitle) && (
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            {props.title && <h2 className="text-h2" style={{ marginBottom: '0.75rem' }}>{props.title}</h2>}
-            {props.subtitle && <p className="text-lead" style={{ maxWidth: '600px', margin: '0 auto' }}>{props.subtitle}</p>}
+          <div style={{ textAlign, marginBottom: '2.5rem', margin: headerMargin }}>
+            {props.title && (
+              <h2
+                className="text-h2"
+                style={{ marginBottom: '0.75rem', ...getHeadlineStyle(props.headlineSize, 'h2') }}
+              >
+                {props.title}
+              </h2>
+            )}
+            {props.subtitle && (
+              <p
+                className="text-lead"
+                style={{ maxWidth: '600px', margin: textAlign === 'center' ? '0 auto' : undefined }}
+              >
+                {props.subtitle}
+              </p>
+            )}
           </div>
         )}
         <div

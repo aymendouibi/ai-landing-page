@@ -113,7 +113,7 @@ class BillingService
      */
     public function createStripePaymentIntent(User $user, string $interval = 'monthly'): array
     {
-        $amount = ($interval === 'yearly' || $interval === 'annual') ? 4190 : 499;
+        $amount = ($interval === 'yearly' || $interval === 'annual') ? 3990 : 499;
         $stripeSecret = config('services.stripe.secret');
 
         // If Stripe secret is set, call real Stripe API via SDK or HTTP
@@ -548,7 +548,7 @@ class BillingService
                 $payload = $event->payload ?? [];
                 $interval = $payload['interval'] ?? $payload['plan'] ?? 'monthly';
                 $isYearly = ($interval === 'yearly' || $interval === 'annual');
-                $amount = $isYearly ? 41.90 : 4.99;
+                $amount = $isYearly ? 39.90 : 4.99;
                 $reference = $payload['payment_intent_id'] ?? $event->provider_event_id;
 
                 if ($reference) {
@@ -588,7 +588,7 @@ class BillingService
             if ($sub->plan && $sub->plan->slug !== 'free') {
                 $isYearly = $sub->current_period_end && $sub->current_period_start
                     && $sub->current_period_start->diffInDays($sub->current_period_end) > 60;
-                $amount = $isYearly ? 41.90 : 4.99;
+                $amount = $isYearly ? 39.90 : 4.99;
 
                 $history[] = [
                     'id' => $sub->id,

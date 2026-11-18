@@ -61,5 +61,52 @@ class MediaAssetTest extends TestCase
 
         $this->assertSoftDeleted('media_assets', ['id' => $assetId]);
     }
+
+    public function test_user_can_upload_binary_file(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('s3');
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('avatar.jpg', 400, 400);
+
+        $response = $this->postJson('/api/v1/assets', [
+            'file' => $file,
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('asset.original_filename', 'avatar.jpg');
+
+        $this->assertDatabaseHas('media_assets', [
+            'original_filename' => 'avatar.jpg',
+            'user_id' => $user->id,
+        ]);
+    }
+
+    public function test_user_can_upload_base64_data_url(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('s3');
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $base64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
+        $response = $this->postJson('/api/v1/assets', [
+            'url' => $base64,
+            'filename' => 'pixel.png',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('asset.original_filename', 'pixel.png');
+
+        $this->assertDatabaseHas('media_assets', [
+            'original_filename' => 'pixel.png',
+            'user_id' => $user->id,
+        ]);
+    }
 }
 

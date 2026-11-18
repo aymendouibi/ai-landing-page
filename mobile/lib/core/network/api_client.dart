@@ -1316,7 +1316,7 @@ CRITICAL RULES:
   }) async {
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
       final amount = (interval == 'yearly' || interval == 'annual')
-          ? 4190
+          ? 3990
           : 499;
       return {
         'paymentIntentId': 'pi_3Nz8y12eZvKYlo2C0VXYZ123',
@@ -1357,7 +1357,7 @@ CRITICAL RULES:
         'plan': {
           'name': isPro ? 'Premium' : 'Free',
           'slug': planSlug,
-          'price_monthly': isPro ? (interval == 'yearly' ? 41.90 : 4.99) : 0,
+          'price_monthly': isPro ? (interval == 'yearly' ? 39.90 : 4.99) : 0,
         },
         'entitlements': {
           'max_websites': isPro ? 15 : 3,
@@ -1507,9 +1507,9 @@ CRITICAL RULES:
               'title': 'Premium · Yearly',
               'plan': 'Premium',
               'interval': 'yearly',
-              'amount': 41.90,
+              'amount': 39.90,
               'currency': 'EUR',
-              'formatted_amount': '€41.90',
+              'formatted_amount': '€39.90',
               'provider': 'stripe',
               'status': 'Expired',
               'reference': 'pi_2TzJC5CCKIK7McZ39UraIgiW',

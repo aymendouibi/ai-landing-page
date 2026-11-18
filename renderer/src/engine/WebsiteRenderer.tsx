@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Pencil, ChevronUp, ChevronDown, Copy, Trash2, CornerUpLeft } from 'lucide-react';
 import { WebsiteDocument, BridgeMessage, SectionConfig } from '../types/schema';
-import { generateCssVariables, generateGoogleFontsUrl } from './theme';
+import { generateCssVariables, generateGoogleFontsUrl, getGoogleFontsForDocument } from './theme';
 import { Navbar } from '../components/Navbar';
 import { SectionWrapper } from '../components/SectionWrapper';
 import { renderComponent } from '../components/ComponentRegistry';
@@ -225,6 +225,37 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       }
     };
 
+    (window as any).updateSectionStyles = (sectionId: string, stylesData: any) => {
+      try {
+        const styles = typeof stylesData === 'string' ? JSON.parse(stylesData) : stylesData;
+        setDoc(prev => {
+          const newPages = prev.pages.map(page => ({
+            ...page,
+            sections: page.sections.map(sec => {
+              if (sec.id !== sectionId) return sec;
+              return { ...sec, styles: { ...sec.styles, ...styles } };
+            }),
+          }));
+          return { ...prev, pages: newPages };
+        });
+      } catch (e) {
+        console.error('Failed to update section styles', e);
+      }
+    };
+
+    (window as any).updateWebsiteTitle = (newTitle: string) => {
+      setDoc(prev => ({
+        ...prev,
+        site: { ...prev.site, name: newTitle },
+        navigation: prev.navigation
+          ? {
+              ...prev.navigation,
+              logo: { ...prev.navigation.logo, text: newTitle },
+            }
+          : prev.navigation,
+      }));
+    };
+
     window.selectSection = (sectionId: string) => {
       setSelectedSectionId(sectionId);
       setSelectedElement(null);
@@ -279,8 +310,14 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
 
     const activePage = doc.pages.find(p => p.slug === currentSlug) || doc.pages[0];
     const sec = activePage?.sections.find(s => s.id === sectionId);
-    const comp = sec?.component || 'section';
-    const compName = comp.charAt(0).toUpperCase() + comp.slice(1);
+    const isNav = sectionId === 'sec_navigation' || sectionId === 'navigation';
+    const isFooter = sectionId === 'sec_footer' || sectionId === 'footer';
+    const comp = isNav ? 'navigation' : isFooter ? 'footer' : (sec?.component || 'section');
+    const compName = isNav
+      ? 'Navigation Bar'
+      : isFooter
+      ? 'Footer'
+      : comp.charAt(0).toUpperCase() + comp.slice(1);
 
     if (onSectionSelect) {
       onSectionSelect(sectionId);
@@ -313,6 +350,12 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     const component = sectionEl.getAttribute('data-component') || 'section';
     const componentName = component.charAt(0).toUpperCase() + component.slice(1);
 
+    // If clicked on navigation, select navigation layer
+    if (sectionId === 'sec_navigation' || component === 'navigation') {
+      handleSectionSelect('sec_navigation');
+      return;
+    }
+
     const isHeading = ['H1', 'H2', 'H3', 'H4'].includes(target.tagName);
     const isParagraph = target.tagName === 'P';
     const isButton = target.tagName === 'A' || target.tagName === 'BUTTON' || target.classList.contains('btn');
@@ -341,6 +384,14 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       typeLabel = 'Element';
     }
 
+    const activePage = doc.pages.find(p => p.slug === currentSlug) || doc.pages[0];
+    const currentSec = activePage?.sections?.find(s => s.id === sectionId);
+    const rawHeadlineSize = (currentSec?.props?.headlineSize || 'Large') as string;
+    const elementSize = (rawHeadlineSize.charAt(0).toUpperCase() + rawHeadlineSize.slice(1).toLowerCase()) as
+      | 'Small'
+      | 'Medium'
+      | 'Large';
+
     const text = target.innerText.trim();
     const rect = target.getBoundingClientRect();
     const rootRect = rootRef.current?.getBoundingClientRect() || { top: 0, left: 0 };
@@ -351,7 +402,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       elementKey,
       typeLabel,
       text,
-      size: 'Large',
+      size: ['Small', 'Medium', 'Large'].includes(elementSize) ? elementSize : 'Large',
       rect: {
         top: rect.top - rootRect.top + (rootRef.current?.scrollTop || 0),
         left: rect.left - rootRect.left,
@@ -369,7 +420,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       elementKey,
       elementName: `${typeLabel} in ${componentName}`,
       text,
-      size: 'Large',
+      size: ['Small', 'Medium', 'Large'].includes(elementSize) ? elementSize : 'Large',
     };
 
     if (window.AndroidBridge?.postMessage) {
@@ -454,7 +505,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
 
   // Dynamic CSS variables from theme
   const cssVariables = generateCssVariables(doc.site.theme) as React.CSSProperties;
-  const fontsUrl = generateGoogleFontsUrl(doc.site.settings?.googleFonts || []);
+  const fontsUrl = generateGoogleFontsUrl(getGoogleFontsForDocument(doc));
 
   return (
     <div
@@ -475,7 +526,15 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       {fontsUrl && <link rel="stylesheet" href={fontsUrl} />}
 
       {/* Navigation */}
-      <Navbar navigation={doc.navigation} siteName={doc.site.name} />
+      <Navbar
+        navigation={doc.navigation}
+        siteName={doc.site?.name || ''}
+        siteUrl={doc.site?.url}
+        subdomain={doc.site?.subdomain}
+        isEditorMode={isEditorMode}
+        onSelect={handleSectionSelect}
+        onBrandClick={() => handleSectionSelect('sec_navigation')}
+      />
 
       {/* Sections or Empty Page State */}
       <main style={{ flex: 1, position: 'relative' }}>

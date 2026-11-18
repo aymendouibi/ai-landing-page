@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
@@ -42,47 +43,93 @@ class EditorTopBar extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Obx(
-                  () => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        controller.websiteName.value,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.inkOf(context),
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      Row(
+                  () => InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => _showEditTitleDialog(context, controller),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            controller.isSaving.value
-                                ? LucideIcons.refreshCw
-                                : LucideIcons.check,
-                            size: 13,
-                            color: controller.isSaving.value
-                                ? const Color(0xFF3B82F6)
-                                : AppColors.inkMutedOf(context),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  controller.websiteName.value,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.inkOf(context),
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                LucideIcons.pencil,
+                                size: 12,
+                                color: AppColors.inkMutedOf(context),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 3),
-                          Text(
-                            controller.isSaving.value ? 'saving'.tr : 'saved'.tr,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.inkMutedOf(context),
-                              fontWeight: FontWeight.w500,
-                            ),
+                          Row(
+                            children: [
+                              Icon(
+                                controller.isSaving.value
+                                    ? LucideIcons.refreshCw
+                                    : LucideIcons.check,
+                                size: 13,
+                                color: controller.isSaving.value
+                                    ? const Color(0xFF3B82F6)
+                                    : AppColors.inkMutedOf(context),
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                controller.isSaving.value ? 'saving'.tr : 'saved'.tr,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.inkMutedOf(context),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
+              // View live site link
+              IconButton(
+                icon: const Icon(
+                  LucideIcons.globe,
+                  size: 18,
+                  color: Color(0xFF10B981),
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                tooltip: 'editor_view_live_site'.tr,
+                onPressed: () {
+                  final url = controller.liveSiteUrl;
+                  Clipboard.setData(ClipboardData(text: url));
+                  Get.snackbar(
+                    'editor_view_live_site'.tr,
+                    '${'editor_site_link_copied'.tr}: $url',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 3),
+                    backgroundColor: const Color(0xFF0F172A),
+                    colorText: Colors.white,
+                    margin: const EdgeInsets.all(16),
+                    borderRadius: 12,
+                  );
+                },
+              ),
+              const SizedBox(width: 4),
               // Settings / Config Button
               IconButton(
                 icon: Icon(
@@ -206,46 +253,78 @@ class EditorLandscapeTopBar extends StatelessWidget {
           // Website name & saved status
           Flexible(
             child: Obx(
-              () => SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const NeverScrollableScrollPhysics(),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      controller.websiteName.value,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.inkOf(context),
-                        letterSpacing: -0.2,
+              () => InkWell(
+                borderRadius: BorderRadius.circular(6),
+                onTap: () => _showEditTitleDialog(context, controller),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          controller.websiteName.value,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.inkOf(context),
+                            letterSpacing: -0.2,
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      controller.isSaving.value
-                          ? LucideIcons.refreshCw
-                          : LucideIcons.check,
-                      size: 12,
-                      color: controller.isSaving.value
-                          ? const Color(0xFF3B82F6)
-                          : AppColors.inkMutedOf(context),
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      controller.isSaving.value ? 'saving'.tr : 'saved'.tr,
-                      style: TextStyle(
-                        fontSize: 11,
+                      const SizedBox(width: 4),
+                      Icon(
+                        LucideIcons.pencil,
+                        size: 11,
                         color: AppColors.inkMutedOf(context),
-                        fontWeight: FontWeight.w500,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Icon(
+                        controller.isSaving.value
+                            ? LucideIcons.refreshCw
+                            : LucideIcons.check,
+                        size: 12,
+                        color: controller.isSaving.value
+                            ? const Color(0xFF3B82F6)
+                            : AppColors.inkMutedOf(context),
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        controller.isSaving.value ? 'saving'.tr : 'saved'.tr,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.inkMutedOf(context),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            icon: const Icon(LucideIcons.globe, size: 16, color: Color(0xFF10B981)),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            tooltip: 'editor_view_live_site'.tr,
+            onPressed: () {
+              final url = controller.liveSiteUrl;
+              Clipboard.setData(ClipboardData(text: url));
+              Get.snackbar(
+                'editor_view_live_site'.tr,
+                '${'editor_site_link_copied'.tr}: $url',
+                snackPosition: SnackPosition.BOTTOM,
+                duration: const Duration(seconds: 3),
+                backgroundColor: const Color(0xFF0F172A),
+                colorText: Colors.white,
+                margin: const EdgeInsets.all(16),
+                borderRadius: 12,
+              );
+            },
           ),
 
           const Spacer(),
@@ -579,4 +658,90 @@ class EditorViewportButton extends StatelessWidget {
       );
     });
   }
+}
+
+void _showEditTitleDialog(BuildContext context, EditorController controller) {
+  final textController = TextEditingController(text: controller.websiteName.value);
+  Get.dialog(
+    Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: AppColors.surfaceOf(context),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(LucideIcons.pencil, size: 18, color: Color(0xFF2563EB)),
+                const SizedBox(width: 8),
+                Text(
+                  'editor_edit_title'.tr,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.inkOf(context),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: textController,
+              autofocus: true,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.inkOf(context),
+                fontWeight: FontWeight.w600,
+              ),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: 'editor_site_title_hint'.tr,
+                hintStyle: TextStyle(color: AppColors.inkMutedOf(context)),
+                filled: true,
+                fillColor: AppColors.surfaceNeutralOf(context),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: AppColors.borderSubtleOf(context)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                ),
+              ),
+              onSubmitted: (val) {
+                Get.back();
+                controller.updateWebsiteTitle(val);
+              },
+            ),
+            const SizedBox(height: 18),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Get.back(),
+                  child: Text('common_cancel'.tr, style: TextStyle(color: AppColors.inkMutedOf(context))),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    Get.back();
+                    controller.updateWebsiteTitle(textController.text);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: Text('common_save'.tr),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

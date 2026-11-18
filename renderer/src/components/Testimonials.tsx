@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star } from 'lucide-react';
+import { getSectionStyleProps, getHeadlineStyle } from '../styles/sectionStyles';
 
 interface TestimonialItem {
   quote: string;
@@ -12,20 +13,25 @@ interface TestimonialItem {
 interface TestimonialsProps {
   props: {
     title?: string;
+    headlineSize?: string;
     items: TestimonialItem[];
   };
   styles?: Record<string, any>;
 }
 
 export const Testimonials: React.FC<TestimonialsProps> = ({ props, styles = {} }) => {
-  const bgClass = styles.background === 'surface' ? 'bg-surface' : 'bg-default';
+  const { bgClass, textAlign: rawAlign } = getSectionStyleProps(styles, props);
+  const textAlign = rawAlign !== 'inherit' ? rawAlign : 'center';
   const items = props.items || [];
 
   return (
     <div className={`section ${bgClass}`}>
       <div className="container">
         {props.title && (
-          <h2 className="text-h2" style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+          <h2
+            className="text-h2"
+            style={{ textAlign, marginBottom: '3.5rem', ...getHeadlineStyle(props.headlineSize, 'h2') }}
+          >
             {props.title}
           </h2>
         )}
@@ -38,9 +44,26 @@ export const Testimonials: React.FC<TestimonialsProps> = ({ props, styles = {} }
           }}
         >
           {items.map((item, idx) => (
-            <div key={idx} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div
+              key={idx}
+              className="card"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                textAlign: textAlign !== 'center' ? textAlign : undefined,
+              }}
+            >
               <div>
-                <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem', color: '#F59E0B' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.25rem',
+                    marginBottom: '1rem',
+                    color: '#F59E0B',
+                    justifyContent: textAlign === 'right' ? 'flex-end' : textAlign === 'center' ? 'center' : 'flex-start',
+                  }}
+                >
                   {Array.from({ length: item.rating || 5 }).map((_, i) => (
                     <Star key={i} size={18} fill="#F59E0B" />
                   ))}
@@ -50,7 +73,14 @@ export const Testimonials: React.FC<TestimonialsProps> = ({ props, styles = {} }
                 </p>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  justifyContent: textAlign === 'right' ? 'flex-end' : textAlign === 'center' ? 'center' : 'flex-start',
+                }}
+              >
                 {item.avatar && (
                   <img
                     src={item.avatar}

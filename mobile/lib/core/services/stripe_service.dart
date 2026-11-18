@@ -8,13 +8,15 @@ import '../../features/dashboard/dashboard_controller.dart';
 import '../../features/subscription/components/payment_result_dialog.dart';
 
 class StripeService extends GetxService {
-  static const String publishableKey =
-      'pk_test_51NXR4jCCKIK7McZ4Kq34fUd9N6fEzj2QXMZmKUtTYh7TSvkeA47t3kP7ngDKiiEHi7bFm4AVw4J3MKUxDB8qGjIJ00Qi1TitQp';
+  static const String publishableKey = String.fromEnvironment(
+    'STRIPE_PUBLISHABLE_KEY',
+    defaultValue: 'pk_live_51NXR4jCCKIK7McZ4Ez6LZNjMa82Edoo0GiFXZQJXX7ocfXzYAj6O6C7LfatLcy0puo8RxVRJIC36k7XjMxzrswXl00PX0dYODz',
+  );
   static const String urlScheme = 'ai-landing-page';
   static const String merchantName = 'AI Landing Page';
 
   static const double monthlyPrice = 4.99;
-  static const double yearlyPrice = 41.90;
+  static const double yearlyPrice = 39.90;
 
   final RxBool isProcessing = false.obs;
 
@@ -98,7 +100,7 @@ class StripeService extends GetxService {
             ),
             content: Text(
               '${'stripe_sandbox_desc'.tr}\n\n'
-              '${isYearly ? "Yearly (€41.90 / year — 30% OFF!)" : "Monthly (€4.99 / month)"}\n\n'
+              '${isYearly ? "Yearly (€39.90 / year — 33% OFF!)" : "Monthly (€4.99 / month)"}\n\n'
               'Would you like to simulate successful payment and activate Premium?',
               style: TextStyle(
                 fontSize: 14,
@@ -140,7 +142,7 @@ class StripeService extends GetxService {
         if (context.mounted) {
           await PaymentResultDialog.showSuccess(
             context: context,
-            planTitle: isYearly ? 'Yearly Premium (€41.90)' : 'Monthly Premium (€4.99)',
+            planTitle: isYearly ? 'Yearly Premium (€39.90)' : 'Monthly Premium (€4.99)',
             interval: isYearly ? 'yearly' : 'monthly',
             endsAt: controller.subscriptionPeriodEnd.value,
           );
@@ -195,7 +197,7 @@ class StripeService extends GetxService {
       if (context.mounted) {
         await PaymentResultDialog.showSuccess(
           context: context,
-          planTitle: isYearly ? 'Yearly Premium (€41.90)' : 'Monthly Premium (€4.99)',
+          planTitle: isYearly ? 'Yearly Premium (€39.90)' : 'Monthly Premium (€4.99)',
           interval: isYearly ? 'yearly' : 'monthly',
           endsAt: controller.subscriptionPeriodEnd.value,
         );

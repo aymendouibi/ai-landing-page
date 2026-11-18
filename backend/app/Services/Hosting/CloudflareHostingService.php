@@ -250,7 +250,7 @@ HTML;
             'verification_token' => $token,
             'ssl_status' => [
                 'status' => 'pending_validation',
-                'cname_target' => config('app.platform_cname_target', 'sites.yourplatform.com'),
+                'cname_target' => config('app.platform_cname_target', 'ai-builder-api.onrender.com'),
                 'txt_record_name' => "_aibuilder-challenge.{$domainName}",
                 'txt_record_value' => $token,
             ],

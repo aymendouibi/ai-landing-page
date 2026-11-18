@@ -89,6 +89,8 @@ export interface SiteSettings {
 
 export interface SiteConfig {
   name: string;
+  subdomain?: string;
+  url?: string;
   favicon?: string | null;
   theme: ThemeConfig;
   settings?: SiteSettings;

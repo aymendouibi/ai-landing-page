@@ -14,7 +14,9 @@ interface ImageSectionProps {
   styles?: Record<string, any>;
 }
 
-export const ImageSection: React.FC<ImageSectionProps> = ({ props }) => {
+export const ImageSection: React.FC<ImageSectionProps> = ({ props, styles = {} }) => {
+  const textAlign = (styles.textAlign || 'center') as 'left' | 'center' | 'right';
+  const padY = styles.padding === 'compact' ? '1rem' : styles.padding === 'spacious' ? '4rem' : '2rem';
   const imgSrc =
     props.url ||
     props.src ||
@@ -27,7 +29,7 @@ export const ImageSection: React.FC<ImageSectionProps> = ({ props }) => {
   const aspectRatio = props.aspectRatio || (isFit ? 'auto' : '16/10');
 
   return (
-    <div style={{ padding: '1.25rem 1rem', width: '100%', boxSizing: 'border-box' }}>
+    <div style={{ padding: `${padY} 1rem`, width: '100%', boxSizing: 'border-box' }}>
       <div
         style={{
           width: '100%',
@@ -58,7 +60,7 @@ export const ImageSection: React.FC<ImageSectionProps> = ({ props }) => {
         <p
           style={{
             marginTop: '0.5rem',
-            textAlign: 'center',
+            textAlign,
             fontSize: '0.85rem',
             color: '#64748B',
           }}

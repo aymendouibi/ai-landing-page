@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSectionStyleProps } from '../styles/sectionStyles';
 
 interface FooterProps {
   props: {
@@ -13,7 +14,8 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ props, styles = {} }) => {
-  const bgClass = styles.background === 'surface' ? 'bg-surface' : 'bg-default';
+  const { bgClass, paddingY, textAlign: rawAlign } = getSectionStyleProps(styles, props);
+  const textAlign = rawAlign !== 'inherit' ? rawAlign : 'center';
   const columns = props.columns;
 
   return (
@@ -21,9 +23,10 @@ export const Footer: React.FC<FooterProps> = ({ props, styles = {} }) => {
       id="sec_footer"
       className={`section ${bgClass}`}
       style={{
-        paddingTop: '4rem',
-        paddingBottom: '3rem',
+        paddingTop: paddingY,
+        paddingBottom: paddingY,
         borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+        textAlign,
       }}
     >
       <div className="container">

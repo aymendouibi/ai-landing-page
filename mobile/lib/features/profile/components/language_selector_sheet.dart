@@ -3,15 +3,13 @@ import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
 import '../../../core/localization/supported_locales.dart';
+import '../../../core/localization/widgets/language_flag_icon.dart';
 import '../../dashboard/dashboard_controller.dart';
 
 class LanguageSelectorSheet extends StatelessWidget {
   final DashboardController controller;
 
-  const LanguageSelectorSheet({
-    super.key,
-    required this.controller,
-  });
+  const LanguageSelectorSheet({super.key, required this.controller});
 
   static void show(BuildContext context, DashboardController controller) {
     showModalBottomSheet(
@@ -89,15 +87,37 @@ class LanguageSelectorSheet extends StatelessWidget {
                     // System Default (Follows Phone)
                     ListTile(
                       dense: true,
-                      leading: const Text(
-                        '📱',
-                        style: TextStyle(fontSize: 22),
+                      leading: Container(
+                        width: 32,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white.withValues(alpha: 0.12)
+                                : Colors.black.withValues(alpha: 0.08),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Icon(
+                          LucideIcons.smartphone,
+                          size: 14,
+                          color: isSystem
+                              ? AppColors.atmosphereViolet
+                              : AppColors.inkMutedOf(context),
+                        ),
                       ),
                       title: Text(
                         'system_default_language'.tr,
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight: isSystem ? FontWeight.bold : FontWeight.w500,
+                          fontWeight: isSystem
+                              ? FontWeight.bold
+                              : FontWeight.w500,
                           color: AppColors.inkOf(context),
                         ),
                       ),
@@ -129,20 +149,23 @@ class LanguageSelectorSheet extends StatelessWidget {
                     ),
 
                     ...AppLocales.languages.map((lang) {
-                      final isSelected = !isSystem &&
+                      final isSelected =
+                          !isSystem &&
                           selectedLocale.languageCode == lang.languageCode;
                       return ListTile(
                         dense: true,
-                        leading: Text(
-                          lang.flag,
-                          style: const TextStyle(fontSize: 22),
+                        leading: LanguageFlagIcon(
+                          languageCode: lang.languageCode,
+                          countryCode: lang.countryCode,
+                          size: 22,
                         ),
                         title: Text(
                           lang.nativeName,
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.w500,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
                             color: AppColors.inkOf(context),
                           ),
                         ),
@@ -176,4 +199,3 @@ class LanguageSelectorSheet extends StatelessWidget {
     );
   }
 }
-

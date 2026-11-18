@@ -243,6 +243,11 @@ void main() {
           ManageDnsSheet(
             controller: controller,
             isDark: false,
+            domainEntry: const {
+              'domain': 'example.com',
+              'verification_token': 'aibuilder-site-verify',
+              'ssl_status': {'cname_target': 'sites.aibuilder.app'},
+            },
           ),
         ),
       );

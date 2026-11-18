@@ -29,7 +29,7 @@ class DomainController extends Controller
         return response()->json([
             'domains' => $website->domains()->latest()->get(),
             'subdomain' => $website->subdomain,
-            'subdomain_url' => "https://{$website->subdomain}." . config('app.platform_domain', 'yourplatform.com'),
+            'subdomain_url' => "https://{$website->subdomain}." . config('app.platform_domain', 'ai-landing-page.xyz'),
         ]);
     }
 
@@ -55,7 +55,7 @@ class DomainController extends Controller
                     'cname_record' => [
                         'type' => 'CNAME',
                         'name' => $domain->domain,
-                        'target' => config('app.platform_cname_target', 'sites.yourplatform.com'),
+                        'target' => config('app.platform_cname_target', 'ai-builder-api.onrender.com'),
                     ],
                     'txt_record' => [
                         'type' => 'TXT',

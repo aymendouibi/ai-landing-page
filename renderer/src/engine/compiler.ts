@@ -1,5 +1,5 @@
 import { WebsiteDocument } from '../types/schema';
-import { generateCssVariables, generateGoogleFontsUrl } from './theme';
+import { generateCssVariables, generateGoogleFontsUrl, getGoogleFontsForDocument } from './theme';
 
 /**
  * Compile a WebsiteDocument into a standalone static HTML document for production CDN hosting.
@@ -10,7 +10,7 @@ export function compileStaticHtml(doc: WebsiteDocument, pageSlug: string = '/'):
   const pageTitle = activePage?.seo?.title || `${activePage?.title || 'Home'} - ${doc.site.name}`;
   const pageDesc = activePage?.seo?.description || activePage?.description || `Welcome to ${doc.site.name}`;
   const cssVars = generateCssVariables(doc.site.theme);
-  const fontsUrl = generateGoogleFontsUrl(doc.site.settings?.googleFonts || []);
+  const fontsUrl = generateGoogleFontsUrl(getGoogleFontsForDocument(doc));
 
   const cssVarString = Object.entries(cssVars)
     .map(([k, v]) => `  ${k}: ${v};`)

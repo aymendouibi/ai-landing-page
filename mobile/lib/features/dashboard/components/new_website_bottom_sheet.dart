@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -63,10 +62,10 @@ class _NewWebsiteBottomSheetState extends State<NewWebsiteBottomSheet> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        AppShowcase.checkAndStartNewWebsiteShowcase(
-          context,
-          [_aiLandingKey, _blankKey],
-        );
+        AppShowcase.checkAndStartNewWebsiteShowcase(context, [
+          _aiLandingKey,
+          _blankKey,
+        ]);
       }
     });
   }

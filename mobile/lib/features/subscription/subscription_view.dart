@@ -63,7 +63,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
     setState(() => isProcessing = true);
     try {
       bool success = false;
-      if (selectedPaymentMethod == 'card') {
+      if (!RevenueCatService.isEnabled || selectedPaymentMethod == 'card') {
         debugPrint('💳 [PAYMENT] User selected Credit Card (Stripe)');
         success = await StripeService.instance.processPayment(
           context: context,
@@ -533,7 +533,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
-                            isYearly ? '€41.90' : '€4.99',
+                            isYearly ? '€39.90' : '€4.99',
                             style: TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
@@ -586,7 +586,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                       ),
                     ),
                     Text(
-                      isYearly ? '€41.90' : '€4.99',
+                      isYearly ? '€39.90' : '€4.99',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
@@ -608,169 +608,257 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                 ),
                 const SizedBox(height: 18),
 
-                // Payment Method Selector (Apple Pay / Google Pay vs Credit Card)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'sub_payment_method'.tr,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
-                        letterSpacing: -0.2,
+                // Payment Method Section (Selector when RevenueCat enabled, or single Stripe badge)
+                if (RevenueCatService.isEnabled) ...[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'sub_payment_method'.tr,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                          letterSpacing: -0.2,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        // Option 1: Apple Pay (iOS) or Google Pay (Android)
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => setState(() => selectedPaymentMethod = 'wallet'),
-                            borderRadius: BorderRadius.circular(16),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
-                              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-                              decoration: BoxDecoration(
-                                color: selectedPaymentMethod == 'wallet'
-                                    ? (isDark
-                                        ? const Color(0xFF581C87).withValues(alpha: 0.25)
-                                        : const Color(0xFFEDE9FE))
-                                    : (isDark
-                                        ? const Color(0xFF1E293B)
-                                        : Colors.white),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          // Option 1: Apple Pay (iOS) or Google Pay (Android)
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => setState(() => selectedPaymentMethod = 'wallet'),
+                              borderRadius: BorderRadius.circular(16),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 180),
+                                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                                decoration: BoxDecoration(
                                   color: selectedPaymentMethod == 'wallet'
                                       ? (isDark
-                                          ? const Color(0xFFA855F7)
-                                          : const Color(0xFF7C3AED))
+                                          ? const Color(0xFF581C87).withValues(alpha: 0.25)
+                                          : const Color(0xFFEDE9FE))
                                       : (isDark
-                                          ? Colors.white.withValues(alpha: 0.08)
-                                          : const Color(0xFFE2E8F0)),
-                                  width: selectedPaymentMethod == 'wallet' ? 1.8 : 1.0,
-                                ),
-                                boxShadow: selectedPaymentMethod == 'wallet'
-                                    ? [
-                                        BoxShadow(
-                                          color: isDark
-                                              ? const Color(0xFF581C87).withValues(alpha: 0.35)
-                                              : const Color(0xFF7C3AED).withValues(alpha: 0.12),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Platform.isIOS ? Icons.apple : LucideIcons.smartphone,
-                                    size: 20,
+                                          ? const Color(0xFF1E293B)
+                                          : Colors.white),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
                                     color: selectedPaymentMethod == 'wallet'
-                                        ? (isDark ? const Color(0xFFC4B5FD) : const Color(0xFF581C87))
-                                        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                        ? (isDark
+                                            ? const Color(0xFFA855F7)
+                                            : const Color(0xFF7C3AED))
+                                        : (isDark
+                                            ? Colors.white.withValues(alpha: 0.08)
+                                            : const Color(0xFFE2E8F0)),
+                                    width: selectedPaymentMethod == 'wallet' ? 1.8 : 1.0,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: Text(
-                                      Platform.isIOS ? 'sub_apple_pay'.tr : 'sub_google_pay'.tr,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 13.5,
-                                        fontWeight: selectedPaymentMethod == 'wallet'
-                                            ? FontWeight.w700
-                                            : FontWeight.w600,
-                                        color: selectedPaymentMethod == 'wallet'
-                                            ? (isDark ? Colors.white : const Color(0xFF581C87))
-                                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                  boxShadow: selectedPaymentMethod == 'wallet'
+                                      ? [
+                                          BoxShadow(
+                                            color: isDark
+                                                ? const Color(0xFF581C87).withValues(alpha: 0.35)
+                                                : const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Platform.isIOS ? Icons.apple : LucideIcons.smartphone,
+                                      size: 20,
+                                      color: selectedPaymentMethod == 'wallet'
+                                          ? (isDark ? const Color(0xFFC4B5FD) : const Color(0xFF581C87))
+                                          : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        Platform.isIOS ? 'sub_apple_pay'.tr : 'sub_google_pay'.tr,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 13.5,
+                                          fontWeight: selectedPaymentMethod == 'wallet'
+                                              ? FontWeight.w700
+                                              : FontWeight.w600,
+                                          color: selectedPaymentMethod == 'wallet'
+                                              ? (isDark ? Colors.white : const Color(0xFF581C87))
+                                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
+                          const SizedBox(width: 10),
 
-                        // Option 2: Credit Card
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => setState(() => selectedPaymentMethod = 'card'),
-                            borderRadius: BorderRadius.circular(16),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
-                              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-                              decoration: BoxDecoration(
-                                color: selectedPaymentMethod == 'card'
-                                    ? (isDark
-                                        ? const Color(0xFF581C87).withValues(alpha: 0.25)
-                                        : const Color(0xFFEDE9FE))
-                                    : (isDark
-                                        ? const Color(0xFF1E293B)
-                                        : Colors.white),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
+                          // Option 2: Credit Card
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => setState(() => selectedPaymentMethod = 'card'),
+                              borderRadius: BorderRadius.circular(16),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 180),
+                                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                                decoration: BoxDecoration(
                                   color: selectedPaymentMethod == 'card'
                                       ? (isDark
-                                          ? const Color(0xFFA855F7)
-                                          : const Color(0xFF7C3AED))
+                                          ? const Color(0xFF581C87).withValues(alpha: 0.25)
+                                          : const Color(0xFFEDE9FE))
                                       : (isDark
-                                          ? Colors.white.withValues(alpha: 0.08)
-                                          : const Color(0xFFE2E8F0)),
-                                  width: selectedPaymentMethod == 'card' ? 1.8 : 1.0,
-                                ),
-                                boxShadow: selectedPaymentMethod == 'card'
-                                    ? [
-                                        BoxShadow(
-                                          color: isDark
-                                              ? const Color(0xFF581C87).withValues(alpha: 0.35)
-                                              : const Color(0xFF7C3AED).withValues(alpha: 0.12),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    LucideIcons.creditCard,
-                                    size: 18,
+                                          ? const Color(0xFF1E293B)
+                                          : Colors.white),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
                                     color: selectedPaymentMethod == 'card'
-                                        ? (isDark ? const Color(0xFFC4B5FD) : const Color(0xFF581C87))
-                                        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                        ? (isDark
+                                            ? const Color(0xFFA855F7)
+                                            : const Color(0xFF7C3AED))
+                                        : (isDark
+                                            ? Colors.white.withValues(alpha: 0.08)
+                                            : const Color(0xFFE2E8F0)),
+                                    width: selectedPaymentMethod == 'card' ? 1.8 : 1.0,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: Text(
-                                      'sub_credit_card'.tr,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 13.5,
-                                        fontWeight: selectedPaymentMethod == 'card'
-                                            ? FontWeight.w700
-                                            : FontWeight.w600,
-                                        color: selectedPaymentMethod == 'card'
-                                            ? (isDark ? Colors.white : const Color(0xFF581C87))
-                                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                  boxShadow: selectedPaymentMethod == 'card'
+                                      ? [
+                                          BoxShadow(
+                                            color: isDark
+                                                ? const Color(0xFF581C87).withValues(alpha: 0.35)
+                                                : const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      LucideIcons.creditCard,
+                                      size: 18,
+                                      color: selectedPaymentMethod == 'card'
+                                          ? (isDark ? const Color(0xFFC4B5FD) : const Color(0xFF581C87))
+                                          : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        'sub_credit_card'.tr,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 13.5,
+                                          fontWeight: selectedPaymentMethod == 'card'
+                                              ? FontWeight.w700
+                                              : FontWeight.w600,
+                                          color: selectedPaymentMethod == 'card'
+                                              ? (isDark ? Colors.white : const Color(0xFF581C87))
+                                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                ] else ...[
+                  // Single Stripe payment badge when RevenueCat is hidden
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF1E293B)
+                          : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : const Color(0xFFE2E8F0),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF581C87).withValues(alpha: 0.3)
+                                : const Color(0xFFEDE9FE),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            LucideIcons.creditCard,
+                            size: 18,
+                            color: isDark
+                                ? const Color(0xFFA855F7)
+                                : const Color(0xFF7C3AED),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'sub_credit_card'.tr,
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Secure checkout via Stripe',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              LucideIcons.shieldCheck,
+                              size: 15,
+                              color: Color(0xFF10B981),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Stripe',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: isDark
+                                    ? const Color(0xFFCBD5E1)
+                                    : const Color(0xFF475569),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                  ),
+                  const SizedBox(height: 20),
+                ],
 
                 // Continue to payment Button / Upgrade Button
                 Obx(() {
@@ -779,7 +867,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                   final isUpgradingToYearly =
                       isAlreadyPro && currentInterval == 'monthly' && isYearly;
 
-                  String buttonLabel = selectedPaymentMethod == 'card'
+                  String buttonLabel = !RevenueCatService.isEnabled || selectedPaymentMethod == 'card'
                       ? 'sub_pay_with_card'.tr
                       : (Platform.isIOS
                           ? 'sub_pay_with_apple'.tr
@@ -829,7 +917,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                                     Icon(
                                       isUpgradingToYearly
                                           ? LucideIcons.sparkles
-                                          : (selectedPaymentMethod == 'card'
+                                          : (!RevenueCatService.isEnabled || selectedPaymentMethod == 'card'
                                               ? LucideIcons.creditCard
                                               : (Platform.isIOS
                                                   ? Icons.apple
@@ -907,56 +995,58 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                               ),
                             ),
                           ),
-                          Text(
-                            '•',
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.white38
-                                  : const Color(0xFF94A3B8),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: isProcessing
-                                ? null
-                                : () => _handleRestorePurchases(controller),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 4,
+                          if (RevenueCatService.isEnabled) ...[
+                            Text(
+                              '•',
+                              style: TextStyle(
+                                color: isDark
+                                    ? Colors.white38
+                                    : const Color(0xFF94A3B8),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    LucideIcons.refreshCw,
-                                    size: 12,
-                                    color: isDark
-                                        ? Colors.white70
-                                        : const Color(0xFF475569),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    'sub_restore_purchases'.tr,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                            ),
+                            InkWell(
+                              onTap: isProcessing
+                                  ? null
+                                  : () => _handleRestorePurchases(controller),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 4,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      LucideIcons.refreshCw,
+                                      size: 12,
                                       color: isDark
                                           ? Colors.white70
                                           : const Color(0xFF475569),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      'sub_restore_purchases'.tr,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: isDark
+                                            ? Colors.white70
+                                            : const Color(0xFF475569),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
 
                       // If user is already Pro, offer Customer Center (manage subscription) or cancel
                       if (isAlreadyPro) ...[
                         const SizedBox(height: 10),
-                        if (RevenueCatService.instance.hasValidKey) ...[
+                        if (RevenueCatService.isEnabled && RevenueCatService.instance.hasValidKey) ...[
                           TextButton.icon(
                             onPressed: isProcessing
                                 ? null
