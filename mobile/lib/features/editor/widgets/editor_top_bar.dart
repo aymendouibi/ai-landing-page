@@ -33,23 +33,28 @@ class EditorTopBar extends StatelessWidget {
                   size: 20,
                   color: AppColors.inkOf(context),
                 ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                style: IconButton.styleFrom(
+                  minimumSize: Size.zero,
+                  padding: const EdgeInsets.all(4),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
                 onPressed: () {
                   controller.setPortrait();
                   Get.offAllNamed(AppRoutes.dashboard);
                 },
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               Expanded(
                 child: Obx(
                   () => InkWell(
                     borderRadius: BorderRadius.circular(8),
                     onTap: () => _showEditTitleDialog(context, controller),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(
                             mainAxisSize: MainAxisSize.min,
@@ -60,39 +65,44 @@ class EditorTopBar extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.inkOf(context),
                                     letterSpacing: -0.2,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 3),
                               Icon(
                                 LucideIcons.pencil,
-                                size: 12,
+                                size: 11,
                                 color: AppColors.inkMutedOf(context),
                               ),
                             ],
                           ),
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 controller.isSaving.value
                                     ? LucideIcons.refreshCw
                                     : LucideIcons.check,
-                                size: 13,
+                                size: 11,
                                 color: controller.isSaving.value
                                     ? const Color(0xFF3B82F6)
                                     : AppColors.inkMutedOf(context),
                               ),
                               const SizedBox(width: 3),
-                              Text(
-                                controller.isSaving.value ? 'saving'.tr : 'saved'.tr,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.inkMutedOf(context),
-                                  fontWeight: FontWeight.w500,
+                              Flexible(
+                                child: Text(
+                                  controller.isSaving.value ? 'saving'.tr : 'saved'.tr,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.inkMutedOf(context),
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ],
@@ -108,11 +118,15 @@ class EditorTopBar extends StatelessWidget {
               IconButton(
                 icon: const Icon(
                   LucideIcons.globe,
-                  size: 18,
+                  size: 17,
                   color: Color(0xFF10B981),
                 ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                style: IconButton.styleFrom(
+                  minimumSize: Size.zero,
+                  padding: const EdgeInsets.all(4),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
                 tooltip: 'editor_view_live_site'.tr,
                 onPressed: () {
                   final url = controller.liveSiteUrl;
@@ -129,16 +143,20 @@ class EditorTopBar extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 3),
               // Settings / Config Button
               IconButton(
                 icon: Icon(
                   LucideIcons.settings,
-                  size: 19,
+                  size: 18,
                   color: AppColors.inkOf(context),
                 ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                style: IconButton.styleFrom(
+                  minimumSize: Size.zero,
+                  padding: const EdgeInsets.all(4),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
                 tooltip: 'editor_website_config'.tr,
                 onPressed: () {
                   controller.setPortrait();
@@ -148,10 +166,10 @@ class EditorTopBar extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 3),
               // Rotate Button
               EditorRotateButton(controller: controller),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
               // Black/White Publish Pill
               EditorPublishButton(controller: controller),
             ],
@@ -166,30 +184,37 @@ class EditorTopBar extends StatelessWidget {
               // Undo / Redo
               Obx(
                 () => Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(LucideIcons.undo2, size: 19),
-                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(LucideIcons.undo2, size: 18),
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(28, 28),
+                        padding: EdgeInsets.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
                       color: controller.canUndo
                           ? AppColors.inkOf(context)
                           : (AppColors.isDark(context)
                               ? const Color(0xFF475569)
                               : const Color(0xFFCBD5E1)),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                       onPressed: controller.canUndo ? controller.undo : null,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 2),
                     IconButton(
-                      icon: const Icon(LucideIcons.redo2, size: 19),
-                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(LucideIcons.redo2, size: 18),
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(28, 28),
+                        padding: EdgeInsets.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
                       color: controller.canRedo
                           ? AppColors.inkOf(context)
                           : (AppColors.isDark(context)
                               ? const Color(0xFF475569)
                               : const Color(0xFFCBD5E1)),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                       onPressed: controller.canRedo ? controller.redo : null,
                     ),
                   ],
@@ -203,12 +228,15 @@ class EditorTopBar extends StatelessWidget {
               IconButton(
                 icon: Icon(
                   LucideIcons.eye,
-                  size: 20,
+                  size: 19,
                   color: AppColors.inkMutedOf(context),
                 ),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                style: IconButton.styleFrom(
+                  minimumSize: const Size(28, 28),
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
                 onPressed: () {
                   controller.isPanelOpen.value = !controller.isPanelOpen.value;
                 },
@@ -230,7 +258,7 @@ class EditorLandscapeTopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: AppColors.surfaceOf(context),
         border: Border(
@@ -242,65 +270,80 @@ class EditorLandscapeTopBar extends StatelessWidget {
           // Back button
           IconButton(
             icon: Icon(LucideIcons.chevronLeft, size: 20, color: AppColors.inkOf(context)),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            style: IconButton.styleFrom(
+              minimumSize: const Size(28, 28),
+              padding: EdgeInsets.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
             onPressed: () {
               controller.setPortrait();
               Get.offAllNamed(AppRoutes.dashboard);
             },
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 4),
           // Website name & saved status
-          Flexible(
-            child: Obx(
-              () => InkWell(
-                borderRadius: BorderRadius.circular(6),
-                onTap: () => _showEditTitleDialog(context, controller),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          controller.websiteName.value,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.inkOf(context),
-                            letterSpacing: -0.2,
+          Expanded(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(6),
+              onTap: () => _showEditTitleDialog(context, controller),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final showStatusText = constraints.maxWidth > 140;
+                    return Obx(
+                      () => Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              controller.websiteName.value,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.inkOf(context),
+                                letterSpacing: -0.2,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            LucideIcons.pencil,
+                            size: 11,
+                            color: AppColors.inkMutedOf(context),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            controller.isSaving.value
+                                ? LucideIcons.refreshCw
+                                : LucideIcons.check,
+                            size: 11,
+                            color: controller.isSaving.value
+                                ? const Color(0xFF3B82F6)
+                                : AppColors.inkMutedOf(context),
+                          ),
+                          if (showStatusText) ...[
+                            const SizedBox(width: 3),
+                            Flexible(
+                              child: Text(
+                                controller.isSaving.value ? 'saving'.tr : 'saved'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.inkMutedOf(context),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        LucideIcons.pencil,
-                        size: 11,
-                        color: AppColors.inkMutedOf(context),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        controller.isSaving.value
-                            ? LucideIcons.refreshCw
-                            : LucideIcons.check,
-                        size: 12,
-                        color: controller.isSaving.value
-                            ? const Color(0xFF3B82F6)
-                            : AppColors.inkMutedOf(context),
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        controller.isSaving.value ? 'saving'.tr : 'saved'.tr,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.inkMutedOf(context),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -308,8 +351,12 @@ class EditorLandscapeTopBar extends StatelessWidget {
           const SizedBox(width: 4),
           IconButton(
             icon: const Icon(LucideIcons.globe, size: 16, color: Color(0xFF10B981)),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            style: IconButton.styleFrom(
+              minimumSize: const Size(28, 28),
+              padding: EdgeInsets.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
             tooltip: 'editor_view_live_site'.tr,
             onPressed: () {
               final url = controller.liveSiteUrl;
@@ -326,8 +373,7 @@ class EditorLandscapeTopBar extends StatelessWidget {
               );
             },
           ),
-
-          const Spacer(),
+          const SizedBox(width: 6),
 
           // Undo / Redo
           Obx(
@@ -336,36 +382,44 @@ class EditorLandscapeTopBar extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(LucideIcons.undo2, size: 17),
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(28, 28),
+                    padding: EdgeInsets.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
                   color: controller.canUndo
                       ? AppColors.inkOf(context)
                       : (AppColors.isDark(context)
                           ? const Color(0xFF475569)
                           : const Color(0xFFCBD5E1)),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                   onPressed: controller.canUndo ? controller.undo : null,
                 ),
                 IconButton(
                   icon: const Icon(LucideIcons.redo2, size: 17),
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(28, 28),
+                    padding: EdgeInsets.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
                   color: controller.canRedo
                       ? AppColors.inkOf(context)
                       : (AppColors.isDark(context)
                           ? const Color(0xFF475569)
                           : const Color(0xFFCBD5E1)),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                   onPressed: controller.canRedo ? controller.redo : null,
                 ),
               ],
             ),
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
 
           // Viewport Switcher Capsule
-          EditorViewportCapsule(controller: controller),
+          EditorViewportCapsule(controller: controller, iconOnly: true),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
 
           // Rotate Button
           EditorRotateButton(controller: controller),
@@ -383,15 +437,19 @@ class EditorLandscapeTopBar extends StatelessWidget {
                     : AppColors.inkMutedOf(context),
               ),
             ),
+            style: IconButton.styleFrom(
+              minimumSize: const Size(28, 28),
+              padding: EdgeInsets.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
             tooltip: 'toggle_panel'.tr,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             onPressed: () {
               controller.isPanelOpen.value = !controller.isPanelOpen.value;
             },
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
 
           // Settings / Config Button
           IconButton(
@@ -400,8 +458,12 @@ class EditorLandscapeTopBar extends StatelessWidget {
               size: 17,
               color: AppColors.inkOf(context),
             ),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            style: IconButton.styleFrom(
+              minimumSize: const Size(28, 28),
+              padding: EdgeInsets.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
             tooltip: 'editor_website_config'.tr,
             onPressed: () {
               controller.setPortrait();
@@ -412,7 +474,7 @@ class EditorLandscapeTopBar extends StatelessWidget {
             },
           ),
 
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
 
           // Publish Button
           EditorPublishButton(controller: controller, isLandscape: true),
@@ -424,16 +486,21 @@ class EditorLandscapeTopBar extends StatelessWidget {
 
 class EditorViewportCapsule extends StatelessWidget {
   final EditorController controller;
+  final bool iconOnly;
 
-  const EditorViewportCapsule({super.key, required this.controller});
+  const EditorViewportCapsule({
+    super.key,
+    required this.controller,
+    this.iconOnly = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(3),
+      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
       decoration: BoxDecoration(
         color: AppColors.surfaceNeutralOf(context),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(9),
         border: Border.all(color: AppColors.borderSubtleOf(context)),
       ),
       child: Row(
@@ -445,6 +512,8 @@ class EditorViewportCapsule extends StatelessWidget {
             mode: ViewportMode.mobile,
             icon: LucideIcons.smartphone,
             label: 'viewport_mobile'.tr,
+            iconOnlyWhenInactive: true,
+            forceIconOnly: iconOnly,
           ),
           const SizedBox(width: 2),
           // Tablet
@@ -454,6 +523,7 @@ class EditorViewportCapsule extends StatelessWidget {
             icon: LucideIcons.tablet,
             label: 'viewport_tablet'.tr,
             iconOnlyWhenInactive: true,
+            forceIconOnly: iconOnly,
           ),
           const SizedBox(width: 2),
           // Desktop
@@ -463,6 +533,7 @@ class EditorViewportCapsule extends StatelessWidget {
             icon: LucideIcons.monitor,
             label: 'viewport_desktop'.tr,
             iconOnlyWhenInactive: true,
+            forceIconOnly: iconOnly,
           ),
         ],
       ),
@@ -481,7 +552,7 @@ class EditorRotateButton extends StatelessWidget {
       key: controller.showcaseRotateKey,
       title: 'editor_rotate_screen'.tr,
       description: 'showcase_rotate_desc'.tr,
-      targetPadding: const EdgeInsets.all(4),
+      targetPadding: const EdgeInsets.all(2),
       targetShapeBorder: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
@@ -510,12 +581,15 @@ class EditorRotateButton extends StatelessWidget {
                   ? const Color(0xFF2563EB)
                   : AppColors.inkMutedOf(context),
             ),
+            style: IconButton.styleFrom(
+              minimumSize: Size.zero,
+              padding: const EdgeInsets.all(4),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
             tooltip: controller.isLandscape.value
                 ? 'switch_portrait'.tr
                 : 'switch_landscape'.tr,
-            padding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             onPressed: controller.toggleLandscape,
           ),
         ),
@@ -555,9 +629,11 @@ class EditorPublishButton extends StatelessWidget {
                 ? const Color(0xFF0F172A)
                 : Colors.white,
             elevation: 0,
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             padding: EdgeInsets.symmetric(
-              horizontal: isLandscape ? 14 : 18,
-              vertical: isLandscape ? 6 : 8,
+              horizontal: isLandscape ? 8 : 10,
+              vertical: isLandscape ? 5 : 6,
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(999),
@@ -574,11 +650,16 @@ class EditorPublishButton extends StatelessWidget {
                         : Colors.white,
                   ),
                 )
-              : Text(
-                  'publish'.tr,
-                  style: TextStyle(
-                    fontSize: isLandscape ? 12 : 13,
-                    fontWeight: FontWeight.w600,
+              : ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isLandscape ? 85 : 75),
+                  child: Text(
+                    'publish'.tr,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: isLandscape ? 11.5 : 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
         ),
@@ -593,6 +674,7 @@ class EditorViewportButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool iconOnlyWhenInactive;
+  final bool forceIconOnly;
 
   const EditorViewportButton({
     super.key,
@@ -601,6 +683,7 @@ class EditorViewportButton extends StatelessWidget {
     required this.icon,
     required this.label,
     this.iconOnlyWhenInactive = false,
+    this.forceIconOnly = false,
   });
 
   @override
@@ -612,8 +695,8 @@ class EditorViewportButton extends StatelessWidget {
         onTap: () => controller.setViewport(mode),
         child: Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isSelected ? 8 : (iconOnlyWhenInactive ? 6 : 8),
-            vertical: 4,
+            horizontal: isSelected && !forceIconOnly ? 6 : ((iconOnlyWhenInactive || forceIconOnly) ? 4 : 6),
+            vertical: 3,
           ),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.surfaceOf(context) : Colors.transparent,
@@ -639,7 +722,7 @@ class EditorViewportButton extends StatelessWidget {
                     ? AppColors.inkOf(context)
                     : AppColors.inkMutedOf(context),
               ),
-              if (isSelected || !iconOnlyWhenInactive) ...[
+              if (!forceIconOnly && (isSelected || !iconOnlyWhenInactive)) ...[
                 const SizedBox(width: 4),
                 Text(
                   label,
