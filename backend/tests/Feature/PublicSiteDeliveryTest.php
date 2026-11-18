@@ -157,4 +157,23 @@ class PublicSiteDeliveryTest extends TestCase
         $response->assertStatus(200);
         $this->assertStringContainsString('start.io, 112660328, DIRECT', $response->getContent());
     }
+
+    public function test_api_subdomain_is_not_intercepted_by_subdomain_route(): void
+    {
+        $response = $this->get('http://api.ai-landing-page.xyz/api/v1/health');
+        $response->assertStatus(200);
+        $response->assertJson([
+            'status' => 'ok',
+        ]);
+    }
+
+    public function test_published_website_is_accessible_via_subdomain_route(): void
+    {
+        $this->actingAs($this->user, 'sanctum')->postJson("/api/v1/websites/{$this->website->id}/publish");
+
+        $response = $this->get('http://lumen-coffee.ai-landing-page.xyz/');
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'text/html; charset=UTF-8');
+        $this->assertStringContainsString('Lumen Coffee', $response->getContent());
+    }
 }

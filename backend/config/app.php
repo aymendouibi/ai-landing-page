@@ -54,7 +54,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'platform_domain' => env('APP_PLATFORM_DOMAIN', 'ai-landing-page.xyz'),
+    'platform_domain' => env('PLATFORM_DOMAIN', env('APP_PLATFORM_DOMAIN', 'ai-landing-page.xyz')),
 
     'platform_cname_target' => env('PLATFORM_CNAME_TARGET', 'ai-builder-api.onrender.com'),
 

@@ -132,9 +132,10 @@ Route::prefix('admin')->middleware(['web', 'admin'])->group(function () {
 // 1. Subdomain delivery: https://{subdomain}.our-domain.com/{path?}
 $platformDomain = config('app.platform_domain');
 if (!empty($platformDomain) && !in_array($platformDomain, ['localhost', '127.0.0.1'], true)) {
-    Route::domain('{subdomain}.' . $platformDomain)->group(function () {
+    $reservedSubdomains = implode('|', \App\Services\Hosting\CloudflareHostingService::RESERVED_SUBDOMAINS);
+    Route::domain('{subdomain}.' . $platformDomain)->group(function () use ($reservedSubdomains) {
         Route::get('/{path?}', [PublicSiteController::class, 'serve'])
-            ->where('subdomain', '^[a-zA-Z0-9\-]+$')
+            ->where('subdomain', '^(?!(' . $reservedSubdomains . ')($|\.))[a-zA-Z0-9\-]+')
             ->where('path', '.*')
             ->name('public.site.subdomain');
     });
@@ -147,7 +148,8 @@ Route::get('/sites/{subdomain}/{path?}', [PublicSiteController::class, 'serve'])
     ->name('public.site.prefixed');
 
 // 3. Root path-based delivery: https://our-domain.com/{subdomain}/{path?}
+$excludedPaths = implode('|', array_unique(array_merge(\App\Services\Hosting\CloudflareHostingService::RESERVED_SUBDOMAINS, ['sanctum', 'up', '_ignition', 'storage', 'hosting', 'assets', 'favicon', 'app-ads', 'canvas', 'sites'])));
 Route::get('/{subdomain}/{path?}', [PublicSiteController::class, 'serve'])
-    ->where('subdomain', '^(?!admin|api|sanctum|up|_ignition|storage|hosting|assets|favicon|app-ads)[a-zA-Z0-9\-]+$')
+    ->where('subdomain', '^(?!(' . $excludedPaths . ')$)[a-zA-Z0-9\-]+$')
     ->where('path', '.*')
     ->name('public.site.path');
