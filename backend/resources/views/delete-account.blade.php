@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Account & Data Removal — LandingCraft AI</title>
-    <meta name="description" content="Official account and data deletion page for LandingCraft AI & AI Landing Page. Follow our in-app visual guide or submit a web deletion request.">
+    <title>Delete Account & Data Removal — AI Landing Page</title>
+    <meta name="description" content="Official account and data deletion page for AI Landing Page & AI Landing Page. Follow our in-app visual guide or submit a web deletion request.">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     
@@ -101,10 +101,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <!-- Brand Logo -->
             <a href="/" class="flex items-center space-x-3 group">
-                <img src="/images/logo.png" class="w-10 h-10 rounded-xl shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform object-cover" alt="LandingCraft AI Logo">
+                <img src="/images/logo.png" class="w-10 h-10 rounded-xl shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform object-cover" alt="AI Landing Page Logo">
                 <div>
                     <span class="text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
-                        LandingCraft <span class="text-xs px-2 py-0.5 rounded-full font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20">AI</span>
+                        AI Landing Page <span class="text-xs px-2 py-0.5 rounded-full font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20">AI</span>
                     </span>
                     <span class="text-[11px] text-slate-400 block -mt-1 font-medium">Mobile Landing Page Platform</span>
                 </div>
@@ -499,8 +499,8 @@
     <footer class="border-t border-white/[0.06] bg-dark-base py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-slate-500">
             <div class="flex items-center space-x-3">
-                <img src="/images/logo.png" class="w-6 h-6 rounded-lg object-cover" alt="LandingCraft AI">
-                <span class="text-white font-bold">LandingCraft AI</span>
+                <img src="/images/logo.png" class="w-6 h-6 rounded-lg object-cover" alt="AI Landing Page">
+                <span class="text-white font-bold">AI Landing Page</span>
                 <span>·</span>
                 <span>© 2026 AI Landing Page. All rights reserved.</span>
             </div>

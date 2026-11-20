@@ -1317,13 +1317,13 @@ CRITICAL RULES:
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
       final amount = (interval == 'yearly' || interval == 'annual')
           ? 3990
-          : 499;
+          : 490;
       return {
         'paymentIntentId': 'pi_3Nz8y12eZvKYlo2C0VXYZ123',
         'clientSecret':
             'pi_3Nz8y12eZvKYlo2C0VXYZ123_secret_Yp90XYZ1234567890abcdef12',
         'amount': amount,
-        'currency': 'eur',
+        'currency': 'usd',
         'is_mock': true,
       };
     }
@@ -1357,7 +1357,7 @@ CRITICAL RULES:
         'plan': {
           'name': isPro ? 'Premium' : 'Free',
           'slug': planSlug,
-          'price_monthly': isPro ? (interval == 'yearly' ? 39.90 : 4.99) : 0,
+          'price_monthly': isPro ? (interval == 'yearly' ? 39.90 : 4.90) : 0,
         },
         'entitlements': {
           'max_websites': isPro ? 15 : 3,
@@ -1475,9 +1475,9 @@ CRITICAL RULES:
               'title': 'Premium · Monthly',
               'plan': 'Premium',
               'interval': 'monthly',
-              'amount': 4.99,
-              'currency': 'EUR',
-              'formatted_amount': '€4.99',
+              'amount': 4.90,
+              'currency': 'USD',
+              'formatted_amount': '$4.90',
               'provider': 'stripe',
               'status': 'Expired',
               'reference': 'pi_3UbLD7CCKIK7McZ41WtbKikY',
@@ -1491,9 +1491,9 @@ CRITICAL RULES:
               'title': 'Premium · Monthly',
               'plan': 'Premium',
               'interval': 'monthly',
-              'amount': 4.99,
-              'currency': 'EUR',
-              'formatted_amount': '€4.99',
+              'amount': 4.90,
+              'currency': 'USD',
+              'formatted_amount': '$4.90',
               'provider': 'stripe',
               'status': 'Expired',
               'reference': 'pi_3UaKD6CCKIK7McZ40VsbJhjX',

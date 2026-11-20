@@ -533,7 +533,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
-                            isYearly ? '€39.90' : '€4.99',
+                            isYearly ? '$39.90' : '$4.90',
                             style: TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
@@ -586,7 +586,7 @@ class _SubscriptionViewState extends State<SubscriptionView> {
                       ),
                     ),
                     Text(
-                      isYearly ? '€39.90' : '€4.99',
+                      isYearly ? '$39.90' : '$4.90',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,

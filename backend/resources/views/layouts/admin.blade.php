@@ -21,7 +21,7 @@
         <aside class="w-64 bg-slate-900/80 border-r border-slate-800/80 backdrop-blur-md flex flex-col shrink-0 hidden md:flex">
             <!-- Brand -->
             <div class="h-16 flex items-center px-6 border-b border-slate-800/80 gap-3">
-                <img src="/images/logo.png" class="w-9 h-9 rounded-xl shadow-lg shadow-indigo-500/20 object-cover" alt="LandingCraft AI Logo">
+                <img src="/images/logo.png" class="w-9 h-9 rounded-xl shadow-lg shadow-indigo-500/20 object-cover" alt="AI Landing Page Logo">
                 <div>
                     <h1 class="text-sm font-black text-white tracking-tight flex items-center gap-1.5">
                         AI LANDING PAGE
