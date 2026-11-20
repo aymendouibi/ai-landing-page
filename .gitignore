@@ -53,6 +53,7 @@ pnpm-debug.log*
 *.jks
 *.keystore
 **/key.properties
+**/.kotlin/
 **/.env*
 !**/.env.example
 .neon
