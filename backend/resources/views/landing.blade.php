@@ -219,11 +219,9 @@
                 <a href="#pricing" class="hidden sm:inline-flex text-xs font-bold px-3.5 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-brand-300 border border-brand-500/20 transition-all">
                     $4.9/mo · Pro
                 </a>
-                <a href="/canvas" class="inline-flex items-center justify-center space-x-2 text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 text-white shadow-lg shadow-brand-500/25 hover:brightness-110 active:scale-95 transition-all">
-                    <span>Try Canvas</span>
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
+                <a href="https://play.google.com/store/apps/details?id=com.douibi.landing.ai" target="_blank" rel="noopener" class="inline-flex items-center justify-center space-x-2 text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 text-white shadow-lg shadow-brand-500/25 hover:brightness-110 active:scale-95 transition-all">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3.609 1.814L13.793 12 3.61 22.186a2.373 2.373 0 0 1-.61-.937V2.75c.162-.367.373-.687.61-.937zm11.233 11.234l2.584 2.584-11.83 6.74 9.246-9.324zm0-2.096L5.596 1.628l11.83 6.74-2.584 2.584zm1.485 1.048l3.69-2.102a1.353 1.353 0 0 1 0 2.37l-3.69 2.102-1.047-1.047 1.047-1.323z"/></svg>
+                    <span>Get on Google Play</span>
                 </a>
             </div>
         </div>
@@ -259,11 +257,9 @@
 
                 <!-- Hero CTAs -->
                 <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="/canvas" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-brand-500 via-purple-600 to-pink-500 text-white font-bold text-base shadow-xl shadow-brand-500/30 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <polygon points="5 3 19 12 5 21 5 3"/>
-                        </svg>
-                        <span>Start Building Free</span>
+                    <a href="https://play.google.com/store/apps/details?id=com.douibi.landing.ai" target="_blank" rel="noopener" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-brand-500 via-purple-600 to-pink-500 text-white font-bold text-base shadow-xl shadow-brand-500/30 hover:shadow-brand-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2.5">
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M3.609 1.814L13.793 12 3.61 22.186a2.373 2.373 0 0 1-.61-.937V2.75c.162-.367.373-.687.61-.937zm11.233 11.234l2.584 2.584-11.83 6.74 9.246-9.324zm0-2.096L5.596 1.628l11.83 6.74-2.584 2.584zm1.485 1.048l3.69-2.102a1.353 1.353 0 0 1 0 2.37l-3.69 2.102-1.047-1.047 1.047-1.323z"/></svg>
+                        <span>Start Free on Google Play</span>
                     </a>
                     <a href="#pricing" class="w-full sm:w-auto px-8 py-4 rounded-xl glass-panel text-slate-200 hover:text-white hover:bg-white/[0.08] font-semibold text-base transition-all flex items-center justify-center gap-2 border border-white/10">
                         <span>See Plans ($4.9/mo)</span>
@@ -363,9 +359,9 @@
                                         <span><strong>1-Click Action:</strong> Deploy in 60 seconds to Cloudflare edge</span>
                                     </div>
                                     <div class="pt-2">
-                                        <a href="/canvas" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 text-white font-bold text-xs uppercase tracking-wider hover:brightness-110 transition-all shadow-md">
-                                            <span>Explore All Templates</span>
-                                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                        <a href="https://play.google.com/store/apps/details?id=com.douibi.landing.ai" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 text-white font-bold text-xs uppercase tracking-wider hover:brightness-110 transition-all shadow-md">
+                                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3.609 1.814L13.793 12 3.61 22.186a2.373 2.373 0 0 1-.61-.937V2.75c.162-.367.373-.687.61-.937zm11.233 11.234l2.584 2.584-11.83 6.74 9.246-9.324zm0-2.096L5.596 1.628l11.83 6.74-2.584 2.584zm1.485 1.048l3.69-2.102a1.353 1.353 0 0 1 0 2.37l-3.69 2.102-1.047-1.047 1.047-1.323z"/></svg>
+                                            <span>Explore Templates on Google Play</span>
                                         </a>
                                     </div>
                                 </div>
@@ -517,8 +513,9 @@
                                     <span>Interactive Preview</span>
                                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                                 </button>
-                                <a href="/canvas" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider transition-all">
-                                    Use Template
+                                <a href="https://play.google.com/store/apps/details?id=com.douibi.landing.ai" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider transition-all">
+                                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M3.609 1.814L13.793 12 3.61 22.186a2.373 2.373 0 0 1-.61-.937V2.75c.162-.367.373-.687.61-.937zm11.233 11.234l2.584 2.584-11.83 6.74 9.246-9.324zm0-2.096L5.596 1.628l11.83 6.74-2.584 2.584zm1.485 1.048l3.69-2.102a1.353 1.353 0 0 1 0 2.37l-3.69 2.102-1.047-1.047 1.047-1.323z"/></svg>
+                                    <span>Use Template</span>
                                 </a>
                             </div>
                         </div>
@@ -554,8 +551,9 @@
                                     <span>Interactive Preview</span>
                                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                                 </button>
-                                <a href="/canvas" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider transition-all">
-                                    Use Template
+                                <a href="https://play.google.com/store/apps/details?id=com.douibi.landing.ai" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider transition-all">
+                                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M3.609 1.814L13.793 12 3.61 22.186a2.373 2.373 0 0 1-.61-.937V2.75c.162-.367.373-.687.61-.937zm11.233 11.234l2.584 2.584-11.83 6.74 9.246-9.324zm0-2.096L5.596 1.628l11.83 6.74-2.584 2.584zm1.485 1.048l3.69-2.102a1.353 1.353 0 0 1 0 2.37l-3.69 2.102-1.047-1.047 1.047-1.323z"/></svg>
+                                    <span>Use Template</span>
                                 </a>
                             </div>
                         </div>
@@ -705,8 +703,9 @@
                         </div>
 
                         <div class="mt-10">
-                            <a href="/canvas" class="w-full py-3.5 rounded-xl glass-panel text-white font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center border border-white/10">
-                                Start Free Now
+                            <a href="https://play.google.com/store/apps/details?id=com.douibi.landing.ai" target="_blank" rel="noopener" class="w-full py-3.5 rounded-xl glass-panel text-white font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2 border border-white/10">
+                                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3.609 1.814L13.793 12 3.61 22.186a2.373 2.373 0 0 1-.61-.937V2.75c.162-.367.373-.687.61-.937zm11.233 11.234l2.584 2.584-11.83 6.74 9.246-9.324zm0-2.096L5.596 1.628l11.83 6.74-2.584 2.584zm1.485 1.048l3.69-2.102a1.353 1.353 0 0 1 0 2.37l-3.69 2.102-1.047-1.047 1.047-1.323z"/></svg>
+                                <span>Start Free on Google Play</span>
                             </a>
                         </div>
                     </div>
@@ -756,8 +755,9 @@
                         </div>
 
                         <div class="mt-10">
-                            <a href="/canvas" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 text-white font-bold text-sm shadow-lg shadow-brand-500/25 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center">
-                                Get Pro Monthly ($4.9)
+                            <a href="https://play.google.com/store/apps/details?id=com.douibi.landing.ai" target="_blank" rel="noopener" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 text-white font-bold text-sm shadow-lg shadow-brand-500/25 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3.609 1.814L13.793 12 3.61 22.186a2.373 2.373 0 0 1-.61-.937V2.75c.162-.367.373-.687.61-.937zm11.233 11.234l2.584 2.584-11.83 6.74 9.246-9.324zm0-2.096L5.596 1.628l11.83 6.74-2.584 2.584zm1.485 1.048l3.69-2.102a1.353 1.353 0 0 1 0 2.37l-3.69 2.102-1.047-1.047 1.047-1.323z"/></svg>
+                                <span>Subscribe on Google Play ($4.9/mo)</span>
                             </a>
                         </div>
                     </div>
@@ -810,8 +810,9 @@
                         </div>
 
                         <div class="mt-10">
-                            <a href="/canvas" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 via-brand-500 to-purple-600 text-white font-extrabold text-sm shadow-xl shadow-brand-500/30 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center">
-                                Unlock Pro Yearly ($39.9)
+                            <a href="https://play.google.com/store/apps/details?id=com.douibi.landing.ai" target="_blank" rel="noopener" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 via-brand-500 to-purple-600 text-white font-extrabold text-sm shadow-xl shadow-brand-500/30 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3.609 1.814L13.793 12 3.61 22.186a2.373 2.373 0 0 1-.61-.937V2.75c.162-.367.373-.687.61-.937zm11.233 11.234l2.584 2.584-11.83 6.74 9.246-9.324zm0-2.096L5.596 1.628l11.83 6.74-2.584 2.584zm1.485 1.048l3.69-2.102a1.353 1.353 0 0 1 0 2.37l-3.69 2.102-1.047-1.047 1.047-1.323z"/></svg>
+                                <span>Subscribe on Google Play ($39.9/yr)</span>
                             </a>
                         </div>
                     </div>
@@ -934,11 +935,12 @@
                     </p>
 
                     <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <a href="/canvas" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-slate-950 font-bold text-base hover:bg-slate-100 transition-all shadow-xl">
-                            Start Building Now
+                        <a href="https://play.google.com/store/apps/details?id=com.douibi.landing.ai" target="_blank" rel="noopener" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-slate-950 font-bold text-base hover:bg-slate-100 transition-all shadow-xl flex items-center justify-center gap-2.5">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M3.609 1.814L13.793 12 3.61 22.186a2.373 2.373 0 0 1-.61-.937V2.75c.162-.367.373-.687.61-.937zm11.233 11.234l2.584 2.584-11.83 6.74 9.246-9.324zm0-2.096L5.596 1.628l11.83 6.74-2.584 2.584zm1.485 1.048l3.69-2.102a1.353 1.353 0 0 1 0 2.37l-3.69 2.102-1.047-1.047 1.047-1.323z"/></svg>
+                            <span>Start Building Now</span>
                         </a>
-                        <a href="#pricing" class="w-full sm:w-auto px-8 py-4 rounded-xl glass-panel text-white font-bold text-base hover:bg-white/10 transition-all border border-white/10">
-                            View Pro Plans ($4.9/mo)
+                        <a href="https://play.google.com/store/apps/details?id=com.douibi.landing.ai" target="_blank" rel="noopener" class="w-full sm:w-auto px-8 py-4 rounded-xl glass-panel text-white font-bold text-base hover:bg-white/10 transition-all border border-white/10 flex items-center justify-center gap-2">
+                            <span>Subscribe on Google Play ($4.9/mo)</span>
                         </a>
                     </div>
                 </div>
