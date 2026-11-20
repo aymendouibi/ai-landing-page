@@ -3,7 +3,8 @@ import '../../../core/designsystem/colors.dart';
 import '../../../core/widgets/shimmer_box.dart';
 
 /// Shimmer loading placeholder for the Projects (Dashboard) screen.
-/// Renders skeleton placeholders for the Hero Card and the Recent Projects carousel.
+/// Renders skeleton placeholders for the Hero Card and the Recent Projects carousel
+/// with unified hardware-accelerated diagonal sweeps.
 class ProjectsShimmerView extends StatelessWidget {
   const ProjectsShimmerView({super.key});
 
@@ -26,45 +27,58 @@ class ProjectsShimmerView extends StatelessWidget {
               color: AppColors.borderSubtleOf(context),
               width: 1,
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Badge & status row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ShimmerBox(width: 90, height: 20, borderRadius: 10),
-                  ShimmerBox(width: 60, height: 20, borderRadius: 10),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Hero preview area
-              ShimmerBox(
-                width: double.infinity,
-                height: 180,
-                borderRadius: 16,
-              ),
-              const SizedBox(height: 16),
-              // Title & subtitle
-              ShimmerBox(width: 180, height: 22, borderRadius: 8),
-              const SizedBox(height: 8),
-              ShimmerBox(width: 240, height: 14, borderRadius: 6),
-              const SizedBox(height: 18),
-              // Button
-              ShimmerBox(
-                width: double.infinity,
-                height: 48,
-                borderRadius: 16,
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.25)
+                    : const Color(0x141E1E50),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
               ),
             ],
+          ),
+          child: Shimmer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Badge & status row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    ShimmerBox(width: 104, height: 24, borderRadius: 12),
+                    ShimmerBox(width: 68, height: 24, borderRadius: 12),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Hero preview area
+                const ShimmerBox(
+                  width: double.infinity,
+                  height: 195,
+                  borderRadius: 16,
+                ),
+                const SizedBox(height: 16),
+                // Title & subtitle
+                const ShimmerBox(width: 210, height: 24, borderRadius: 8),
+                const SizedBox(height: 8),
+                const ShimmerBox(width: 280, height: 14, borderRadius: 6),
+                const SizedBox(height: 18),
+                // Button
+                const ShimmerBox.button(
+                  width: double.infinity,
+                  height: 48,
+                  borderRadius: 16,
+                ),
+              ],
+            ),
           ),
         ),
 
         const SizedBox(height: 24),
 
         // "Recent" Section Title Shimmer
-        ShimmerBox(width: 100, height: 20, borderRadius: 6),
+        const Shimmer(
+          child: ShimmerBox(width: 110, height: 22, borderRadius: 6),
+        ),
 
         const SizedBox(height: 14),
 
@@ -87,28 +101,39 @@ class ProjectsShimmerView extends StatelessWidget {
                     color: AppColors.borderSubtleOf(context),
                     width: 1,
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ShimmerBox(
-                      width: double.infinity,
-                      height: 160,
-                      borderRadius: 14,
-                    ),
-                    const SizedBox(height: 14),
-                    ShimmerBox(width: 140, height: 18, borderRadius: 6),
-                    const SizedBox(height: 8),
-                    ShimmerBox(width: 180, height: 12, borderRadius: 6),
-                    const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ShimmerBox(width: 70, height: 14, borderRadius: 6),
-                        ShimmerBox(width: 60, height: 24, borderRadius: 8),
-                      ],
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.18)
+                          : const Color(0x0C1E1E50),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
+                ),
+                child: Shimmer(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      ShimmerBox(
+                        width: double.infinity,
+                        height: 160,
+                        borderRadius: 14,
+                      ),
+                      SizedBox(height: 14),
+                      ShimmerBox(width: 150, height: 18, borderRadius: 6),
+                      SizedBox(height: 8),
+                      ShimmerBox(width: 190, height: 12, borderRadius: 6),
+                      Spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ShimmerBox(width: 76, height: 14, borderRadius: 6),
+                          ShimmerBox(width: 64, height: 26, borderRadius: 8),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

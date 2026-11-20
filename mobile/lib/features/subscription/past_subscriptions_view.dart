@@ -9,6 +9,7 @@ import 'widgets/past_subscription_helper.dart';
 import 'widgets/past_subscription_item_card.dart';
 import 'widgets/past_subscriptions_header.dart';
 import 'widgets/past_subscriptions_promo_card.dart';
+import 'widgets/past_subscriptions_shimmer_view.dart';
 import 'widgets/receipt_details_sheet.dart';
 
 export 'widgets/past_current_plan_card.dart';
@@ -16,6 +17,7 @@ export 'widgets/past_subscription_helper.dart';
 export 'widgets/past_subscription_item_card.dart';
 export 'widgets/past_subscriptions_header.dart';
 export 'widgets/past_subscriptions_promo_card.dart';
+export 'widgets/past_subscriptions_shimmer_view.dart';
 export 'widgets/receipt_details_sheet.dart';
 
 class PastSubscriptionsView extends StatefulWidget {
@@ -140,12 +142,7 @@ class _PastSubscriptionsViewState extends State<PastSubscriptionsView> {
 
                 // Year Sections
                 if (isLoading)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 40),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
+                  const PastSubscriptionsShimmerView()
                 else if (errorMessage != null)
                   Container(
                     padding: const EdgeInsets.all(24),

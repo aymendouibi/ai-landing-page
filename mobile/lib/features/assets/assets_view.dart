@@ -6,6 +6,7 @@ import '../../core/widgets/atmospheric_background.dart';
 import '../../core/widgets/user_avatar_circle.dart';
 import '../dashboard/components/recent_project_card.dart';
 import 'assets_controller.dart';
+import 'components/assets_shimmer_view.dart';
 import 'components/upload_project_card.dart';
 
 class AssetsView extends StatelessWidget {
@@ -139,6 +140,10 @@ class AssetsView extends StatelessWidget {
 
               // 4. Content Area: Pages & Uploads with Same Project Cards
               Obx(() {
+                if (controller.isLoading.value) {
+                  return const AssetsShimmerView();
+                }
+
                 final filter = controller.selectedFilter.value;
                 final pages = controller.filteredPages;
                 final uploads = controller.filteredUploads;

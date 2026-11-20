@@ -10,6 +10,7 @@ import 'widgets/website_config_page_header.dart';
 import 'widgets/website_config_publishing_card.dart';
 import 'widgets/website_config_save_bar.dart';
 import 'widgets/website_config_top_nav.dart';
+import 'widgets/website_config_shimmer_view.dart';
 
 export 'widgets/manage_dns_sheet.dart';
 export 'widgets/website_config_delete_card.dart';
@@ -35,9 +36,7 @@ class WebsiteConfigScreen extends StatelessWidget {
       backgroundColor: AppColors.backgroundOf(context),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(strokeWidth: 2),
-          );
+          return const WebsiteConfigShimmerView();
         }
 
         return Stack(

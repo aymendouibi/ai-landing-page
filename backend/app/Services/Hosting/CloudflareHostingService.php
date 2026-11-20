@@ -23,6 +23,7 @@ class CloudflareHostingService
         'admin', 'api', 'app', 'support', 'www', 'mail', 'billing', 'cdn',
         'static', 'auth', 'staging', 'dev', 'test', 'status', 'help', 'docs',
         'assets', 'root', 'dashboard', 'login', 'signup', 'register',
+        'privacy', 'terms', 'legal',
     ];
 
     public function __construct(

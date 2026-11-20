@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/designsystem/colors.dart';
 import '../../../core/network/api_client.dart';
+import '../widgets/past_subscriptions_shimmer_view.dart';
 
 class BillingHistorySheet extends StatefulWidget {
   const BillingHistorySheet({super.key});
@@ -152,11 +153,9 @@ class _BillingHistorySheetState extends State<BillingHistorySheet> {
             // Content body
             Flexible(
               child: isLoading
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(40),
-                        child: CircularProgressIndicator(),
-                      ),
+                  ? const SingleChildScrollView(
+                      padding: EdgeInsets.all(20),
+                      child: PastSubscriptionsShimmerView(count: 3),
                     )
                   : (errorMessage != null)
                   ? Center(

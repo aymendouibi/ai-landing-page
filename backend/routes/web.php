@@ -65,6 +65,23 @@ Route::get('/.well-known/assetlinks.json', function () {
     abort(404);
 });
 
+// Legal: Privacy Policy & Terms of Service
+Route::get('/privacy', function () {
+    return view('privacy');
+})->name('privacy');
+
+Route::get('/privacy-policy', function () {
+    return redirect('/privacy', 301);
+});
+
+Route::get('/terms', function () {
+    return view('terms');
+})->name('terms');
+
+Route::get('/terms-of-service', function () {
+    return redirect('/terms', 301);
+});
+
 // Admin Guest Routes (Login, Dev Quick-Login)
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
@@ -148,7 +165,7 @@ Route::get('/sites/{subdomain}/{path?}', [PublicSiteController::class, 'serve'])
     ->name('public.site.prefixed');
 
 // 3. Root path-based delivery: https://our-domain.com/{subdomain}/{path?}
-$excludedPaths = implode('|', array_unique(array_merge(\App\Services\Hosting\CloudflareHostingService::RESERVED_SUBDOMAINS, ['sanctum', 'up', '_ignition', 'storage', 'hosting', 'assets', 'favicon', 'app-ads', 'canvas', 'sites'])));
+$excludedPaths = implode('|', array_unique(array_merge(\App\Services\Hosting\CloudflareHostingService::RESERVED_SUBDOMAINS, ['sanctum', 'up', '_ignition', 'storage', 'hosting', 'assets', 'favicon', 'app-ads', 'canvas', 'sites', 'privacy', 'privacy-policy', 'terms', 'terms-of-service'])));
 Route::get('/{subdomain}/{path?}', [PublicSiteController::class, 'serve'])
     ->where('subdomain', '^(?!(' . $excludedPaths . ')$)[a-zA-Z0-9\-]+$')
     ->where('path', '.*')
