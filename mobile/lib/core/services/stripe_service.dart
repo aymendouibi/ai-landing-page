@@ -15,7 +15,7 @@ class StripeService extends GetxService {
   static const String urlScheme = 'ai-landing-page';
   static const String merchantName = 'AI Landing Page';
 
-  static const double monthlyPrice = 4.90;
+  static const double monthlyPrice = 4.99;
   static const double yearlyPrice = 39.90;
 
   final RxBool isProcessing = false.obs;
@@ -100,7 +100,7 @@ class StripeService extends GetxService {
             ),
             content: Text(
               '${'stripe_sandbox_desc'.tr}\n\n'
-              '${isYearly ? "Yearly ($39.90 / year — 32% OFF!)" : "Monthly ($4.90 / month)"}\n\n'
+              '${isYearly ? "Yearly (€39.90 / year — 33% OFF!)" : "Monthly (€4.99 / month)"}\n\n'
               'Would you like to simulate successful payment and activate Premium?',
               style: TextStyle(
                 fontSize: 14,
@@ -142,7 +142,7 @@ class StripeService extends GetxService {
         if (context.mounted) {
           await PaymentResultDialog.showSuccess(
             context: context,
-            planTitle: isYearly ? 'Yearly Premium ($39.90)' : 'Monthly Premium ($4.90)',
+            planTitle: isYearly ? 'Yearly Premium (€39.90)' : 'Monthly Premium (€4.99)',
             interval: isYearly ? 'yearly' : 'monthly',
             endsAt: controller.subscriptionPeriodEnd.value,
           );
@@ -197,7 +197,7 @@ class StripeService extends GetxService {
       if (context.mounted) {
         await PaymentResultDialog.showSuccess(
           context: context,
-          planTitle: isYearly ? 'Yearly Premium ($39.90)' : 'Monthly Premium ($4.90)',
+          planTitle: isYearly ? 'Yearly Premium (€39.90)' : 'Monthly Premium (€4.99)',
           interval: isYearly ? 'yearly' : 'monthly',
           endsAt: controller.subscriptionPeriodEnd.value,
         );

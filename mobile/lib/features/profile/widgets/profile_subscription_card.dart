@@ -71,7 +71,7 @@ class ProfileSubscriptionCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  isPro ? 'profile_monthly_price'.tr : '$4.90',
+                  isPro ? 'profile_monthly_price'.tr : '€4.99',
                   style: TextStyle(
                     fontSize: isPro ? 16 : 22,
                     fontWeight: FontWeight.w800,
