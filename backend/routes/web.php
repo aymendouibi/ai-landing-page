@@ -82,6 +82,43 @@ Route::get('/terms-of-service', function () {
     return redirect('/terms', 301);
 });
 
+// Account Deletion (Google Play & App Store Compliance)
+Route::get('/delete-account', function () {
+    return view('delete-account');
+})->name('delete-account');
+
+Route::post('/delete-account', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'email' => 'required|email|max:255',
+        'reason' => 'nullable|string|max:1000',
+        'confirm_deletion' => 'required|accepted',
+    ]);
+
+    $user = \App\Models\User::where('email', strtolower(trim($validated['email'])))->first();
+
+    \App\Models\Feedback::create([
+        'user_id' => $user?->id,
+        'category' => 'account_deletion',
+        'message' => "Web Account Deletion Request for: " . $validated['email'] . "\nReason: " . ($validated['reason'] ?? 'Not provided'),
+        'status' => 'new',
+        'metadata' => [
+            'email' => $validated['email'],
+            'reason' => $validated['reason'] ?? null,
+            'source' => 'web_form',
+            'user_exists' => $user !== null,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'requested_at' => now()->toIso8601String(),
+        ],
+    ]);
+
+    return redirect('/delete-account')->with('success_message', 'Your account deletion request has been received. Our data protection team will verify and permanently purge your account, websites, uploaded media assets, and AI history within 48 hours. A confirmation notice will be sent to ' . $validated['email'] . '.');
+})->middleware('throttle:10,1')->name('delete-account.submit');
+
+Route::get('/account-deletion', function () {
+    return redirect('/delete-account', 301);
+});
+
 // Admin Guest Routes (Login, Dev Quick-Login)
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
@@ -165,7 +202,7 @@ Route::get('/sites/{subdomain}/{path?}', [PublicSiteController::class, 'serve'])
     ->name('public.site.prefixed');
 
 // 3. Root path-based delivery: https://our-domain.com/{subdomain}/{path?}
-$excludedPaths = implode('|', array_unique(array_merge(\App\Services\Hosting\CloudflareHostingService::RESERVED_SUBDOMAINS, ['sanctum', 'up', '_ignition', 'storage', 'hosting', 'assets', 'favicon', 'app-ads', 'canvas', 'sites', 'privacy', 'privacy-policy', 'terms', 'terms-of-service'])));
+$excludedPaths = implode('|', array_unique(array_merge(\App\Services\Hosting\CloudflareHostingService::RESERVED_SUBDOMAINS, ['sanctum', 'up', '_ignition', 'storage', 'hosting', 'assets', 'favicon', 'app-ads', 'canvas', 'sites', 'privacy', 'privacy-policy', 'terms', 'terms-of-service', 'delete-account', 'account-deletion'])));
 Route::get('/{subdomain}/{path?}', [PublicSiteController::class, 'serve'])
     ->where('subdomain', '^(?!(' . $excludedPaths . ')$)[a-zA-Z0-9\-]+$')
     ->where('path', '.*')

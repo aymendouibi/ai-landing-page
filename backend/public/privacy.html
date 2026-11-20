@@ -623,6 +623,7 @@
             <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-400">
                 <a href="/privacy" class="text-brand-400 font-semibold hover:text-white transition-colors">Privacy Policy</a>
                 <a href="/terms" class="hover:text-white transition-colors">Terms of Service</a>
+                <a href="/delete-account" class="hover:text-white transition-colors">Delete Account</a>
                 <a href="/admin/login" class="hover:text-white transition-colors">Admin Login</a>
                 <a href="/api/v1/health" target="_blank" class="hover:text-white transition-colors">API Status</a>
                 <a href="/#showcase" class="hover:text-white transition-colors">Live Gallery</a>
