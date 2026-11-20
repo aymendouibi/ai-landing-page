@@ -88,17 +88,14 @@ class DashboardScreen extends StatelessWidget {
     BuildContext context,
     DashboardController controller,
   ) {
+    final isDark = AppColors.isDark(context);
     return Stack(
       children: [
-        // Ambient Backdrop Aura Gradient
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 280,
+        // Soft iridescent gradient wash background (same as Profile)
+        Positioned.fill(
           child: Container(
-            decoration: const BoxDecoration(
-              gradient: AppGradients.backdropAura,
+            decoration: BoxDecoration(
+              gradient: AppGradients.profileBackgroundGradient(isDark),
             ),
           ),
         ),

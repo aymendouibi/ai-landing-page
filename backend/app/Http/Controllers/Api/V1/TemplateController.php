@@ -38,12 +38,12 @@ class TemplateController extends Controller
         // Tab category filtering
         if ($tab === 'startups') {
             $query->where(function ($q) {
-                $q->whereIn('industry', ['SaaS', 'Startups', 'Startups & AI Platform', 'Startups & Developer Tools', 'Startups & HealthTech', 'Startups & FinTech', 'Technology', 'SaaS & AI Platform'])
+                $q->whereIn('industry', ['SaaS', 'Startups', 'Startups & AI Platform', 'Startups & Developer Tools', 'Startups & HealthTech', 'Startups & FinTech', 'Startups & Digital Wellness', 'Technology', 'SaaS & AI Platform'])
                   ->orWhereHas('category', fn ($c) => $c->whereIn('slug', ['saas', 'startups']));
             });
         } elseif ($tab === 'business') {
             $query->where(function ($q) {
-                $q->whereIn('industry', ['SaaS', 'Food & drink', 'Restaurant', 'Portfolio · Architecture', 'Real Estate', 'Local Businesses', 'Agencies', 'Business & Specialty Coffee', 'Business & Luxury Skincare', 'Business & Wealth Advisory', 'Business & Fine Dining', 'Finance', 'Business'])
+                $q->whereIn('industry', ['SaaS', 'Food & drink', 'Restaurant', 'Portfolio · Architecture', 'Real Estate', 'Local Businesses', 'Agencies', 'Business & Specialty Coffee', 'Business & Luxury Skincare', 'Business & Wealth Advisory', 'Business & Fine Dining', 'Business & Outdoor Lifestyle', 'Business & Luxury Jewelry', 'Business & Luxury Travel', 'Finance', 'Business'])
                   ->orWhereHas('category', fn ($c) => $c->whereIn('slug', ['saas', 'restaurants', 'real-estate', 'local-business', 'agencies', 'business', 'ecommerce']));
             });
         } elseif ($tab === 'weddings') {
@@ -53,7 +53,7 @@ class TemplateController extends Controller
             });
         } elseif ($tab === 'creative') {
             $query->where(function ($q) {
-                $q->whereIn('industry', ['Portfolio · Architecture', 'Portfolios', 'Photography', 'Art', 'Creative', 'Creative & Architectural Design', 'Creative & Visual Identity'])
+                $q->whereIn('industry', ['Portfolio · Architecture', 'Portfolios', 'Photography', 'Art', 'Creative', 'Creative & Architectural Design', 'Creative & Visual Identity', 'Creative & Film Production'])
                   ->orWhereHas('category', fn ($c) => $c->whereIn('slug', ['portfolios', 'photography', 'agencies', 'creative']));
             });
         } elseif ($tab === 'personal') {

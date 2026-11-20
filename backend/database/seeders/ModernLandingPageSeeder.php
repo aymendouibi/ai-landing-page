@@ -215,161 +215,7 @@ class ModernLandingPageSeeder extends Seeder
             ]
         );
 
-        // 2. Kroma Studio - Warm Editorial Architecture & Agency
-        $kromaDoc = [
-            'schema_version' => 1,
-            'site' => [
-                'name' => 'Kroma Studio',
-                'theme' => [
-                    'colors' => [
-                        'primary' => '#18181B',
-                        'secondary' => '#71717A',
-                        'accent' => '#B45309',
-                        'background' => '#F4F1EA',
-                        'surface' => '#FFFFFF',
-                        'text' => [
-                            'primary' => '#18181B',
-                            'secondary' => '#52525B',
-                            'inverse' => '#FFFFFF',
-                        ],
-                    ],
-                    'typography' => [
-                        'headingFamily' => 'Playfair Display',
-                        'bodyFamily' => 'Inter',
-                        'scale' => [
-                            'h1' => ['size' => '4.2rem', 'weight' => 700, 'lineHeight' => 1.08],
-                            'h2' => ['size' => '2.8rem', 'weight' => 600, 'lineHeight' => 1.15],
-                            'h3' => ['size' => '1.5rem', 'weight' => 600, 'lineHeight' => 1.3],
-                            'body' => ['size' => '1.05rem', 'weight' => 400, 'lineHeight' => 1.7],
-                        ],
-                    ],
-                    'spacing' => [
-                        'containerMaxWidth' => '1240px',
-                        'sectionPadding' => ['x' => '2rem', 'y' => '6rem'],
-                    ],
-                ],
-                'settings' => [
-                    'language' => 'en',
-                    'googleFonts' => ['Playfair Display', 'Inter'],
-                ],
-            ],
-            'navigation' => [
-                'logo' => ['text' => 'KROMA STUDIO'],
-                'items' => [
-                    ['label' => 'Selected Works', 'url' => '#works'],
-                    ['label' => 'Philosophy', 'url' => '#about'],
-                    ['label' => 'Inquire', 'url' => '#cta', 'type' => 'button'],
-                ],
-            ],
-            'pages' => [
-                [
-                    'id' => 'page_home',
-                    'slug' => '/',
-                    'title' => 'Home',
-                    'description' => 'Architectural design practice crafting spaces that endure through material honesty.',
-                    'seo' => [
-                        'title' => 'Kroma Studio — Architectural Craft',
-                        'description' => 'Spatial design, monolithic residences, and modern editorial architecture.',
-                        'ogImage' => 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-                    ],
-                    'sections' => [
-                        [
-                            'id' => 'sec_kroma_hero',
-                            'component' => 'hero',
-                            'variant' => 'editorial_monolith',
-                            'order' => 0,
-                            'visible' => true,
-                            'props' => [
-                                'badge' => 'ARCHITECTURAL DESIGN · COPENHAGEN & TOKYO',
-                                'headline' => 'Silence in form.<br>Permanence in stone.',
-                                'subheadline' => 'We curate bespoke residential monoliths and spatial sanctuaries, blending raw natural textures with refined Scandinavian minimalism.',
-                                'ctaText' => 'Explore Portfolio',
-                                'ctaLink' => '#works',
-                                'secondaryCtaText' => 'Private Commissions',
-                                'secondaryCtaLink' => '#cta',
-                                'image' => [
-                                    'src' => 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-                                    'alt' => 'Kroma Studio Villa Sandstone',
-                                ],
-                            ],
-                        ],
-                        [
-                            'id' => 'sec_kroma_features',
-                            'component' => 'features',
-                            'variant' => 'editorial_grid',
-                            'order' => 1,
-                            'visible' => true,
-                            'props' => [
-                                'title' => 'Principles of Spatial Honesty',
-                                'subtitle' => 'Our deliberate pursuit of timeless geometry and tactile balance.',
-                                'items' => [
-                                    ['title' => 'Raw Material Authenticity', 'description' => 'Unsealed travertine, hand-planed Japanese cedar, and patinated bronze.', 'icon' => 'Sparkles'],
-                                    ['title' => 'Solar Choreography', 'description' => 'Sculpted light wells designed to capture changing celestial daylight angles.', 'icon' => 'Globe'],
-                                    ['title' => 'Acoustic Solitude', 'description' => 'Integrated thermal mass walls delivering studio-grade auditory isolation.', 'icon' => 'ShieldCheck'],
-                                ],
-                            ],
-                        ],
-                        [
-                            'id' => 'sec_kroma_cta',
-                            'component' => 'cta',
-                            'variant' => 'warm_editorial',
-                            'order' => 2,
-                            'visible' => true,
-                            'props' => [
-                                'headline' => 'Begin your architectural journey.',
-                                'subheadline' => 'Now accepting private residential commissions for the upcoming fiscal calendar.',
-                                'ctaText' => 'Request Studio Portfolio & Monograph',
-                                'ctaLink' => '#top',
-                            ],
-                        ],
-                        [
-                            'id' => 'sec_kroma_footer',
-                            'component' => 'footer',
-                            'order' => 3,
-                            'visible' => true,
-                            'props' => [
-                                'copyright' => '© ' . date('Y') . ' Kroma Studio Architects. All rights reserved.',
-                                'links' => [
-                                    ['label' => 'Monograph', 'url' => '#mono'],
-                                    ['label' => 'Press', 'url' => '#press'],
-                                    ['label' => 'Contact', 'url' => '#contact'],
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ];
-
-        $kromaTemplate = Template::updateOrCreate(
-            ['slug' => 'kroma-studio-modern'],
-            [
-                'category_id' => $agencyCat?->id,
-                'name' => 'Kroma Studio',
-                'description' => 'Award-winning warm editorial architecture & creative studio portfolio with serif typography and split galleries.',
-                'industry' => 'Portfolio & Agency',
-                'badge' => 'AWARD WINNING',
-                'is_featured' => true,
-                'is_public' => true,
-                'status' => TemplateStatus::Published,
-                'license_type' => 'internal',
-                'author' => 'Kroma Studio',
-                'use_count' => 97,
-                'preview_images' => ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80'],
-            ]
-        );
-
-        TemplateVersion::updateOrCreate(
-            ['template_id' => $kromaTemplate->id, 'version' => 1],
-            [
-                'document' => $kromaDoc,
-                'design_tokens' => $kromaDoc['site']['theme'],
-                'fonts' => ['Playfair Display', 'Inter'],
-                'is_active' => true,
-            ]
-        );
-
-        // 3. Aura Botanicals - Clean Luxury Skincare E-Commerce
+        // 2. Aura Botanicals - Clean Luxury Skincare E-Commerce
         $auraDoc = [
             'schema_version' => 1,
             'site' => [
@@ -420,7 +266,7 @@ class ModernLandingPageSeeder extends Seeder
                                 'secondaryCtaText' => 'Our Sourcing Story',
                                 'secondaryCtaLink' => '#story',
                                 'image' => [
-                                    'src' => 'https://images.unsplash.com/photo-1608248597359-548762f928e0?auto=format&fit=crop&w=1200&q=80',
+                                    'src' => 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=1200&q=80',
                                     'alt' => 'Aura Botanicals Glass Bottles',
                                 ],
                             ],
@@ -486,7 +332,7 @@ class ModernLandingPageSeeder extends Seeder
                                 'title' => 'Rooted in Alpine Reverence',
                                 'subtitle' => 'Where ancient herbal wisdom meets clean cellular biology.',
                                 'body' => 'Founded by holistic biochemist Clara von Berg, Aura was created to replace multi-step synthetic routines with pure, biodynamic plant medicine. We cultivate and harvest flora in rhythm with natural seasons, producing small-batch elixirs that restore balance and radiance to modern skin.',
-                                'image' => 'https://images.unsplash.com/photo-1512290900672-1f02e75e5330?auto=format&fit=crop&w=1200&q=80',
+                                'image' => 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=1200&q=80',
                             ],
                             'styles' => ['background' => 'surface'],
                         ],
@@ -536,7 +382,7 @@ class ModernLandingPageSeeder extends Seeder
                 'license_type' => 'internal',
                 'author' => 'DeepMind Studio',
                 'use_count' => 118,
-                'preview_images' => ['https://images.unsplash.com/photo-1608248597359-548762f928e0?auto=format&fit=crop&w=1200&q=80'],
+                'preview_images' => ['https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=1200&q=80'],
             ]
         );
 

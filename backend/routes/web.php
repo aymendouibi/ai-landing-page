@@ -153,6 +153,8 @@ Route::prefix('admin')->middleware(['web', 'admin'])->group(function () {
     Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
     Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('admin.users.show');
     Route::post('/users/{user}/toggle-role', [AdminUserController::class, 'toggleRole'])->name('admin.users.toggle_role');
+    Route::post('/users/{user}/upgrade-premium', [AdminUserController::class, 'upgradePremium'])->name('admin.users.upgrade_premium');
+    Route::post('/users/{user}/cancel-premium', [AdminUserController::class, 'cancelPremium'])->name('admin.users.cancel_premium');
 
     // Avis & Feedback from Mobile ("Envoyer les avis")
     Route::get('/feedback', [AdminFeedbackController::class, 'index'])->name('admin.feedback.index');

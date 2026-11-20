@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/designsystem/colors.dart';
+import '../../core/designsystem/gradients.dart';
 import '../../core/widgets/ad_banner_widget.dart';
 import 'components/template_real_preview_modal.dart';
 import 'templates_controller.dart';
@@ -35,32 +36,11 @@ class TemplatesView extends StatelessWidget {
 
     return Stack(
       children: [
-        // 1. Ambient Aura Gradient Backdrop (Top)
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 380,
+        // Soft iridescent gradient wash background (same as Profile)
+        Positioned.fill(
           child: Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDark
-                    ? [
-                        const Color(0xFF090D16),
-                        const Color(0xFF1E1B4B).withValues(alpha: 0.5),
-                        const Color(0xFF1E293B).withValues(alpha: 0.3),
-                        const Color(0xFF090D16),
-                      ]
-                    : [
-                        const Color(0xFFE0E7FF).withValues(alpha: 0.65),
-                        const Color(0xFFFCE7F3).withValues(alpha: 0.55),
-                        const Color(0xFFE0F2FE).withValues(alpha: 0.5),
-                        const Color(0xFFF8FAFC),
-                      ],
-                stops: const [0.0, 0.45, 0.75, 1.0],
-              ),
+              gradient: AppGradients.profileBackgroundGradient(isDark),
             ),
           ),
         ),

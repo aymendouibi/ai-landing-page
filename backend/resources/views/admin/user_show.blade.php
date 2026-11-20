@@ -40,11 +40,25 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5 flex-wrap">
+                @if(!$user->isPremium())
+                    <button type="button" onclick="openUpgradeModal()" class="px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-lg shadow-violet-600/30 transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <span>Surclasser en Premium ★</span>
+                    </button>
+                @else
+                    <button type="button" onclick="openUpgradeModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-500/30 transition flex items-center gap-1.5">
+                        <span>★ Prolonger / Modifier Premium</span>
+                    </button>
+                    <button type="button" onclick="confirmDowngrade()" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition">
+                        <span>Rétrograder en Gratuit</span>
+                    </button>
+                @endif
+
                 <form action="{{ route('admin.users.toggle_role', $user) }}" method="POST">
                     @csrf
-                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold {{ $user->role->value === 'admin' ? 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/30' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30' }} transition">
-                        {{ $user->role->value === 'admin' ? 'Rétrograder en utilisateur standard' : 'Promouvoir Administrateur' }}
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold {{ $user->role->value === 'admin' ? 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/30' : 'bg-slate-800 hover:bg-slate-700 text-slate-200' }} transition">
+                        {{ $user->role->value === 'admin' ? 'Rétrograder en standard' : 'Promouvoir Admin' }}
                     </button>
                 </form>
             </div>
@@ -53,8 +67,19 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-slate-800/80">
             <div>
                 <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Abonnement</span>
-                <p class="text-sm font-bold text-white mt-0.5">{{ $user->subscription?->plan?->name ?? 'Gratuit' }}</p>
-                <span class="text-[10px] text-slate-400">{{ $user->subscription?->status->value ?? 'Sans abonnement' }}</span>
+                <p class="text-sm font-bold {{ $user->isPremium() ? 'text-violet-300' : 'text-white' }} mt-0.5 flex items-center gap-1.5">
+                    @if($user->isPremium())
+                        <span class="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></span>
+                    @endif
+                    <span>{{ $user->subscription?->plan?->name ?? 'Gratuit' }}</span>
+                </p>
+                <span class="text-[10px] text-slate-400 block mt-0.5">
+                    @if($user->isPremium())
+                        {{ $user->subscription?->current_period_end ? 'Expire le ' . $user->subscription->current_period_end->format('M d, Y') : 'Accès à vie / Permanent' }}
+                    @else
+                        Sans abonnement payant
+                    @endif
+                </span>
             </div>
             <div>
                 <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Date d'inscription</span>
@@ -130,4 +155,145 @@
             </div>
         @endif
     </div>
+
+    <!-- Upgrade User to Premium Modal -->
+    <div id="upgradeUserModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 transition-all">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-800 bg-gradient-to-r from-violet-950/40 via-slate-900 to-indigo-950/40 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-violet-500/30">
+                        <svg class="w-5 h-5 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-black text-white">{{ $user->isPremium() ? 'Modifier / Prolonger Premium ★' : 'Surclasser en Premium ★' }}</h2>
+                        <p class="text-xs text-slate-400">Attribution des accès illimités, templates PRO et quotas IA</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeUpgradeModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form action="{{ route('admin.users.upgrade_premium', $user) }}" method="POST" class="p-6 space-y-4">
+                @csrf
+                <!-- User Target Info -->
+                <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Compte Utilisateur</span>
+                        <h4 class="text-sm font-bold text-white mt-0.5">{{ $user->name }}</h4>
+                        <p class="text-[11px] text-slate-400 font-mono">{{ $user->email }}</p>
+                    </div>
+                    <div class="text-right">
+                        @if($user->isPremium())
+                            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-violet-600/30 text-violet-300 border border-violet-500/40">Actif ({{ $user->subscription?->plan?->name }})</span>
+                        @else
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-400">Gratuit</span>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Plan Selection -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Choisir le Forfait</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        @foreach($plans as $p)
+                            @php
+                                $isCurrentPlan = $user->subscription?->plan_id === $p->id || ($user->subscription?->plan?->slug === $p->slug);
+                            @endphp
+                            <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-3 rounded-xl flex items-start gap-2.5 transition">
+                                <input type="radio" name="plan_slug" value="{{ $p->slug }}" {{ ($isCurrentPlan || $loop->first) ? 'checked' : '' }} class="mt-1 text-violet-600 focus:ring-violet-500">
+                                <div class="text-xs">
+                                    <div class="font-bold text-white flex items-center gap-1">
+                                        <span>{{ $p->name }}</span>
+                                        @if($p->price_monthly > 0)
+                                            <span class="text-[10px] font-mono text-violet-300">({{ $p->price_monthly }}€)</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">{{ $p->description ?? 'Accès illimité aux fonctionnalités PRO' }}</p>
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Duration Selection -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Durée de l'Abonnement</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition">
+                            <input type="radio" name="duration" value="1_month" class="hidden">
+                            <span class="block text-xs font-bold text-white">1 Mois</span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Test rapide</span>
+                        </label>
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition">
+                            <input type="radio" name="duration" value="3_months" class="hidden">
+                            <span class="block text-xs font-bold text-white">3 Mois</span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Trimestre</span>
+                        </label>
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition">
+                            <input type="radio" name="duration" value="6_months" class="hidden">
+                            <span class="block text-xs font-bold text-white">6 Mois</span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Semestre</span>
+                        </label>
+                        <label class="cursor-pointer border border-violet-500 bg-violet-950/30 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/30 p-2.5 rounded-xl text-center transition relative">
+                            <input type="radio" name="duration" value="1_year" checked class="hidden">
+                            <span class="block text-xs font-black text-white">1 An</span>
+                            <span class="block text-[10px] text-violet-300 mt-0.5">★ Recommandé</span>
+                        </label>
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition col-span-2 sm:col-span-2">
+                            <input type="radio" name="duration" value="lifetime" class="hidden">
+                            <span class="block text-xs font-black text-amber-300 flex items-center justify-center gap-1">
+                                <span>∞ À Vie / Permanent</span>
+                            </span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Accès illimité sans expiration</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Admin Note -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Note Interne Admin (Optionnel)</label>
+                    <input type="text" name="note" placeholder="Ex: Surclassement offert, client fidèle, code créateur..." class="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition">
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
+                    <button type="button" onclick="closeUpgradeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-violet-600/30 transition flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <span>{{ $user->isPremium() ? 'Mettre à jour le forfait' : 'Activer le statut Premium' }}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hidden Downgrade Form -->
+    <form id="downgradeUserForm" action="{{ route('admin.users.cancel_premium', $user) }}" method="POST" class="hidden">
+        @csrf
+    </form>
+
+    <script>
+        function openUpgradeModal() {
+            document.getElementById('upgradeUserModal').classList.remove('hidden');
+        }
+
+        function closeUpgradeModal() {
+            document.getElementById('upgradeUserModal').classList.add('hidden');
+        }
+
+        document.getElementById('upgradeUserModal').addEventListener('click', function(e) {
+            if (e.target === this) closeUpgradeModal();
+        });
+
+        function confirmDowngrade() {
+            if (confirm("Êtes-vous certain de vouloir révoquer le statut Premium de {{ addslashes($user->name) }} et repasser son compte au forfait Gratuit ?")) {
+                document.getElementById('downgradeUserForm').submit();
+            }
+        }
+    </script>
 @endsection

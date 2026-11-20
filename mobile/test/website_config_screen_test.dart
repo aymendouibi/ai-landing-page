@@ -280,7 +280,7 @@ void main() {
       }
     });
 
-    testWidgets('WebsiteConfigLandingFilesCard renders import and export options', (tester) async {
+    testWidgets('WebsiteConfigLandingFilesCard renders export options without choose zip', (tester) async {
       await tester.pumpWidget(
         buildTestWidget(
           WebsiteConfigLandingFilesCard(
@@ -292,10 +292,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Landing page files'), findsOneWidget);
-      expect(find.text('Import your own page'), findsOneWidget);
-      expect(find.text('portfolio.zip'), findsOneWidget);
-      expect(find.text('2.4 MB · Imported 15 Nov 2026'), findsOneWidget);
-      expect(find.text('Choose ZIP file'), findsOneWidget);
+      expect(find.text('Choose ZIP file'), findsNothing);
       expect(find.text('Export Project (ZIP)'), findsOneWidget);
       expect(find.text('Download Project (ZIP)'), findsOneWidget);
       expect(find.text('Copy code to clipboard'), findsOneWidget);
@@ -327,7 +324,7 @@ void main() {
       expect(find.text('Cancel'), findsOneWidget);
     });
 
-    testWidgets('WebsiteConfigSaveBar renders save button and note', (tester) async {
+    testWidgets('WebsiteConfigSaveBar renders save button and note with purple styling', (tester) async {
       await tester.pumpWidget(
         buildTestWidget(
           WebsiteConfigSaveBar(
@@ -340,6 +337,14 @@ void main() {
 
       expect(find.text('Save changes'), findsOneWidget);
       expect(find.text('Changes go live after you save.'), findsOneWidget);
+
+      final saveBtn = tester.widget<ElevatedButton>(
+        find.widgetWithText(ElevatedButton, 'Save changes'),
+      );
+      expect(
+        saveBtn.style?.backgroundColor?.resolve({}),
+        equals(const Color(0xFF7C5CFF)),
+      );
     });
 
     testWidgets('WebsiteConfigScreen renders complete screen with all modular parts', (tester) async {

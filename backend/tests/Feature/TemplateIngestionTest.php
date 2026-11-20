@@ -33,12 +33,14 @@ class TemplateIngestionTest extends TestCase
             'role' => UserRole::Admin,
         ]);
 
-        $this->category = TemplateCategory::create([
-            'name' => 'Business',
-            'slug' => 'business',
-            'description' => 'Corporate and business templates',
-            'sort_order' => 1,
-        ]);
+        $this->category = TemplateCategory::firstOrCreate(
+            ['slug' => 'business'],
+            [
+                'name' => 'Business',
+                'description' => 'Corporate and business templates',
+                'sort_order' => 1,
+            ]
+        );
     }
 
     public function test_user_can_ingest_valid_zip_template(): void

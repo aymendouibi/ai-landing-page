@@ -308,7 +308,7 @@
                 <thead>
                     <tr class="border-b border-slate-800/80 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                         <th class="py-2.5 px-3">User</th>
-                        <th class="py-2.5 px-3">Role</th>
+                        <th class="py-2.5 px-3">Statut / Plan</th>
                         <th class="py-2.5 px-3">Projects</th>
                         <th class="py-2.5 px-3">Joined Date</th>
                         <th class="py-2.5 px-3 text-right">Actions</th>
@@ -318,17 +318,27 @@
                     @forelse($recentUsers as $usr)
                         <tr class="hover:bg-slate-800/30 transition">
                             <td class="py-3 px-3">
-                                <div class="font-bold text-white">{{ $usr->name }}</div>
+                                <div class="font-bold text-white flex items-center gap-1.5">
+                                    <span>{{ $usr->name }}</span>
+                                    @if($usr->isPremium())
+                                        <span class="text-[9px] font-black uppercase px-1 rounded bg-violet-600 text-white">PRO</span>
+                                    @endif
+                                </div>
                                 <div class="text-[11px] text-slate-400">{{ $usr->email }}</div>
                             </td>
                             <td class="py-3 px-3">
-                                @if($usr->role->value === 'admin')
+                                @if($usr->isPremium())
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-violet-600/20 to-indigo-600/20 text-violet-300 border border-violet-500/40">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse"></span>
+                                        ★ {{ $usr->subscription?->plan?->name ?? 'Premium' }}
+                                    </span>
+                                @elseif($usr->role->value === 'admin')
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                                        ★ Admin
+                                        Admin
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300">
-                                        Creator
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400">
+                                        Gratuit
                                     </span>
                                 @endif
                             </td>
@@ -339,12 +349,22 @@
                                 {{ $usr->created_at->diffForHumans() }}
                             </td>
                             <td class="py-3 px-3 text-right">
-                                <form action="{{ route('admin.users.toggle_role', $usr) }}" method="POST" class="inline">
-                                    @csrf
-                                    <button type="submit" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-medium transition">
-                                        {{ $usr->role->value === 'admin' ? 'Demote to User' : 'Promote to Admin' }}
-                                    </button>
-                                </form>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    @if(!$usr->isPremium())
+                                        <button type="button" onclick="openDashboardUpgradeModal('{{ $usr->id }}', '{{ addslashes($usr->name) }}', '{{ addslashes($usr->email) }}')" class="px-2.5 py-1 rounded bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-[10px] font-black shadow-sm shadow-violet-500/20 transition flex items-center gap-1" title="Surclasser ce compte en Premium">
+                                            <svg class="w-3 h-3 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                            <span>★ Upgrade</span>
+                                        </button>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded bg-violet-600/10 text-violet-400 text-[10px] font-bold border border-violet-500/20">
+                                            Actif
+                                        </span>
+                                    @endif
+
+                                    <a href="{{ route('admin.users.show', $usr) }}" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-semibold transition">
+                                        Profil
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -356,5 +376,115 @@
             </table>
         </div>
     </div>
+
+    <!-- Quick Upgrade Modal for Dashboard -->
+    <div id="dashboardUpgradeModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 transition-all">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-slate-800 bg-gradient-to-r from-violet-950/40 via-slate-900 to-indigo-950/40 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-violet-500/30">
+                        <svg class="w-5 h-5 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-black text-white">Surclasser en Premium ★</h2>
+                        <p class="text-xs text-slate-400">Activer les privilèges créateur et quotas illimités</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDashboardUpgradeModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form id="dashUpgradeForm" action="" method="POST" class="p-6 space-y-4">
+                @csrf
+                <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Compte Cible</span>
+                        <h4 id="dashUpgradeUserName" class="text-sm font-bold text-white mt-0.5">...</h4>
+                        <p id="dashUpgradeUserEmail" class="text-[11px] text-slate-400 font-mono">...</p>
+                    </div>
+                    <div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-400">Gratuit</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Choisir le Forfait</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        @foreach($plans as $p)
+                            <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-3 rounded-xl flex items-start gap-2.5 transition">
+                                <input type="radio" name="plan_slug" value="{{ $p->slug }}" {{ $loop->first ? 'checked' : '' }} class="mt-1 text-violet-600 focus:ring-violet-500">
+                                <div class="text-xs">
+                                    <div class="font-bold text-white flex items-center gap-1">
+                                        <span>{{ $p->name }}</span>
+                                        @if($p->price_monthly > 0)
+                                            <span class="text-[10px] font-mono text-violet-300">({{ $p->price_monthly }}€)</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">{{ $p->description ?? 'Accès illimité aux fonctionnalités PRO' }}</p>
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Durée de l'Abonnement</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition">
+                            <input type="radio" name="duration" value="1_month" class="hidden">
+                            <span class="block text-xs font-bold text-white">1 Mois</span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Court</span>
+                        </label>
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition">
+                            <input type="radio" name="duration" value="6_months" class="hidden">
+                            <span class="block text-xs font-bold text-white">6 Mois</span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Semestre</span>
+                        </label>
+                        <label class="cursor-pointer border border-violet-500 bg-violet-950/30 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/30 p-2.5 rounded-xl text-center transition relative">
+                            <input type="radio" name="duration" value="1_year" checked class="hidden">
+                            <span class="block text-xs font-black text-white">1 An</span>
+                            <span class="block text-[10px] text-violet-300 mt-0.5">★ Conseillé</span>
+                        </label>
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition col-span-2 sm:col-span-3">
+                            <input type="radio" name="duration" value="lifetime" class="hidden">
+                            <span class="block text-xs font-black text-amber-300 flex items-center justify-center gap-1">
+                                <span>∞ À Vie / Permanent</span>
+                            </span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Accès illimité sans expiration</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
+                    <button type="button" onclick="closeDashboardUpgradeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-violet-600/30 transition flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <span>Activer Premium</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openDashboardUpgradeModal(userId, userName, userEmail) {
+            const form = document.getElementById('dashUpgradeForm');
+            form.action = '/admin/users/' + userId + '/upgrade-premium';
+            document.getElementById('dashUpgradeUserName').innerText = userName || 'Utilisateur';
+            document.getElementById('dashUpgradeUserEmail').innerText = userEmail || '';
+            document.getElementById('dashboardUpgradeModal').classList.remove('hidden');
+        }
+
+        function closeDashboardUpgradeModal() {
+            document.getElementById('dashboardUpgradeModal').classList.add('hidden');
+        }
+
+        document.getElementById('dashboardUpgradeModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDashboardUpgradeModal();
+        });
+    </script>
 @endsection
 

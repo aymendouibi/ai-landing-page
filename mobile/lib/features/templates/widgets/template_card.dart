@@ -41,9 +41,15 @@ class TemplateCard extends StatelessWidget {
         doc?['pages']?[0]?['sections']?[0]?['props']?['ctaText'] ??
         'Explore our coffee';
     final previewList = template['preview_images'] as List?;
-    final imageUrl = (previewList != null && previewList.isNotEmpty)
-        ? previewList.first as String
-        : 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1200&q=80';
+    final heroImgObj = doc?['pages']?[0]?['sections']?[0]?['props']?['image'];
+    final heroImgSrc = heroImgObj is Map
+        ? heroImgObj['src']?.toString()
+        : heroImgObj?.toString();
+    final imageUrl = (previewList != null && previewList.isNotEmpty && previewList.first.toString().isNotEmpty)
+        ? previewList.first.toString()
+        : (heroImgSrc != null && heroImgSrc.isNotEmpty)
+            ? heroImgSrc
+            : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80';
 
     // Theme tokens
     final primaryColorHex =

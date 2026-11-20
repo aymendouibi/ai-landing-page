@@ -102,6 +102,7 @@ class _EditorScreenState extends State<EditorScreen> {
         OrientationRouteObserver.lockPortrait();
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: AppColors.backgroundOf(context),
         body: SafeArea(
           child: isLandscape

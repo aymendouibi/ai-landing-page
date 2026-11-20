@@ -15,8 +15,13 @@ class EditorBottomPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final panelHeight = (500.0 + bottomInset).clamp(500.0, screenHeight * 0.85);
+
     return Container(
-      height: 500,
+      height: panelHeight,
+      padding: EdgeInsets.only(bottom: bottomInset),
       decoration: BoxDecoration(
         color: AppColors.surfaceOf(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -45,6 +50,7 @@ class EditorLandscapeSidePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     return Obx(
       () => AnimatedContainer(
         duration: const Duration(milliseconds: 250),
@@ -57,6 +63,7 @@ class EditorLandscapeSidePanel extends StatelessWidget {
             alignment: Alignment.topRight,
             child: Container(
               width: 350.0,
+              padding: EdgeInsets.only(bottom: bottomInset),
               decoration: BoxDecoration(
                 color: AppColors.surfaceOf(context),
                 border: Border(

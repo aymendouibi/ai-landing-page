@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/designsystem/colors.dart';
-import '../../core/widgets/atmospheric_background.dart';
+import '../../core/designsystem/gradients.dart';
 import '../../core/widgets/user_avatar_circle.dart';
 import '../dashboard/components/recent_project_card.dart';
 import 'assets_controller.dart';
@@ -23,196 +23,230 @@ class AssetsView extends StatelessWidget {
 
     return Stack(
       children: [
-        // Ambient atmospheric mesh gradient background (same as Login)
-        AtmosphericBackground(isDark: isDark),
+        // Soft iridescent gradient wash background (same as Profile)
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: AppGradients.profileBackgroundGradient(isDark),
+            ),
+          ),
+        ),
 
         // Foreground Content
         SafeArea(
           bottom: false,
           child: RefreshIndicator(
-          onRefresh: controller.loadSites,
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
-            children: [
-              // 1. Top Header: "Assets" Title + Circular "MR" Avatar
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'assets_title'.tr,
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.8,
-                      color: AppColors.inkOf(context),
-                    ),
-                  ),
-
-                  // Circular Avatar Pill
-                  UserAvatarCircle(
-                    size: 40,
-                    isDark: isDark,
-                    onTap: onAvatarTap,
-                  ),
-                ],
+            onRefresh: controller.loadSites,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-
-              const SizedBox(height: 20),
-
-              // 2. Minimalist Search Bar ("Search pages and uploads")
-              Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isDark
-                        ? const Color(0x33FFFFFF)
-                        : const Color(0xFFE2E8F0),
-                    width: 1.2,
-                  ),
-                ),
-                child: Row(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
+              children: [
+                // 1. Top Header: "Assets" Title + Circular "MR" Avatar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(width: 14),
-                    Icon(
-                      LucideIcons.search,
-                      size: 19,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        controller: controller.searchController,
-                        onChanged: controller.setSearchQuery,
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: AppColors.inkOf(context),
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'assets_search_hint'.tr,
-                          hintStyle: TextStyle(
-                            fontSize: 14.5,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
-                          ),
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
+                    Text(
+                      'assets_title'.tr,
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.8,
+                        color: AppColors.inkOf(context),
                       ),
                     ),
-                    Obx(() {
-                      if (controller.searchQuery.value.isNotEmpty) {
-                        return GestureDetector(
-                          onTap: controller.clearSearch,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Icon(
-                              LucideIcons.x,
-                              size: 16,
+
+                    // Circular Avatar Pill
+                    UserAvatarCircle(
+                      size: 40,
+                      isDark: isDark,
+                      onTap: onAvatarTap,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // 2. Minimalist Search Bar ("Search pages and uploads")
+                Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF1E293B)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0x33FFFFFF)
+                          : const Color(0xFFE2E8F0),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 14),
+                      Icon(
+                        LucideIcons.search,
+                        size: 19,
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: controller.searchController,
+                          onChanged: controller.setSearchQuery,
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: AppColors.inkOf(context),
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'assets_search_hint'.tr,
+                            hintStyle: TextStyle(
+                              fontSize: 14.5,
                               color: isDark
                                   ? const Color(0xFF94A3B8)
                                   : const Color(0xFF64748B),
                             ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
                           ),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    }),
-                  ],
+                        ),
+                      ),
+                      Obx(() {
+                        if (controller.searchQuery.value.isNotEmpty) {
+                          return GestureDetector(
+                            onTap: controller.clearSearch,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              child: Icon(
+                                LucideIcons.x,
+                                size: 16,
+                                color: isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B),
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }),
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 18),
+                const SizedBox(height: 18),
 
-              // 3. Filter Pills: [All]  Pages · 4  Uploads · 4
-              Obx(() => _buildFilterPillsRow(context, controller)),
+                // 3. Filter Pills: [All]  Pages · 4  Uploads · 4
+                Obx(() => _buildFilterPillsRow(context, controller)),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // 4. Content Area: Pages & Uploads with Same Project Cards
-              Obx(() {
-                if (controller.isLoading.value) {
-                  return const AssetsShimmerView();
-                }
+                // 4. Content Area: Pages & Uploads with Same Project Cards
+                Obx(() {
+                  if (controller.isLoading.value) {
+                    return const AssetsShimmerView();
+                  }
 
-                final filter = controller.selectedFilter.value;
-                final pages = controller.filteredPages;
-                final uploads = controller.filteredUploads;
+                  final filter = controller.selectedFilter.value;
+                  final pages = controller.filteredPages;
+                  final uploads = controller.filteredUploads;
 
-                if (pages.isEmpty && uploads.isEmpty) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
-                    alignment: Alignment.center,
-                    child: Column(
+                  if (pages.isEmpty && uploads.isEmpty) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 48,
+                        horizontal: 20,
+                      ),
+                      alignment: Alignment.center,
+                      child: Column(
+                        children: [
+                          Icon(
+                            LucideIcons.searchX,
+                            size: 42,
+                            color: isDark
+                                ? const Color(0xFF64748B)
+                                : const Color(0xFF94A3B8),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'assets_no_results'.tr,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.inkOf(context),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${'assets_no_match_query'.tr} "${controller.searchQuery.value}"',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.inkMutedOf(context),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: controller.clearSearch,
+                            child: Text('assets_clear_search'.tr),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (filter == 'pages') {
+                    return _buildPagesSection(
+                      context,
+                      controller,
+                      isSingleTab: true,
+                    );
+                  } else if (filter == 'uploads') {
+                    return _buildUploadsSection(
+                      context,
+                      controller,
+                      isSingleTab: true,
+                    );
+                  } else {
+                    // 'all' shows both Pages and Uploads
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          LucideIcons.searchX,
-                          size: 42,
-                          color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        _buildPagesSection(
+                          context,
+                          controller,
+                          isSingleTab: false,
                         ),
-                        const SizedBox(height: 14),
-                        Text(
-                          'assets_no_results'.tr,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.inkOf(context),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${'assets_no_match_query'.tr} "${controller.searchQuery.value}"',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.inkMutedOf(context),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextButton(
-                          onPressed: controller.clearSearch,
-                          child: Text('assets_clear_search'.tr),
+                        const SizedBox(height: 32),
+                        _buildUploadsSection(
+                          context,
+                          controller,
+                          isSingleTab: false,
                         ),
                       ],
-                    ),
-                  );
-                }
-
-                if (filter == 'pages') {
-                  return _buildPagesSection(context, controller, isSingleTab: true);
-                } else if (filter == 'uploads') {
-                  return _buildUploadsSection(context, controller, isSingleTab: true);
-                } else {
-                  // 'all' shows both Pages and Uploads
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildPagesSection(context, controller, isSingleTab: false),
-                      const SizedBox(height: 32),
-                      _buildUploadsSection(context, controller, isSingleTab: false),
-                    ],
-                  );
-                }
-              }),
-            ],
+                    );
+                  }
+                }),
+              ],
+            ),
           ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 
   // Filter Pills: [All]   Pages · 4   Uploads · 4
-  Widget _buildFilterPillsRow(BuildContext context, AssetsController controller) {
+  Widget _buildFilterPillsRow(
+    BuildContext context,
+    AssetsController controller,
+  ) {
     final current = controller.selectedFilter.value;
     final pagesCount = controller.pagesCount;
     final uploadsCount = controller.uploadsCount;
@@ -383,7 +417,10 @@ class AssetsView extends StatelessWidget {
             GestureDetector(
               onTap: controller.uploadAsset,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: isDark ? Colors.white : const Color(0xFF18181B),
                   borderRadius: BorderRadius.circular(10),
@@ -445,9 +482,13 @@ class AssetsView extends StatelessWidget {
                     icon: const Icon(LucideIcons.upload, size: 14),
                     label: Text('assets_upload_from_device'.tr),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
+                      backgroundColor: isDark
+                          ? Colors.white
+                          : const Color(0xFF18181B),
                       foregroundColor: isDark ? Colors.black : Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
                 ],
@@ -468,10 +509,7 @@ class AssetsView extends StatelessWidget {
                   return UploadNewCard(onTap: controller.uploadAsset);
                 }
                 final asset = uploads[index - 1];
-                return UploadProjectCard(
-                  asset: asset,
-                  controller: controller,
-                );
+                return UploadProjectCard(asset: asset, controller: controller);
               },
             ),
           ),

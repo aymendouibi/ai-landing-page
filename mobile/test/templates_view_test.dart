@@ -172,8 +172,8 @@ void main() {
       final weddingTemplates = templatesController.filteredTemplates;
       expect(weddingTemplates, isNotEmpty);
       expect(weddingTemplates.any((t) => t['name'] == 'Ana & Teo'), isTrue);
-      expect(weddingTemplates.any((t) => t['name'] == 'Elysian Vows'), isTrue);
-      expect(weddingTemplates.any((t) => t['name'] == 'Botanical Romance'), isTrue);
+      expect(weddingTemplates.any((t) => t['name'] == 'Elysian Vows'), isFalse);
+      expect(weddingTemplates.any((t) => t['name'] == 'Botanical Romance'), isFalse);
 
       // 2. Startups tab
       templatesController.setTab('Startups');
@@ -183,13 +183,14 @@ void main() {
       expect(startupTemplates.any((t) => t['name'] == 'DevFlow Cloud'), isTrue);
       expect(startupTemplates.any((t) => t['name'] == 'Pulse Health AI'), isTrue);
       expect(startupTemplates.any((t) => t['name'] == 'VaultPay'), isTrue);
+      expect(startupTemplates.any((t) => t['name'] == 'Ora Mindful'), isTrue);
 
       // 3. Personal tab
       templatesController.setTab('Personal');
       final personalTemplates = templatesController.filteredTemplates;
       expect(personalTemplates, isNotEmpty);
       expect(personalTemplates.any((t) => t['name'] == 'Dr. Marcus Vance'), isTrue);
-      expect(personalTemplates.any((t) => t['name'] == 'Elena Rostova'), isTrue);
+      expect(personalTemplates.any((t) => t['name'] == 'Elena Rostova'), isFalse);
       expect(personalTemplates.any((t) => t['name'] == 'Kai Thorne'), isTrue);
       expect(personalTemplates.any((t) => t['name'] == 'Kite Yoga'), isTrue);
 
@@ -198,10 +199,21 @@ void main() {
       final businessTemplates = templatesController.filteredTemplates;
       expect(businessTemplates, isNotEmpty);
       expect(businessTemplates.any((t) => t['name'] == 'Apex Capital Partners'), isTrue);
-      expect(businessTemplates.any((t) => t['name'] == 'Nordic Craft Roasters'), isTrue);
+      expect(businessTemplates.any((t) => t['name'] == 'Nordic Craft Roasters'), isFalse);
       expect(businessTemplates.any((t) => t['name'] == 'Lumen Coffee'), isTrue);
       expect(businessTemplates.any((t) => t['name'] == 'Aura Botanicals'), isTrue);
       expect(businessTemplates.any((t) => t['name'] == 'Solstice Fine Dining'), isTrue);
+      expect(businessTemplates.any((t) => t['name'] == 'Terrain Outdoors'), isTrue);
+      expect(businessTemplates.any((t) => t['name'] == 'Noor Atelier'), isTrue);
+      expect(businessTemplates.any((t) => t['name'] == 'Vela Sailing Co.'), isTrue);
+
+      // 5. Creative tab
+      templatesController.setTab('Creative');
+      final creativeTemplates = templatesController.filteredTemplates;
+      expect(creativeTemplates, isNotEmpty);
+      expect(creativeTemplates.any((t) => t['name'] == 'Studio Marlow'), isTrue);
+      expect(creativeTemplates.any((t) => t['name'] == 'Mono Studio'), isTrue);
+      expect(creativeTemplates.any((t) => t['name'] == 'Lumière Cinema'), isTrue);
     });
 
     testWidgets('TemplatesSectionHeader renders curated edit title and count text', (tester) async {

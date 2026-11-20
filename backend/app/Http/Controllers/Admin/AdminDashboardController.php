@@ -7,6 +7,7 @@ use App\Enums\WebsiteStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Deployment;
 use App\Models\Project;
+use App\Models\SubscriptionPlan;
 use App\Models\Template;
 use App\Models\User;
 use App\Models\Website;
@@ -39,8 +40,13 @@ class AdminDashboardController extends Controller
             ->get();
 
         $recentUsers = User::withCount(['projects'])
+            ->with(['subscription.plan'])
             ->latest('created_at')
             ->take(6)
+            ->get();
+
+        $plans = SubscriptionPlan::where('slug', '!=', 'free')
+            ->orderBy('sort_order')
             ->get();
 
         $recentDeployments = Deployment::with(['website'])
@@ -57,6 +63,7 @@ class AdminDashboardController extends Controller
             'metrics' => $metrics,
             'recentWebsites' => $recentWebsites,
             'recentUsers' => $recentUsers,
+            'plans' => $plans,
             'recentDeployments' => $recentDeployments,
             'topTemplates' => $topTemplates,
         ]);

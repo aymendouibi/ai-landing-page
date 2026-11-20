@@ -159,15 +159,26 @@
 
                             <!-- Actions -->
                             <td class="py-3.5 px-4 text-right" onclick="event.stopPropagation()">
-                                <div class="flex items-center justify-end gap-2">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    @if($isPremium)
+                                        <button type="button" onclick="openUpgradeModal('{{ $user->id }}', '{{ addslashes($user->name) }}', '{{ addslashes($user->email) }}', true, '{{ $activeSub?->plan?->slug ?? 'pro' }}', '{{ $activeSub?->current_period_end?->format('M d, Y') ?? 'Permanent' }}')" class="px-2 py-1 rounded bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 text-[10px] font-bold border border-violet-500/30 transition flex items-center gap-1" title="Gérer ou prolonger le forfait Premium">
+                                            <span>★ Gérer Premium</span>
+                                        </button>
+                                    @else
+                                        <button type="button" onclick="openUpgradeModal('{{ $user->id }}', '{{ addslashes($user->name) }}', '{{ addslashes($user->email) }}', false, 'pro', '')" class="px-2 py-1 rounded bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-[10px] font-extrabold shadow-md shadow-violet-600/20 transition flex items-center gap-1" title="Surclasser ce compte en Premium">
+                                            <svg class="w-3 h-3 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                            <span>Surclasser</span>
+                                        </button>
+                                    @endif
+
                                     <button type="button" onclick="openUserModal('{{ $user->id }}')" class="px-2.5 py-1 rounded bg-indigo-600/10 hover:bg-indigo-600/30 text-indigo-400 text-[11px] font-bold border border-indigo-500/20 transition flex items-center gap-1">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                        <span>Détails & Pages</span>
+                                        <span>Détails</span>
                                     </button>
 
                                     <form action="{{ route('admin.users.toggle_role', $user) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition">
+                                        <button type="submit" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition" title="{{ $user->role->value === 'admin' ? 'Rétrograder en utilisateur' : 'Promouvoir Admin' }}">
                                             {{ $user->role->value === 'admin' ? 'Rétrograder' : 'Admin' }}
                                         </button>
                                     </form>
@@ -218,10 +229,18 @@
             <div class="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-950/40">
                 <!-- Profile & Subscription Info Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
-                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Abonnement</span>
-                        <p id="modalPlanName" class="text-sm font-bold text-white mt-1">Gratuit</p>
-                        <span id="modalSubPeriod" class="text-[10px] text-slate-500 block mt-0.5">Sans engagement</span>
+                    <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Abonnement</span>
+                                <span id="modalPlanBadge" class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">FREE</span>
+                            </div>
+                            <p id="modalPlanName" class="text-sm font-bold text-white mt-1">Gratuit</p>
+                            <span id="modalSubPeriod" class="text-[10px] text-slate-500 block mt-0.5">Sans engagement</span>
+                        </div>
+                        <div id="modalSubActions" class="mt-3 pt-2.5 border-t border-slate-800/60 flex items-center gap-1.5">
+                            <!-- Populated with quick Upgrade / Downgrade buttons -->
+                        </div>
                     </div>
                     <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
                         <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Date d'inscription</span>
@@ -267,6 +286,120 @@
         </div>
     </div>
 
+    <!-- Upgrade User to Premium Modal -->
+    <div id="upgradeUserModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 transition-all">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-800 bg-gradient-to-r from-violet-950/40 via-slate-900 to-indigo-950/40 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-violet-500/30">
+                        <svg class="w-5 h-5 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 id="upgradeModalTitle" class="text-base font-black text-white">Surclasser en Premium ★</h2>
+                        <p id="upgradeModalSubtitle" class="text-xs text-slate-400">Activer les privilèges créateur et quotas illimités</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeUpgradeModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="upgradeUserForm" action="" method="POST" class="p-6 space-y-4">
+                @csrf
+                <!-- Target User Info -->
+                <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Compte Cible</span>
+                        <h4 id="upgradeTargetUserName" class="text-sm font-bold text-white mt-0.5">...</h4>
+                        <p id="upgradeTargetUserEmail" class="text-[11px] text-slate-400 font-mono">...</p>
+                    </div>
+                    <div id="upgradeCurrentStatusBadge" class="text-right">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-400">Gratuit</span>
+                    </div>
+                </div>
+
+                <!-- Plan Selection -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Choisir le Forfait</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        @foreach($plans as $p)
+                            <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-3 rounded-xl flex items-start gap-2.5 transition">
+                                <input type="radio" name="plan_slug" value="{{ $p->slug }}" {{ $loop->first ? 'checked' : '' }} class="mt-1 text-violet-600 focus:ring-violet-500">
+                                <div class="text-xs">
+                                    <div class="font-bold text-white flex items-center gap-1">
+                                        <span>{{ $p->name }}</span>
+                                        @if($p->price_monthly > 0)
+                                            <span class="text-[10px] font-mono text-violet-300">({{ $p->price_monthly }}€)</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">{{ $p->description ?? 'Accès complet aux fonctionnalités et modèles' }}</p>
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Duration Selection -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Durée de l'Abonnement</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition">
+                            <input type="radio" name="duration" value="1_month" class="hidden">
+                            <span class="block text-xs font-bold text-white">1 Mois</span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Test court</span>
+                        </label>
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition">
+                            <input type="radio" name="duration" value="3_months" class="hidden">
+                            <span class="block text-xs font-bold text-white">3 Mois</span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Trimestre</span>
+                        </label>
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition">
+                            <input type="radio" name="duration" value="6_months" class="hidden">
+                            <span class="block text-xs font-bold text-white">6 Mois</span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Semestre</span>
+                        </label>
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition relative">
+                            <input type="radio" name="duration" value="1_year" checked class="hidden">
+                            <span class="block text-xs font-black text-white">1 An</span>
+                            <span class="block text-[10px] text-violet-300 mt-0.5">★ Recommandé</span>
+                        </label>
+                        <label class="cursor-pointer border border-slate-800 hover:border-violet-500/50 bg-slate-950/40 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-950/20 p-2.5 rounded-xl text-center transition col-span-2 sm:col-span-2">
+                            <input type="radio" name="duration" value="lifetime" class="hidden">
+                            <span class="block text-xs font-black text-amber-300 flex items-center justify-center gap-1">
+                                <span>∞ À Vie / Permanent</span>
+                            </span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Illimité sans date d'expiration</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Admin Note -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Note Interne Admin (Optionnel)</label>
+                    <input type="text" name="note" placeholder="Ex: Offert pour test, VIP créateur, support..." class="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition">
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
+                    <button type="button" onclick="closeUpgradeModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-violet-600/30 transition flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <span id="upgradeSubmitBtnText">Activer le statut Premium</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hidden Downgrade Form -->
+    <form id="downgradeUserForm" action="" method="POST" class="hidden">
+        @csrf
+    </form>
+
     <!-- Script to Fetch User Profile & Generated Pages on Click -->
     <script>
         function openUserModal(userId) {
@@ -303,12 +436,45 @@
                     tierEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-slate-800 text-slate-300';
                 }
 
+                const planBadge = document.getElementById('modalPlanBadge');
+                if (planBadge) {
+                    planBadge.innerText = u.is_premium ? '★ PREMIUM' : (u.role === 'admin' ? 'ADMIN' : 'GRATUIT');
+                    planBadge.className = u.is_premium ? 'text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-violet-600/30 text-violet-300 border border-violet-500/30' : 'text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-slate-800 text-slate-400';
+                }
+
                 if (u.subscription) {
                     document.getElementById('modalPlanName').innerText = u.subscription.plan_name;
-                    document.getElementById('modalSubPeriod').innerText = (u.subscription.status === 'active' ? 'Actif · ' : 'Inactif · ') + (u.subscription.current_period_end ? 'Renouvellement: ' + u.subscription.current_period_end : '');
+                    document.getElementById('modalSubPeriod').innerText = (u.subscription.status === 'active' ? 'Actif · ' : 'Inactif · ') + (u.subscription.current_period_end ? 'Renouvellement: ' + u.subscription.current_period_end : 'Permanent');
                 } else {
                     document.getElementById('modalPlanName').innerText = 'Gratuit (Free)';
                     document.getElementById('modalSubPeriod').innerText = 'Aucun abonnement payant';
+                }
+
+                // Render dynamic subscription actions in modal
+                const subActions = document.getElementById('modalSubActions');
+                if (subActions) {
+                    const safeName = (u.name || '').replace(/'/g, "\\'");
+                    const safeEmail = (u.email || '').replace(/'/g, "\\'");
+                    const planSlug = (u.subscription && u.subscription.plan_slug) ? u.subscription.plan_slug : 'pro';
+                    const periodEnd = (u.subscription && u.subscription.current_period_end) ? u.subscription.current_period_end : '';
+
+                    if (u.is_premium) {
+                        subActions.innerHTML = `
+                            <button type="button" onclick="openUpgradeModal('${u.id}', '${safeName}', '${safeEmail}', true, '${planSlug}', '${periodEnd}')" class="flex-1 py-1 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 text-[10px] font-bold border border-violet-500/30 transition text-center">
+                                ★ Prolonger / Modifier
+                            </button>
+                            <button type="button" onclick="confirmDowngrade('${u.id}', '${safeName}')" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-medium border border-rose-500/20 transition text-center">
+                                Rétrograder
+                            </button>
+                        `;
+                    } else {
+                        subActions.innerHTML = `
+                            <button type="button" onclick="openUpgradeModal('${u.id}', '${safeName}', '${safeEmail}', false, 'pro', '')" class="w-full py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-[11px] font-black shadow-md shadow-violet-600/20 transition flex items-center justify-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-amber-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                <span>Surclasser ce compte en Premium</span>
+                            </button>
+                        `;
+                    }
                 }
 
                 document.getElementById('modalUserJoined').innerText = u.created_at;
@@ -368,5 +534,56 @@
         document.getElementById('userProfileModal').addEventListener('click', function(e) {
             if (e.target === this) closeUserModal();
         });
+
+        // Upgrade Modal Controls
+        function openUpgradeModal(userId, userName, userEmail, isPremium, planSlug, currentEnd) {
+            const modal = document.getElementById('upgradeUserModal');
+            const form = document.getElementById('upgradeUserForm');
+            form.action = '/admin/users/' + userId + '/upgrade-premium';
+
+            document.getElementById('upgradeTargetUserName').innerText = userName || 'Utilisateur';
+            document.getElementById('upgradeTargetUserEmail').innerText = userEmail || '';
+
+            const title = document.getElementById('upgradeModalTitle');
+            const subtitle = document.getElementById('upgradeModalSubtitle');
+            const submitBtn = document.getElementById('upgradeSubmitBtnText');
+            const badge = document.getElementById('upgradeCurrentStatusBadge');
+
+            if (isPremium) {
+                title.innerText = 'Modifier / Prolonger Premium ★';
+                subtitle.innerText = 'Étendre la durée ou changer le forfait de ce créateur';
+                submitBtn.innerText = 'Mettre à jour le forfait';
+                badge.innerHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-violet-600/30 text-violet-300 border border-violet-500/40">Actif (${currentEnd || 'En cours'})</span>`;
+            } else {
+                title.innerText = 'Surclasser en Premium ★';
+                subtitle.innerText = 'Attribuer des avantages et quotas illimités au créateur';
+                submitBtn.innerText = 'Activer le statut Premium';
+                badge.innerHTML = `<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-800 text-slate-400">Gratuit</span>`;
+            }
+
+            // Pre-select plan if matches
+            if (planSlug) {
+                const radio = form.querySelector(`input[name="plan_slug"][value="${planSlug}"]`);
+                if (radio) radio.checked = true;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeUpgradeModal() {
+            document.getElementById('upgradeUserModal').classList.add('hidden');
+        }
+
+        document.getElementById('upgradeUserModal').addEventListener('click', function(e) {
+            if (e.target === this) closeUpgradeModal();
+        });
+
+        function confirmDowngrade(userId, userName) {
+            if (confirm(`Êtes-vous certain de vouloir révoquer le statut Premium de "${userName}" et repasser son compte en Gratuit ?`)) {
+                const form = document.getElementById('downgradeUserForm');
+                form.action = '/admin/users/' + userId + '/cancel-premium';
+                form.submit();
+            }
+        }
     </script>
 @endsection

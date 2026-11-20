@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/designsystem/colors.dart';
+import '../../core/designsystem/gradients.dart';
 import '../dashboard/dashboard_controller.dart';
 import 'widgets/profile_preferences_card.dart';
 import 'widgets/profile_privacy_card.dart';
@@ -35,24 +36,7 @@ class ProfileView extends StatelessWidget {
         Positioned.fill(
           child: Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDark
-                    ? [
-                        const Color(0xFF090D16),
-                        const Color(0xFF1E1B4B).withValues(alpha: 0.5),
-                        const Color(0xFF1E293B).withValues(alpha: 0.4),
-                        const Color(0xFF090D16),
-                      ]
-                    : [
-                        const Color(0xFFE0F2FE).withValues(alpha: 0.8),
-                        const Color(0xFFEDE9FE).withValues(alpha: 0.6),
-                        const Color(0xFFFCE7F3).withValues(alpha: 0.4),
-                        const Color(0xFFF8FAFC),
-                      ],
-                stops: const [0.0, 0.35, 0.7, 1.0],
-              ),
+              gradient: AppGradients.profileBackgroundGradient(isDark),
             ),
           ),
         ),

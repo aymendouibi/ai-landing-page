@@ -21,9 +21,12 @@ class EditorCanvasView extends StatelessWidget {
 
   double? _calculateCanvasWidth(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final availableWidth = isLandscape && controller.isPanelOpen.value
-        ? screenWidth - 350 - 24
-        : screenWidth - 24;
+    final availableWidth = max(
+      0.0,
+      isLandscape && controller.isPanelOpen.value
+          ? screenWidth - 350 - 24
+          : screenWidth - 24,
+    );
 
     switch (controller.viewport.value) {
       case ViewportMode.mobile:
@@ -72,21 +75,29 @@ class EditorCanvasView extends StatelessWidget {
 
               // WebView
               Expanded(
-                child: controller.isLoading.value ||
-                        controller.webViewController == null
-                    ? Center(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    if (constraints.maxHeight <= 1 || constraints.maxWidth <= 1) {
+                      return const SizedBox.shrink();
+                    }
+                    if (controller.isLoading.value ||
+                        controller.webViewController == null) {
+                      return Center(
                         child: CircularProgressIndicator(
                           color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
-                      )
-                    : WebViewWidget(
-                        controller: controller.webViewController!,
-                        gestureRecognizers: {
-                          Factory<OneSequenceGestureRecognizer>(
-                            () => EagerGestureRecognizer(),
-                          ),
-                        },
-                      ),
+                      );
+                    }
+                    return WebViewWidget(
+                      controller: controller.webViewController!,
+                      gestureRecognizers: {
+                        Factory<OneSequenceGestureRecognizer>(
+                          () => EagerGestureRecognizer(),
+                        ),
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),

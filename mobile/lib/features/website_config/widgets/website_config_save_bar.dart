@@ -24,9 +24,7 @@ class WebsiteConfigSaveBar extends StatelessWidget {
                   ? null
                   : () => controller.saveMetadata(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isDark
-                    ? const Color(0xFF1E293B)
-                    : const Color(0xFF141622),
+                backgroundColor: const Color(0xFF7C5CFF),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 16),

@@ -747,82 +747,85 @@ void _showEditTitleDialog(BuildContext context, EditorController controller) {
   final textController = TextEditingController(text: controller.websiteName.value);
   Get.dialog(
     Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: AppColors.surfaceOf(context),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(LucideIcons.pencil, size: 18, color: Color(0xFF2563EB)),
-                const SizedBox(width: 8),
-                Text(
-                  'editor_edit_title'.tr,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.inkOf(context),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(LucideIcons.pencil, size: 18, color: Color(0xFF2563EB)),
+                  const SizedBox(width: 8),
+                  Text(
+                    'editor_edit_title'.tr,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.inkOf(context),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: textController,
+                autofocus: true,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.inkOf(context),
+                  fontWeight: FontWeight.w600,
+                ),
+                decoration: InputDecoration(
+                  isDense: true,
+                  hintText: 'editor_site_title_hint'.tr,
+                  hintStyle: TextStyle(color: AppColors.inkMutedOf(context)),
+                  filled: true,
+                  fillColor: AppColors.surfaceNeutralOf(context),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: AppColors.borderSubtleOf(context)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: textController,
-              autofocus: true,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.inkOf(context),
-                fontWeight: FontWeight.w600,
+                onSubmitted: (val) {
+                  Get.back();
+                  controller.updateWebsiteTitle(val);
+                },
               ),
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: 'editor_site_title_hint'.tr,
-                hintStyle: TextStyle(color: AppColors.inkMutedOf(context)),
-                filled: true,
-                fillColor: AppColors.surfaceNeutralOf(context),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: AppColors.borderSubtleOf(context)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
-                ),
-              ),
-              onSubmitted: (val) {
-                Get.back();
-                controller.updateWebsiteTitle(val);
-              },
-            ),
-            const SizedBox(height: 18),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Get.back(),
-                  child: Text('common_cancel'.tr, style: TextStyle(color: AppColors.inkMutedOf(context))),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    Get.back();
-                    controller.updateWebsiteTitle(textController.text);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text('common_cancel'.tr, style: TextStyle(color: AppColors.inkMutedOf(context))),
                   ),
-                  child: Text('common_save'.tr),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                      controller.updateWebsiteTitle(textController.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: Text('common_save'.tr),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     ),

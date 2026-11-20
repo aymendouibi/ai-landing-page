@@ -42,5 +42,25 @@ class AppGradients {
 
   static LinearGradient aiCardGradientOf(BuildContext context) =>
       AppColors.isDark(context) ? darkAiCardGradient : aiCardGradient;
+
+  static LinearGradient profileBackgroundGradient(bool isDark) =>
+      LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: isDark
+            ? [
+                const Color(0xFF090D16),
+                const Color(0xFF1E1B4B).withValues(alpha: 0.5),
+                const Color(0xFF1E293B).withValues(alpha: 0.4),
+                const Color(0xFF090D16),
+              ]
+            : [
+                const Color(0xFFE0F2FE).withValues(alpha: 0.8),
+                const Color(0xFFEDE9FE).withValues(alpha: 0.6),
+                const Color(0xFFFCE7F3).withValues(alpha: 0.4),
+                const Color(0xFFF8FAFC),
+              ],
+        stops: const [0.0, 0.35, 0.7, 1.0],
+      );
 }
 

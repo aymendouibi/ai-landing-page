@@ -114,15 +114,16 @@ class TemplatesController extends GetxController {
     if (tab == 'For you' && query.isEmpty) {
       final curatedSlugs = [
         'nexus-ai',
-        'elysian-vows',
         'devflow',
+        'lumiere-cinema',
+        'terrain-outdoors',
         'marcus-vance',
         'apex-capital',
-        'botanical-vows',
+        'noor-atelier',
         'pulse-health',
-        'elena-rostova',
-        'nordic-craft',
+        'vela-sailing',
         'ana-teo',
+        'ora-mindful',
         'kai-thorne',
         'lumen-coffee',
         'aura-botanicals',
@@ -137,11 +138,11 @@ class TemplatesController extends GetxController {
         final match = list.firstWhereOrNull(
           (t) =>
               (t['slug'] ?? '').toString() == slug ||
+              (t['slug'] ?? '').toString() == '$slug-modern' ||
               (t['id'] ?? '').toString() == slug ||
               (t['id'] ?? '').toString() == 'tmpl-$slug' ||
-              (t['name'] ?? '').toString().toLowerCase().contains(
-                slug.replaceAll('-', ' ').split(' ').first,
-              ),
+              (t['name'] ?? '').toString().toLowerCase() ==
+                  slug.replaceAll('-', ' '),
         );
         if (match != null && !curated.any((c) => c['id'] == match['id'])) {
           curated.add(match);
@@ -171,7 +172,8 @@ class TemplatesController extends GetxController {
             name.contains('nexus') ||
             name.contains('devflow') ||
             name.contains('pulse') ||
-            name.contains('vault');
+            name.contains('vault') ||
+            name.contains('ora');
       }).toList();
     } else if (tab == 'Business') {
       list = list.where((t) {
@@ -200,8 +202,9 @@ class TemplatesController extends GetxController {
             name.contains('aura') ||
             name.contains('apex') ||
             name.contains('solstice') ||
-            name.contains('nordic') ||
-            name.contains('bistro');
+            name.contains('terrain') ||
+            name.contains('noor') ||
+            name.contains('vela');
       }).toList();
     } else if (tab == 'Weddings') {
       list = list.where((t) {
@@ -217,10 +220,7 @@ class TemplatesController extends GetxController {
             cat.contains('weddings') ||
             cat.contains('wedding') ||
             desc.contains('wedding') ||
-            name.contains('ana') ||
-            name.contains('elysian') ||
-            name.contains('botanical') ||
-            name.contains('vows');
+            name.contains('ana');
       }).toList();
     } else if (tab == 'Creative') {
       list = list.where((t) {
@@ -240,10 +240,10 @@ class TemplatesController extends GetxController {
             cat.contains('agencies') ||
             cat.contains('photography') ||
             name.contains('mono') ||
-            name.contains('kroma') ||
-            name.contains('aura') ||
             name.contains('marlow') ||
-            name.contains('solstice');
+            ind.contains('film') ||
+            ind.contains('cinema') ||
+            name.contains('lumiere');
       }).toList();
     } else if (tab == 'Personal') {
       list = list.where((t) {
@@ -265,7 +265,6 @@ class TemplatesController extends GetxController {
             cat.contains('fitness') ||
             cat.contains('personal') ||
             name.contains('marcus') ||
-            name.contains('elena') ||
             name.contains('kai') ||
             name.contains('kite');
       }).toList();
@@ -635,7 +634,7 @@ class TemplatesController extends GetxController {
       'primaryColor': '#1E3A2F',
       'bgColor': '#FBF9F5',
       'preview_images': [
-        'https://images.unsplash.com/photo-1608248597359-548762f928e0?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=1200&q=80',
       ],
       'document': {
         'schema_version': 1,
@@ -689,7 +688,7 @@ class TemplatesController extends GetxController {
                   'secondaryCtaLink': '#story',
                   'image': {
                     'src':
-                        'https://images.unsplash.com/photo-1608248597359-548762f928e0?auto=format&fit=crop&w=1200&q=80',
+                        'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=1200&q=80',
                     'alt': 'Aura Botanicals Glass Bottles',
                   },
                 },
@@ -788,7 +787,7 @@ class TemplatesController extends GetxController {
                   'body':
                       'Founded by holistic biochemist Clara von Berg, Aura was created to replace multi-step synthetic routines with pure, biodynamic plant medicine. We cultivate and harvest flora in rhythm with natural seasons, producing small-batch elixirs that restore balance and radiance to modern skin.',
                   'image':
-                      'https://images.unsplash.com/photo-1512290900672-1f02e75e5330?auto=format&fit=crop&w=1200&q=80',
+                      'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=1200&q=80',
                 },
                 'styles': {'background': 'surface'},
               },
@@ -2155,349 +2154,6 @@ class TemplatesController extends GetxController {
       },
     },
     {
-      'id': 'tmpl-elysian-vows',
-      'slug': 'elysian-vows',
-      'name': 'Elysian Vows',
-      'industry': 'Weddings & Celebrations',
-      'badge': '✦ EDITORIAL ROMANCE',
-      'is_featured': true,
-      'is_public': true,
-      'is_premium': false,
-      'description':
-          'Warm candlelight, lakeside terraces, and an intimate celebration layout on Lake Como.',
-      'headline': 'Two Lives.\nOne Timeless Evening.',
-      'subheadline':
-          'Join Sophia & Julian as we exchange vows under the wisteria pergolas of Villa Balbianello, Lake Como.',
-      'ctaText': 'RSVP by May 1',
-      'primaryColor': '#B38E5D',
-      'bgColor': '#FAF8F5',
-      'preview_images': [
-        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
-      ],
-      'document': {
-        'schema_version': 1,
-        'site': {
-          'name': 'Sophia & Julian',
-          'theme': {
-            'colors': {
-              'primary': '#B38E5D',
-              'secondary': '#786C5E',
-              'accent': '#D4AF37',
-              'background': '#FAF8F5',
-              'surface': '#FFFFFF',
-              'text': {
-                'primary': '#24211E',
-                'secondary': '#6B635B',
-                'inverse': '#FFFFFF',
-              },
-            },
-            'typography': {
-              'headingFamily': 'Playfair Display',
-              'bodyFamily': 'Inter',
-            },
-          },
-        },
-        'navigation': {
-          'logo': {'text': 'Sophia & Julian'},
-          'items': [
-            {'label': 'Our Story', 'href': '#story'},
-            {'label': 'Schedule', 'href': '#schedule'},
-            {'label': 'Travel', 'href': '#travel'},
-            {'label': 'RSVP', 'href': '#rsvp', 'type': 'button'},
-          ],
-        },
-        'pages': [
-          {
-            'id': 'page_home',
-            'slug': '/',
-            'title': 'Home',
-            'sections': [
-              {
-                'id': 'sec_elysian_hero',
-                'component': 'hero',
-                'order': 0,
-                'props': {
-                  'badge': 'SEPTEMBER 18–20, 2026 · VILLA BALBIANELLO, LAKE COMO',
-                  'headline': 'Two Lives.\nOne Timeless Evening.',
-                  'subheadline':
-                      'We invite our nearest and dearest to join us along the shores of Lake Como to celebrate love, family, and lifelong devotion.',
-                  'ctaText': 'RSVP by May 1',
-                  'ctaLink': '#rsvp',
-                  'secondaryCtaText': 'Our Story ↗',
-                  'secondaryCtaLink': '#story',
-                  'image': {
-                    'src':
-                        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
-                    'alt': 'Sophia and Julian at Lake Como',
-                  },
-                },
-                'styles': {'background': 'background'},
-              },
-              {
-                'id': 'sec_elysian_schedule',
-                'component': 'features',
-                'order': 1,
-                'props': {
-                  'title': 'Celebration Itinerary',
-                  'subtitle':
-                      'A three-day gathering among the historic gardens and waters of Como.',
-                  'items': [
-                    {
-                      'icon': '✦',
-                      'title': 'Friday Welcome Prosecco',
-                      'description':
-                          'Sept 18, 6:00 PM · Grand Hotel Tremezzo Terrace. Sunset cocktails, antipasti, and lakeside jazz.',
-                    },
-                    {
-                      'icon': '✦',
-                      'title': 'Saturday Vows & Gala',
-                      'description':
-                          'Sept 19, 4:30 PM · Villa Balbianello. Garden ceremony overlooking the lake followed by banquet dinner and dancing.',
-                    },
-                    {
-                      'icon': '✦',
-                      'title': 'Sunday Lakeside Brunch',
-                      'description':
-                          'Sept 20, 11:00 AM · Bellagio Pier. Fresh pastries, espresso, and private wooden boat excursions.',
-                    },
-                  ],
-                },
-                'styles': {'background': 'surface'},
-              },
-              {
-                'id': 'sec_elysian_story',
-                'component': 'about',
-                'order': 2,
-                'props': {
-                  'title': 'How We Met',
-                  'subtitle':
-                      'Seven years of laughter, shared passports, and endless coffee.',
-                  'body':
-                      'From our first spontaneous encounter in a sunlit Montmartre gallery to building a life together across three cities, every milestone has brought us closer. We cannot wait to begin this sacred next chapter surrounded by the people who mean the world to us.',
-                  'image':
-                      'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=80',
-                },
-                'styles': {'background': 'background'},
-              },
-              {
-                'id': 'sec_elysian_travel',
-                'component': 'visit',
-                'order': 3,
-                'props': {
-                  'title': 'Travel & Accommodations',
-                  'subtitle': 'Villa Balbianello, Lenno, Lake Como, Italy',
-                  'address': 'Via Guido Monzino 1, 22016 Tremezzina CO, Italy',
-                  'hours':
-                      'Milan Malpensa Airport (MXP) is 60 minutes away. Private ferry shuttles depart every hour from Como San Giovanni station.',
-                  'ctaText': 'View Room Blocks',
-                  'ctaLink': '#rooms',
-                },
-                'styles': {'background': 'surface'},
-              },
-              {
-                'id': 'sec_elysian_rsvp',
-                'component': 'cta',
-                'order': 4,
-                'props': {
-                  'headline': 'Kindly RSVP by May 1, 2026',
-                  'description':
-                      'Please let us know if you can celebrate with us and provide dietary requirements or song requests.',
-                  'buttonText': 'Confirm Attendance',
-                  'buttonLink': '#rsvp',
-                },
-                'styles': {'background': 'background'},
-              },
-              {
-                'id': 'sec_elysian_footer',
-                'component': 'footer',
-                'order': 5,
-                'props': {
-                  'copyright':
-                      'Sophia & Julian · September 2026 · Lake Como, Italy. With love.',
-                },
-                'styles': {'background': 'surface'},
-              },
-            ],
-          },
-        ],
-      },
-    },
-    {
-      'id': 'tmpl-botanical-vows',
-      'slug': 'botanical-vows',
-      'name': 'Botanical Romance',
-      'industry': 'Weddings & Celebrations',
-      'badge': '✦ WILDFLOWER GARDEN',
-      'is_featured': true,
-      'is_public': true,
-      'is_premium': false,
-      'description':
-          'Sunlit coastal redwoods, organic wildflower florals, and outdoor dinner celebration in Big Sur.',
-      'headline': 'Under the Stars,\nSurrounded by Nature.',
-      'subheadline':
-          'Join Maya & Liam in the coastal highlands of Big Sur for a weekend of vows, acoustic melodies, and woodland feast.',
-      'ctaText': 'RSVP by June 15',
-      'primaryColor': '#2D4739',
-      'bgColor': '#F6F7F3',
-      'preview_images': [
-        'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=1200&q=80',
-      ],
-      'document': {
-        'schema_version': 1,
-        'site': {
-          'name': 'Maya & Liam',
-          'theme': {
-            'colors': {
-              'primary': '#2D4739',
-              'secondary': '#4A6B56',
-              'accent': '#D97706',
-              'background': '#F6F7F3',
-              'surface': '#FFFFFF',
-              'text': {
-                'primary': '#1A241E',
-                'secondary': '#4D5E53',
-                'inverse': '#FFFFFF',
-              },
-            },
-            'typography': {
-              'headingFamily': 'Playfair Display',
-              'bodyFamily': 'Inter',
-            },
-          },
-        },
-        'navigation': {
-          'logo': {'text': 'Maya & Liam'},
-          'items': [
-            {'label': 'Schedule', 'href': '#schedule'},
-            {'label': 'Our Story', 'href': '#story'},
-            {'label': 'Guest FAQ', 'href': '#faq'},
-            {'label': 'RSVP', 'href': '#rsvp', 'type': 'button'},
-          ],
-        },
-        'pages': [
-          {
-            'id': 'page_home',
-            'slug': '/',
-            'title': 'Home',
-            'sections': [
-              {
-                'id': 'sec_botanical_hero',
-                'component': 'hero',
-                'order': 0,
-                'props': {
-                  'badge': 'AUGUST 14–16, 2026 · BIG SUR, CALIFORNIA',
-                  'headline': 'Under the Stars,\nSurrounded by Nature.',
-                  'subheadline':
-                      'Two paths intertwining beneath the ancient redwoods. Come share music, wine, and warm memories with us on the Pacific ridge.',
-                  'ctaText': 'RSVP by June 15',
-                  'ctaLink': '#rsvp',
-                  'secondaryCtaText': 'Weekend Schedule ↗',
-                  'secondaryCtaLink': '#schedule',
-                  'image': {
-                    'src':
-                        'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=1200&q=80',
-                    'alt': 'Maya and Liam outdoor wedding',
-                  },
-                },
-                'styles': {'background': 'background'},
-              },
-              {
-                'id': 'sec_botanical_schedule',
-                'component': 'features',
-                'order': 1,
-                'props': {
-                  'title': 'Weekend Gatherings',
-                  'subtitle': 'A rustic coastal celebration from dawn till dusk.',
-                  'items': [
-                    {
-                      'icon': '🌿',
-                      'title': 'Friday Bonfire & Tacos',
-                      'description':
-                          'Aug 14, 7:00 PM · Redwood Glade. Local Baja-style tacos, local craft cider, and acoustic guitar by the firepit.',
-                    },
-                    {
-                      'icon': '🌸',
-                      'title': 'Saturday Forest Ceremony',
-                      'description':
-                          'Aug 15, 3:30 PM · The Cathedral Grove. Exchange of vows followed by family-style farm dinner under twinkle lights.',
-                    },
-                    {
-                      'icon': '☀️',
-                      'title': 'Sunday Morning Coffee & Pastries',
-                      'description':
-                          'Aug 16, 9:30 AM · The Overlook Deck. Pour-over bar, fresh pastries, and warm hugs before journeying home.',
-                    },
-                  ],
-                },
-                'styles': {'background': 'surface'},
-              },
-              {
-                'id': 'sec_botanical_story',
-                'component': 'about',
-                'order': 2,
-                'props': {
-                  'title': 'Our Journey Together',
-                  'subtitle':
-                      'From trail runs in Marin to building our dream homestead.',
-                  'body':
-                      'We met at a trail race in 2019, both reaching for the same post-run orange slice. Six years, countless mountain peaks, and one rambunctious golden retriever later, we are overjoyed to say "I do" in the place where we feel most at home: outdoors.',
-                  'image':
-                      'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80',
-                },
-                'styles': {'background': 'background'},
-              },
-              {
-                'id': 'sec_botanical_faq',
-                'component': 'faq',
-                'order': 3,
-                'props': {
-                  'title': 'Guest Information & FAQ',
-                  'subtitle':
-                      'Everything you need to know for our mountain weekend.',
-                  'items': [
-                    {
-                      'question': 'What is the dress code?',
-                      'answer':
-                          'Garden cocktail attire. Please note that the ceremony and dinner are on grassy terrain, so wedges, block heels, or flats are strongly recommended.',
-                    },
-                    {
-                      'question': 'How do we get to the venue?',
-                      'answer':
-                          'We are providing shuttles from Carmel Valley hotels. Mountain parking is limited, so we encourage taking the group shuttles.',
-                    },
-                  ],
-                },
-                'styles': {'background': 'surface'},
-              },
-              {
-                'id': 'sec_botanical_rsvp',
-                'component': 'cta',
-                'order': 4,
-                'props': {
-                  'headline': 'Will You Join Our Celebration?',
-                  'description':
-                      'Please let us know your RSVP by June 15, 2026 so we can finalize our farm-to-table banquet seats.',
-                  'buttonText': 'Confirm Attendance',
-                  'buttonLink': '#rsvp',
-                },
-                'styles': {'background': 'background'},
-              },
-              {
-                'id': 'sec_botanical_footer',
-                'component': 'footer',
-                'order': 5,
-                'props': {
-                  'copyright':
-                      'Maya & Liam · August 2026 · Big Sur, California. Forever.',
-                },
-                'styles': {'background': 'surface'},
-              },
-            ],
-          },
-        ],
-      },
-    },
-    {
       'id': 'tmpl-devflow',
       'slug': 'devflow',
       'name': 'DevFlow Cloud',
@@ -2988,156 +2644,6 @@ class TemplatesController extends GetxController {
       },
     },
     {
-      'id': 'tmpl-elena-rostova',
-      'slug': 'elena-rostova',
-      'name': 'Elena Rostova',
-      'industry': 'Personal & Architecture Portfolio',
-      'badge': '✦ AD100 ARCHITECT',
-      'is_featured': true,
-      'is_public': true,
-      'is_premium': false,
-      'description':
-          'Bespoke residential pavilions, private sanctuaries, and minimalist interior architecture across Kyoto and Zurich.',
-      'headline': 'Form, Silence,\nand Natural Light.',
-      'subheadline':
-          'Sculpting spaces that endure. Bespoke architectural commissions focusing on tactile materials, monolithic concrete, and sacred geometries.',
-      'ctaText': 'View Selected Works',
-      'primaryColor': '#1C1917',
-      'bgColor': '#FAFAF9',
-      'preview_images': [
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-      ],
-      'document': {
-        'schema_version': 1,
-        'site': {
-          'name': 'Elena Rostova Architect',
-          'theme': {
-            'colors': {
-              'primary': '#1C1917',
-              'secondary': '#57534E',
-              'accent': '#A8A29E',
-              'background': '#FAFAF9',
-              'surface': '#FFFFFF',
-              'text': {
-                'primary': '#1C1917',
-                'secondary': '#78716C',
-                'inverse': '#FAFAF9',
-              },
-            },
-            'typography': {
-              'headingFamily': 'Space Grotesk',
-              'bodyFamily': 'Inter',
-            },
-          },
-        },
-        'navigation': {
-          'logo': {'text': 'Elena Rostova'},
-          'items': [
-            {'label': 'Projects', 'href': '#projects'},
-            {'label': 'Philosophy', 'href': '#philosophy'},
-            {'label': 'Awards', 'href': '#awards'},
-            {'label': 'Inquire', 'href': '#contact', 'type': 'button'},
-          ],
-        },
-        'pages': [
-          {
-            'id': 'page_home',
-            'slug': '/',
-            'title': 'Home',
-            'sections': [
-              {
-                'id': 'sec_elena_hero',
-                'component': 'hero',
-                'order': 0,
-                'props': {
-                  'badge': '✦ AD100 2026 · ARCHITECTURAL DESIGN & INTERIORS',
-                  'headline': 'Form, Silence,\nand Natural Light.',
-                  'subheadline':
-                      'Bespoke architectural commissions that honor natural materiality, raw concrete, and the sacred balance between interior and wild exterior landscapes.',
-                  'ctaText': 'Explore Works',
-                  'ctaLink': '#projects',
-                  'secondaryCtaText': 'Design Philosophy ↗',
-                  'secondaryCtaLink': '#philosophy',
-                  'image': {
-                    'src':
-                        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-                    'alt': 'Villa Kanso in Kyoto by Elena Rostova',
-                  },
-                },
-                'styles': {'background': 'background'},
-              },
-              {
-                'id': 'sec_elena_projects',
-                'component': 'features',
-                'order': 1,
-                'props': {
-                  'title': 'Selected Architectural Works',
-                  'subtitle': 'Monolithic residential sanctuaries completed across Europe and Asia.',
-                  'items': [
-                    {
-                      'icon': '🏛️',
-                      'title': 'Villa Kanso · Kyoto',
-                      'description':
-                          'Charred cedar yakisugi facade paired with basalt stone courtyard gardens and hidden subterranean tea chamber.',
-                    },
-                    {
-                      'icon': '🏔️',
-                      'title': 'Alpine Glass Sanctuary · Vals',
-                      'description':
-                          'Cantilevered board-formed concrete pavilion embedded into the Swiss granite slopes with 360-degree panoramic glazing.',
-                    },
-                    {
-                      'icon': '🌊',
-                      'title': 'Pavilion VII · Stockholm Archipelago',
-                      'description':
-                          'Zero-carbon timber dwelling featuring thermal bedrock heating and private natural harbor jetty.',
-                    },
-                  ],
-                },
-                'styles': {'background': 'surface'},
-              },
-              {
-                'id': 'sec_elena_philosophy',
-                'component': 'about',
-                'order': 2,
-                'props': {
-                  'title': 'Architectural Manifesto',
-                  'subtitle': 'A dialogue between permanence and ephemeral daylight.',
-                  'body':
-                      'Architecture should not compete with nature; it should serve as a quiet frame through which the changes of season, wind, and sky are felt deeply. We work with an intentional palette of raw stone, unvarnished timber, and shadow to craft spaces that inspire reverence.',
-                  'image':
-                      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
-                },
-                'styles': {'background': 'background'},
-              },
-              {
-                'id': 'sec_elena_cta',
-                'component': 'cta',
-                'order': 3,
-                'props': {
-                  'headline': 'Initiate a Private Commission',
-                  'description':
-                      'We accept a select number of residential and cultural architectural commissions each year.',
-                  'buttonText': 'Contact the Studio',
-                  'buttonLink': '#contact',
-                },
-                'styles': {'background': 'background'},
-              },
-              {
-                'id': 'sec_elena_footer',
-                'component': 'footer',
-                'order': 4,
-                'props': {
-                  'copyright': '© 2026 Elena Rostova Studio. Zurich · Kyoto.',
-                },
-                'styles': {'background': 'surface'},
-              },
-            ],
-          },
-        ],
-      },
-    },
-    {
       'id': 'tmpl-kai-thorne',
       'slug': 'kai-thorne',
       'name': 'Kai Thorne',
@@ -3440,55 +2946,55 @@ class TemplatesController extends GetxController {
       },
     },
     {
-      'id': 'tmpl-nordic-craft',
-      'slug': 'nordic-craft',
-      'name': 'Nordic Craft Roasters',
-      'industry': 'Business & Specialty Coffee',
-      'badge': '✦ DIRECT TRADE ORIGIN',
+      'id': 'tmpl-lumiere-cinema',
+      'slug': 'lumiere-cinema',
+      'name': 'Lumière Cinema',
+      'industry': 'Creative & Film Production',
+      'badge': '✦ CANNES 2026 SELECTION',
       'is_featured': true,
       'is_public': true,
       'is_premium': false,
       'description':
-          'Direct-trade Scandinavian light roasts sourced from ethical smallholder cooperatives across Ethiopia and Colombia.',
-      'headline': 'Precision Roasting.\nUncompromised Purity.',
+          'Bold cinematic landing page for auteur independent film studios, creative production companies, and visual directors.',
+      'headline': 'Stories that move\nthe world forward.',
       'subheadline':
-          'Supplying single-origin specialty coffees to Michelin-starred restaurants, boutique hotels, and coffee connoisseurs worldwide.',
-      'ctaText': 'Explore Wholesale & Retail',
-      'primaryColor': '#2C1810',
-      'bgColor': '#F5F2EB',
+          'Award-winning independent cinema and auteur-driven film production. From screenplay incubation to theatrical world premieres.',
+      'ctaText': 'Watch Showreel',
+      'primaryColor': '#DC2626',
+      'bgColor': '#0A0A0A',
       'preview_images': [
-        'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80',
       ],
       'document': {
         'schema_version': 1,
         'site': {
-          'name': 'Nordic Craft Roasters',
+          'name': 'Lumière Cinema',
           'theme': {
             'colors': {
-              'primary': '#2C1810',
-              'secondary': '#5E3A2B',
-              'accent': '#C5A880',
-              'background': '#F5F2EB',
-              'surface': '#FFFFFF',
+              'primary': '#DC2626',
+              'secondary': '#EF4444',
+              'accent': '#F87171',
+              'background': '#0A0A0A',
+              'surface': '#141414',
               'text': {
-                'primary': '#2C1810',
-                'secondary': '#6B5448',
-                'inverse': '#FFFFFF',
+                'primary': '#FAFAFA',
+                'secondary': '#A1A1AA',
+                'inverse': '#0A0A0A',
               },
             },
             'typography': {
-              'headingFamily': 'Playfair Display',
+              'headingFamily': 'Instrument Serif',
               'bodyFamily': 'Inter',
             },
           },
         },
         'navigation': {
-          'logo': {'text': 'Nordic Craft Roasters'},
+          'logo': {'text': 'Lumière Cinema'},
           'items': [
-            {'label': 'Coffee', 'href': '#products'},
-            {'label': 'Sourcing', 'href': '#about'},
-            {'label': 'Café & Tasting', 'href': '#visit'},
-            {'label': 'Wholesale', 'href': '#wholesale', 'type': 'button'},
+            {'label': 'Productions', 'href': '#productions'},
+            {'label': 'Awards', 'href': '#awards'},
+            {'label': 'Slates', 'href': '#offerings'},
+            {'label': 'Inquire', 'href': '#cta', 'type': 'button'},
           ],
         },
         'pages': [
@@ -3498,92 +3004,896 @@ class TemplatesController extends GetxController {
             'title': 'Home',
             'sections': [
               {
-                'id': 'sec_nordic_hero',
+                'id': 'sec_lumiere_cinema_hero',
                 'component': 'hero',
                 'order': 0,
                 'props': {
-                  'badge': '✦ COPENHAGEN MICRO-ROASTERY · DIRECT TRADE',
-                  'headline': 'Precision Roasting.\nUncompromised Purity.',
+                  'badge': '✦ CANNES 2026 SELECTION',
+                  'headline': 'Stories that move\nthe world forward.',
                   'subheadline':
-                      'Light, expressive Scandinavian roast profiles designed to preserve floral sweetness, vibrant citrus acidity, and authentic terroir from farm to cup.',
-                  'ctaText': 'Explore Coffee Offerings',
-                  'ctaLink': '#products',
-                  'secondaryCtaText': 'Visit Our Tasting Room ↗',
-                  'secondaryCtaLink': '#visit',
+                      'Award-winning independent cinema and auteur-driven film production. From screenplay incubation to theatrical world premieres.',
+                  'ctaText': 'Watch Showreel',
+                  'ctaLink': '#cta',
+                  'secondaryCtaText': 'Explore More ↗',
+                  'secondaryCtaLink': '#features',
                   'image': {
                     'src':
-                        'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=1200&q=80',
-                    'alt': 'Nordic Craft Specialty Coffee Roasters',
+                        'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Lumière Cinema Visual Showcase',
                   },
                 },
                 'styles': {'background': 'background'},
               },
               {
-                'id': 'sec_nordic_products',
-                'component': 'products',
+                'id': 'sec_lumiere_cinema_features',
+                'component': 'features',
                 'order': 1,
                 'props': {
-                  'title': 'Seasonal Single-Origin Selections',
-                  'subtitle': 'Small-batch roasted every Tuesday on our zero-emission Loring S35.',
+                  'title': 'Auteur Filmmaking Without Compromise',
+                  'subtitle':
+                      'From raw narrative concept to world cinema distribution.',
                   'items': [
                     {
-                      'name': 'Guji Natural · Ethiopia',
-                      'price': '€19.50',
-                      'description': 'Jasmine blossom, wild strawberry, and bergamot finish.',
-                      'badge': 'LIMITED HARVEST',
+                      'icon': '🎬',
+                      'title': 'Bespoke Production Slates',
+                      'description':
+                          'Full-stack development, casting, principal photography, and master Dolby Atmos audio mixing.',
                     },
                     {
-                      'name': 'Huila Pink Bourbon · Colombia',
-                      'price': '€22.00',
-                      'description': 'Crisp white peach, sugarcane syrup, and honeysuckle aroma.',
-                      'badge': 'MICR-LOT',
+                      'icon': '🏆',
+                      'title': 'Festival Circuit Acclaim',
+                      'description':
+                          '23 official selections across Cannes, Venice, Sundance, and TIFF over the last 4 seasons.',
                     },
                     {
-                      'name': 'Nordic Winter Espresso',
-                      'price': '€17.00',
-                      'description': 'Milk chocolate ganache, candied orange, and smooth body.',
-                      'badge': 'HOUSE BLEND',
+                      'icon': '🎞️',
+                      'title': 'Analog & 70mm Formats',
+                      'description':
+                          'Dedicated photochemical color pipeline supporting 35mm and 70mm large-format film stocks.',
                     },
                   ],
                 },
                 'styles': {'background': 'surface'},
               },
               {
-                'id': 'sec_nordic_visit',
-                'component': 'visit',
+                'id': 'sec_lumiere_cinema_stats',
+                'component': 'statistics',
                 'order': 2,
                 'props': {
-                  'title': 'Copenhagen Tasting Room',
-                  'subtitle': 'Vesterbrogade 44, 1620 København V, Denmark',
-                  'address': 'Vesterbrogade 44, 1620 København V, Denmark',
-                  'hours':
-                      'Monday – Friday: 07:30 – 17:00\nSaturday – Sunday: 08:30 – 18:00\nPublic cuppings every Saturday at 11:00 AM.',
-                  'ctaText': 'Get Directions',
-                  'ctaLink': '#directions',
+                  'title': 'Cinematic Track Record',
+                  'subtitle':
+                      'Decades of groundbreaking independent visual storytelling.',
+                  'items': [
+                    {'value': '47', 'label': 'Films Produced'},
+                    {'value': '23', 'label': 'Festival Laurels'},
+                    {'value': '12', 'label': 'Grand Jury Prizes'},
+                    {'value': '98%', 'label': 'Rotten Tomatoes Avg'},
+                  ],
                 },
                 'styles': {'background': 'background'},
               },
               {
-                'id': 'sec_nordic_cta',
-                'component': 'cta',
+                'id': 'sec_lumiere_cinema_products',
+                'component': 'products',
                 'order': 3,
                 'props': {
-                  'headline': 'Wholesale & Michelin Partner Program',
-                  'description':
-                      'We provide bespoke roast profiles, commercial La Marzocco equipment, and barista training to world-class hospitality venues.',
-                  'buttonText': 'Inquire for Wholesale',
-                  'buttonLink': '#wholesale',
+                  'title': 'Production Packages',
+                  'subtitle':
+                      'Comprehensive production engagements for directors and distributors.',
+                  'items': [
+                    {
+                      'name': 'Short Film Incubator',
+                      'price': '\$35,000',
+                      'description':
+                          'Full technical package, camera crew, post-color grading, and international festival distribution plan.',
+                      'image':
+                          'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80',
+                    },
+                    {
+                      'name': 'Feature Co-Production',
+                      'price': '\$180,000+',
+                      'description':
+                          'Co-financing partnership, Tier-1 talent packaging, multi-territory tax credit management, and theatrical deliverable.',
+                      'image':
+                          'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=600&q=80',
+                    },
+                    {
+                      'name': 'Commercial Brand Cinema',
+                      'price': '\$60,000',
+                      'description':
+                          'High-concept narrative commercials with auteur directing, original orchestral scoring, and global usage rights.',
+                      'image':
+                          'https://images.unsplash.com/photo-1518134346374-184f9d21eb29?auto=format&fit=crop&w=600&q=80',
+                    },
+                  ],
                 },
                 'styles': {'background': 'surface'},
               },
               {
-                'id': 'sec_nordic_footer',
-                'component': 'footer',
+                'id': 'sec_lumiere_cinema_cta',
+                'component': 'cta',
                 'order': 4,
                 'props': {
-                  'copyright': '© 2026 Nordic Craft Roasters ApS. Copenhagen, Denmark.',
+                  'headline': 'Bring Your Vision to the Silver Screen',
+                  'description':
+                      'Our development committee reviews new scripts and treatment packages on a rolling monthly basis.',
+                  'buttonText': 'Submit Treatment Package',
+                  'buttonLink': '#contact',
                 },
                 'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_lumiere_cinema_footer',
+                'component': 'footer',
+                'order': 5,
+                'props': {
+                  'copyright': '© 2026 Lumière Cinema Productions SAS. Paris · New York · Tokyo.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-terrain-outdoors',
+      'slug': 'terrain-outdoors',
+      'name': 'Terrain Outdoors',
+      'industry': 'Business & Outdoor Lifestyle',
+      'badge': '✦ EXPEDITION GRADE',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Earthy premium outdoor lifestyle brand landing page for technical adventure gear and expedition apparel.',
+      'headline': 'Engineered for the\npath less taken.',
+      'subheadline':
+          'Technical outdoor equipment and expedition gear designed for high-altitude survival. Tested at 6,000 meters, guaranteed for life.',
+      'ctaText': 'Explore Expedition Gear',
+      'primaryColor': '#2D4A3E',
+      'bgColor': '#F4EFEA',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Terrain Outdoors',
+          'theme': {
+            'colors': {
+              'primary': '#2D4A3E',
+              'secondary': '#446E5C',
+              'accent': '#D97706',
+              'background': '#F4EFEA',
+              'surface': '#E8E2D9',
+              'text': {
+                'primary': '#1C1917',
+                'secondary': '#57534E',
+                'inverse': '#F4EFEA',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Space Grotesk',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Terrain Outdoors'},
+          'items': [
+            {'label': 'Apparel', 'href': '#products'},
+            {'label': 'Philosophy', 'href': '#features'},
+            {'label': 'Field Tests', 'href': '#stats'},
+            {'label': 'Shop Now', 'href': '#cta', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_terrain_outdoors_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ EXPEDITION GRADE',
+                  'headline': 'Engineered for the\npath less taken.',
+                  'subheadline':
+                      'Technical outdoor equipment and expedition gear designed for high-altitude survival. Tested at 6,000 meters, guaranteed for life.',
+                  'ctaText': 'Explore Expedition Gear',
+                  'ctaLink': '#cta',
+                  'secondaryCtaText': 'Explore More ↗',
+                  'secondaryCtaLink': '#features',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Terrain Outdoors Visual Showcase',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_terrain_outdoors_features',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'Built for Severe Alpine Conditions',
+                  'subtitle':
+                      'No unnecessary features. Only redundant durability and thermal superiority.',
+                  'items': [
+                    {
+                      'icon': '🏔️',
+                      'title': 'Alpine Storm Shield',
+                      'description':
+                          'Proprietary 3-layer breathable membrane resisting 35,000mm hydrostatic head pressures in blizzard conditions.',
+                    },
+                    {
+                      'icon': '♻️',
+                      'title': 'Circular Lifecycle',
+                      'description':
+                          'Manufactured with 100% recycled polyamide and zero fluorocarbons (PFAS-free DWR finishes).',
+                    },
+                    {
+                      'icon': '🛡️',
+                      'title': 'Lifetime Field Repair',
+                      'description':
+                          'Damage your gear on the mountain? Send it to our repair ateliers and we mend it free of charge.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_terrain_outdoors_stats',
+                'component': 'statistics',
+                'order': 2,
+                'props': {
+                  'title': 'Tested in Extreme Elements',
+                  'subtitle':
+                      'Validated by mountain guides and high-altitude rescue teams across 4 continents.',
+                  'items': [
+                    {'value': '6,200m', 'label': 'Max Field Test Altitude'},
+                    {'value': '140K+', 'label': 'Explorers Equipped'},
+                    {'value': '100%', 'label': 'PFAS-Free Materials'},
+                    {'value': '0', 'label': 'Landfill Waste Guarantee'},
+                  ],
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_terrain_outdoors_products',
+                'component': 'products',
+                'order': 3,
+                'props': {
+                  'title': 'Featured Expedition Kit',
+                  'subtitle':
+                      'Essential performance gear for alpine ascents and backcountry traverses.',
+                  'items': [
+                    {
+                      'name': 'Summit Shell 3L Pro',
+                      'price': '\$420',
+                      'description':
+                          'Ultralight 380g stormproof shell with helmet-compatible storm hood, RECCO reflector, and YKK AquaGuard zips.',
+                      'image':
+                          'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&w=600&q=80',
+                    },
+                    {
+                      'name': 'Basecamp Down Parka',
+                      'price': '\$580',
+                      'description':
+                          '900-fill power responsibly sourced hydrophobic down engineered for bivouac survival down to -35°C.',
+                      'image':
+                          'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80',
+                    },
+                    {
+                      'name': 'Alpine Traverse Pack 45L',
+                      'price': '\$260',
+                      'description':
+                          'Ultra-durable Dyneema composite pack with dual ice axe loops, ski carry system, and removable framesheet.',
+                      'image':
+                          'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_terrain_outdoors_cta',
+                'component': 'cta',
+                'order': 4,
+                'props': {
+                  'headline': 'Equip Your Next Mountain Expedition',
+                  'description':
+                      'Join our backcountry collective for early access to limited alpine drops and guided expedition masterclasses.',
+                  'buttonText': 'Get Outfitted',
+                  'buttonLink': '#contact',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_terrain_outdoors_footer',
+                'component': 'footer',
+                'order': 5,
+                'props': {
+                  'copyright': '© 2026 Terrain Outdoors Co. Chamonix · Boulder · Innsbruck.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-noor-atelier',
+      'slug': 'noor-atelier',
+      'name': 'Noor Atelier',
+      'industry': 'Business & Luxury Jewelry',
+      'badge': '✦ HAUTE JOAILLERIE',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Warm, luminous landing page for bespoke fine jewelry ateliers, master goldsmiths, and ethical gem houses.',
+      'headline': 'Heirloom pieces,\nmodern souls.',
+      'subheadline':
+          'Bespoke fine jewelry forged by master artisans in Paris and Florence. Ethically mined rare gemstones, sculptured 18K recycled gold, and timeless silhouettes.',
+      'ctaText': 'Book Atelier Consultation',
+      'primaryColor': '#854D0E',
+      'bgColor': '#FAF7F2',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Noor Atelier',
+          'theme': {
+            'colors': {
+              'primary': '#854D0E',
+              'secondary': '#A16207',
+              'accent': '#CA8A04',
+              'background': '#FAF7F2',
+              'surface': '#F3ECE2',
+              'text': {
+                'primary': '#1C1917',
+                'secondary': '#78716C',
+                'inverse': '#FAF7F2',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Cormorant Garamond',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Noor Atelier'},
+          'items': [
+            {'label': 'High Jewelry', 'href': '#products'},
+            {'label': 'Artisanship', 'href': '#features'},
+            {'label': 'Provenance', 'href': '#stats'},
+            {'label': 'Inquire', 'href': '#cta', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_noor_atelier_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ HAUTE JOAILLERIE',
+                  'headline': 'Heirloom pieces,\nmodern souls.',
+                  'subheadline':
+                      'Bespoke fine jewelry forged by master artisans in Paris and Florence. Ethically mined rare gemstones, sculptured 18K recycled gold, and timeless silhouettes.',
+                  'ctaText': 'Book Atelier Consultation',
+                  'ctaLink': '#cta',
+                  'secondaryCtaText': 'Explore More ↗',
+                  'secondaryCtaLink': '#features',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Noor Atelier Visual Showcase',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_noor_atelier_features',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'The Art of Haute Joaillerie',
+                  'subtitle':
+                      'Centuries-old metalworking traditions honored with contemporary architectural restraint.',
+                  'items': [
+                    {
+                      'icon': '💎',
+                      'title': 'Traceable Gemstone Origins',
+                      'description':
+                          'Every Colombian emerald, Ceylon sapphire, and diamond comes with verified blockchain provenance documentation.',
+                    },
+                    {
+                      'icon': '🔨',
+                      'title': 'Lost Wax Sculpture',
+                      'description':
+                          'Every mount is hand-carved in wax and cast in 18K or 24K fairmined gold. Never mass-stamped.',
+                    },
+                    {
+                      'icon': '✨',
+                      'title': 'Bespoke Bridal & Heirloom',
+                      'description':
+                          'Collaborate directly with our master jeweler over six weeks to create a custom one-of-a-kind legacy heirloom.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_noor_atelier_stats',
+                'component': 'statistics',
+                'order': 2,
+                'props': {
+                  'title': 'Heritage of Precision',
+                  'subtitle':
+                      'Excellence measured in karats, microns, and lifelong devotions.',
+                  'items': [
+                    {'value': '18K+', 'label': 'Recycled Fairmined Gold'},
+                    {'value': '40-120h', 'label': 'Artisan Hours Per Piece'},
+                    {'value': '100%', 'label': 'Conflict-Free Sourcing'},
+                    {'value': '1888', 'label': 'Ancestral Craft Roots'},
+                  ],
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_noor_atelier_products',
+                'component': 'products',
+                'order': 3,
+                'props': {
+                  'title': 'Signature Creations',
+                  'subtitle':
+                      'One-of-a-kind pieces currently available at our Place Vendôme salon.',
+                  'items': [
+                    {
+                      'name': 'Solaris Solitaire Ring',
+                      'price': '\$6,400',
+                      'description':
+                          '2.4ct oval diamond mounted in a sculptural fluted 18K yellow gold setting with hidden micro-pavé band.',
+                      'image':
+                          'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80',
+                    },
+                    {
+                      'name': 'Aura Diamond Choker',
+                      'price': '\$9,800',
+                      'description':
+                          'Articulated chevron collar in 18K white gold featuring 4.8ct of brilliant bezel-set natural diamonds.',
+                      'image':
+                          'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80',
+                    },
+                    {
+                      'name': 'Celestial Emerald Earrings',
+                      'price': '\$5,200',
+                      'description':
+                          'Pair of matched Muzo green emerald drops framed by hand-carved yellow gold starburst accents.',
+                      'image':
+                          'https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_noor_atelier_cta',
+                'component': 'cta',
+                'order': 4,
+                'props': {
+                  'headline': 'Commission Your Legacy Heirloom',
+                  'description':
+                      'Schedule a private consultation at our Place Vendôme salon or request our secure bespoke design concierge worldwide.',
+                  'buttonText': 'Request Private Viewing',
+                  'buttonLink': '#contact',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_noor_atelier_footer',
+                'component': 'footer',
+                'order': 5,
+                'props': {
+                  'copyright': '© 2026 Noor Atelier Joaillerie. Place Vendôme, Paris · Milan · Dubai.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-vela-sailing',
+      'slug': 'vela-sailing',
+      'name': 'Vela Sailing Co.',
+      'industry': 'Business & Luxury Travel',
+      'badge': '✦ MEDITERRANEAN & CARIBBEAN',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Nautical luxury travel landing page for crewed yacht charters, bespoke sailing expeditions, and island voyages.',
+      'headline': 'Sail beyond\nthe edge of maps.',
+      'subheadline':
+          'Curated private yacht expeditions across the Cyclades, Amalfi Coast, and the Grenadines. Bespoke itineraries, master captains, and Michelin-trained onboard chefs.',
+      'ctaText': 'Charter Your Yacht',
+      'primaryColor': '#0F2C59',
+      'bgColor': '#F8FAFC',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1500930287596-c1ecaa373bb2?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Vela Sailing Co.',
+          'theme': {
+            'colors': {
+              'primary': '#0F2C59',
+              'secondary': '#1E40AF',
+              'accent': '#0284C7',
+              'background': '#F8FAFC',
+              'surface': '#EDF2F7',
+              'text': {
+                'primary': '#0F172A',
+                'secondary': '#475569',
+                'inverse': '#F8FAFC',
+              },
+            },
+            'typography': {
+              'headingFamily': 'DM Serif Display',
+              'bodyFamily': 'DM Sans',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Vela Sailing Co.'},
+          'items': [
+            {'label': 'Expeditions', 'href': '#products'},
+            {'label': 'Fleet', 'href': '#features'},
+            {'label': 'Experience', 'href': '#stats'},
+            {'label': 'Inquire', 'href': '#cta', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_vela_sailing_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ MEDITERRANEAN & CARIBBEAN',
+                  'headline': 'Sail beyond\nthe edge of maps.',
+                  'subheadline':
+                      'Curated private yacht expeditions across the Cyclades, Amalfi Coast, and the Grenadines. Bespoke itineraries, master captains, and Michelin-trained onboard chefs.',
+                  'ctaText': 'Charter Your Yacht',
+                  'ctaLink': '#cta',
+                  'secondaryCtaText': 'Explore More ↗',
+                  'secondaryCtaLink': '#features',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1500930287596-c1ecaa373bb2?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Vela Sailing Co. Visual Showcase',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_vela_sailing_features',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'The Art of Private Ocean Navigation',
+                  'subtitle':
+                      'Unrivaled luxury and quiet anchorages far away from cruise routes.',
+                  'items': [
+                    {
+                      'icon': '⛵',
+                      'title': 'Bespoke Catamarans & Sloops',
+                      'description':
+                          'Modern 50ft to 85ft carbon-composite yachts outfitted with watermakers, solar arrays, and hydraulic swim platforms.',
+                    },
+                    {
+                      'icon': '👨‍🍳',
+                      'title': 'Michelin-Trained Chefs',
+                      'description':
+                          'Every voyage includes a dedicated private chef preparing fresh catch, local market produce, and fine organic wines.',
+                    },
+                    {
+                      'icon': '⚓',
+                      'title': 'Off-Grid Island Anchorages',
+                      'description':
+                          'Access secluded turquoise coves and marine sanctuaries only reachable under sail.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_vela_sailing_stats',
+                'component': 'statistics',
+                'order': 2,
+                'props': {
+                  'title': 'Maritime Excellence',
+                  'subtitle':
+                      'Safe passages, seasoned skippers, and unforgettable ocean memories.',
+                  'items': [
+                    {'value': '32', 'label': 'Flagship Yachts'},
+                    {'value': '1,400+', 'label': 'Voyages Completed'},
+                    {'value': '99.4%', 'label': 'Five-Star Reviews'},
+                    {'value': '14', 'label': 'Archipelago Routes'},
+                  ],
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_vela_sailing_products',
+                'component': 'products',
+                'order': 3,
+                'props': {
+                  'title': 'Curated Charter Itineraries',
+                  'subtitle':
+                      'Weekly luxury charters including captain, private chef, provisions, and ocean toys.',
+                  'items': [
+                    {
+                      'name': 'Cyclades Explorer (7 Days)',
+                      'price': '\$14,500 / wk',
+                      'description':
+                          'Mykonos, Delos, Paros, and Milos aboard a 54ft luxury catamaran. Secluded volcanic coves and private wine tastings.',
+                      'image':
+                          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+                    },
+                    {
+                      'name': 'Amalfi Sunset Voyage (5 Days)',
+                      'price': '\$11,200 / wk',
+                      'description':
+                          'Capri, Positano, and Ravello. Sunset moorings below towering cliffs with tender transfers to cliffside restaurants.',
+                      'image':
+                          'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=600&q=80',
+                    },
+                    {
+                      'name': 'Grenadines Passage (10 Days)',
+                      'price': '\$21,000 / wk',
+                      'description':
+                          'St. Vincent to Grenada through the Tobago Cays turtle sanctuaries. Kite-boarding, deep diving, and coral exploration.',
+                      'image':
+                          'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_vela_sailing_cta',
+                'component': 'cta',
+                'order': 4,
+                'props': {
+                  'headline': 'Plan Your Bespoke Voyage at Sea',
+                  'description':
+                      'Our nautical navigators design tailored passages for couples, families, and private groups. Secure summer anchorages today.',
+                  'buttonText': 'Request Voyage Proposal',
+                  'buttonLink': '#contact',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_vela_sailing_footer',
+                'component': 'footer',
+                'order': 5,
+                'props': {
+                  'copyright': '© 2026 Vela Sailing Co. Port Hercule, Monaco · Athens · Road Town.',
+                },
+                'styles': {'background': 'surface'},
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      'id': 'tmpl-ora-mindful',
+      'slug': 'ora-mindful',
+      'name': 'Ora Mindful',
+      'industry': 'Startups & Digital Wellness',
+      'badge': '✦ CLINICALLY BACKED AI',
+      'is_featured': true,
+      'is_public': true,
+      'is_premium': false,
+      'description':
+          'Calming digital wellness app landing page for AI meditation, nervous-system restoration, and soundscape therapy.',
+      'headline': 'Quiet the noise.\nReclaim your focus.',
+      'subheadline':
+          'The adaptive nervous-system companion powered by neural soundscapes and real-time biometric biofeedback. Measurably reduce cortisol in 10 minutes a day.',
+      'ctaText': 'Start 14-Day Free Trial',
+      'primaryColor': '#6D28D9',
+      'bgColor': '#FAF5FF',
+      'preview_images': [
+        'https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1200&q=80',
+      ],
+      'document': {
+        'schema_version': 1,
+        'site': {
+          'name': 'Ora Mindful',
+          'theme': {
+            'colors': {
+              'primary': '#6D28D9',
+              'secondary': '#7C3AED',
+              'accent': '#A855F7',
+              'background': '#FAF5FF',
+              'surface': '#F3E8FF',
+              'text': {
+                'primary': '#1E1B4B',
+                'secondary': '#6B7280',
+                'inverse': '#FAF5FF',
+              },
+            },
+            'typography': {
+              'headingFamily': 'Plus Jakarta Sans',
+              'bodyFamily': 'Inter',
+            },
+          },
+        },
+        'navigation': {
+          'logo': {'text': 'Ora Mindful'},
+          'items': [
+            {'label': 'Method', 'href': '#features'},
+            {'label': 'Clinical Proof', 'href': '#stats'},
+            {'label': 'Plans', 'href': '#products'},
+            {'label': 'Try Free', 'href': '#cta', 'type': 'button'},
+          ],
+        },
+        'pages': [
+          {
+            'id': 'page_home',
+            'slug': '/',
+            'title': 'Home',
+            'sections': [
+              {
+                'id': 'sec_ora_mindful_hero',
+                'component': 'hero',
+                'order': 0,
+                'props': {
+                  'badge': '✦ CLINICALLY BACKED AI',
+                  'headline': 'Quiet the noise.\nReclaim your focus.',
+                  'subheadline':
+                      'The adaptive nervous-system companion powered by neural soundscapes and real-time biometric biofeedback. Measurably reduce cortisol in 10 minutes a day.',
+                  'ctaText': 'Start 14-Day Free Trial',
+                  'ctaLink': '#cta',
+                  'secondaryCtaText': 'Explore More ↗',
+                  'secondaryCtaLink': '#features',
+                  'image': {
+                    'src':
+                        'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80',
+                    'alt': 'Ora Mindful Visual Showcase',
+                  },
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_ora_mindful_features',
+                'component': 'features',
+                'order': 1,
+                'props': {
+                  'title': 'Neuroscience-Engineered Mindfulness',
+                  'subtitle':
+                      'Dynamic sensory entrainment tailored to your autonomic nervous system state.',
+                  'items': [
+                    {
+                      'icon': '🧠',
+                      'title': 'Generative Binaural Audio',
+                      'description':
+                          'Synthesized 40Hz gamma and 7Hz theta waves that shift your brain state into deep focus or restorative recovery.',
+                    },
+                    {
+                      'icon': '💓',
+                      'title': 'Apple Watch & Oura Sync',
+                      'description':
+                          'Continuously reads HRV dips and automatically prompts 3-minute breathwork intervals before stress spikes.',
+                    },
+                    {
+                      'icon': '🌙',
+                      'title': 'Circadian Sleep Architecture',
+                      'description':
+                          'Non-verbal acoustic sleep transitions designed by neurobiologists to extend stage 3 deep restorative sleep.',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_ora_mindful_stats',
+                'component': 'statistics',
+                'order': 2,
+                'props': {
+                  'title': 'Clinical Efficacy Measured',
+                  'subtitle':
+                      'Results from double-blind studies conducted with leading neuro-psychology institutes.',
+                  'items': [
+                    {'value': '42%', 'label': 'Salivary Cortisol Reduction'},
+                    {'value': '1.8M+', 'label': 'Mindful Breathers'},
+                    {'value': '12', 'label': 'Peer-Reviewed Studies'},
+                    {'value': '4.9★', 'label': '85,000+ App Store Reviews'},
+                  ],
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_ora_mindful_products',
+                'component': 'products',
+                'order': 3,
+                'props': {
+                  'title': 'Simple Mindful Memberships',
+                  'subtitle':
+                      'Invest in lifelong neuro-plasticity and mental calm. Cancel anytime.',
+                  'items': [
+                    {
+                      'name': 'Annual All-Access',
+                      'price': '\$69.99 / yr',
+                      'description':
+                          'Full access to neural audio engine, biometric sync, daily personalized coaching, and offline mode. 14-day free trial.',
+                      'image':
+                          'https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=600&q=80',
+                    },
+                    {
+                      'name': 'Lifetime Sovereign Pass',
+                      'price': '\$199 one-time',
+                      'description':
+                          'Lifetime access to all future sound engines, Apple Vision Pro spatial environments, and founder community forum.',
+                      'image':
+                          'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=600&q=80',
+                    },
+                    {
+                      'name': 'Teams & High-Performance',
+                      'price': '\$6 / seat / mo',
+                      'description':
+                          'For high-velocity engineering, design, and executive teams seeking burn-out resilience and focus routines.',
+                      'image':
+                          'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80',
+                    },
+                  ],
+                },
+                'styles': {'background': 'surface'},
+              },
+              {
+                'id': 'sec_ora_mindful_cta',
+                'component': 'cta',
+                'order': 4,
+                'props': {
+                  'headline': 'Begin Your Nervous System Reset',
+                  'description':
+                      'Experience deep mental clarity in under 10 minutes. Download Ora today on iOS, Android, and macOS.',
+                  'buttonText': 'Claim Your 14-Day Free Access',
+                  'buttonLink': '#contact',
+                },
+                'styles': {'background': 'background'},
+              },
+              {
+                'id': 'sec_ora_mindful_footer',
+                'component': 'footer',
+                'order': 5,
+                'props': {
+                  'copyright': '© 2026 Ora Mindful Technologies, Inc. San Francisco · Zurich.',
+                },
+                'styles': {'background': 'surface'},
               },
             ],
           },
