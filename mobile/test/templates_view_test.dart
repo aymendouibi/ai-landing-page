@@ -307,6 +307,37 @@ void main() {
       expect(find.byIcon(LucideIcons.lock), findsOneWidget);
     });
 
+    testWidgets('TemplateCard renders long badge on narrow width without overflowing', (tester) async {
+      tester.view.physicalSize = const Size(320, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final longBadgeTemplate = {
+        'id': 'template_long_badge',
+        'name': 'Extremely Long Template Name For High Reliability',
+        'industry': 'Enterprise Level Cybersecurity Architecture',
+        'badge': '✦ CLINICAL METABOLIC INTELLIGENCE · YC S25 LAUNCH',
+        'headline': 'Next-Gen Performance',
+        'is_pro': true,
+      };
+
+      await tester.pumpWidget(
+        buildTestWidget(
+          SingleChildScrollView(
+            child: TemplateCard(
+              template: longBadgeTemplate,
+              isLocked: true,
+              onPreview: () {},
+              onUse: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('TemplatesView renders complete view with all modular parts', (tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;

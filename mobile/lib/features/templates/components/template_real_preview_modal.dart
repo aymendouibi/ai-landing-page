@@ -146,7 +146,8 @@ class _TemplateRealPreviewModalState extends State<TemplateRealPreviewModal> {
     final isDark = AppColors.isDark(context);
     final name = widget.template['name'] ?? 'Template';
     final industry = widget.template['industry'] ?? 'Design';
-    final badge = widget.template['badge'] ?? 'CURATED';
+    final rawBadge = (widget.template['badge'] ?? 'CURATED').toString().trim();
+    final cleanBadge = (rawBadge.startsWith('✦') ? rawBadge.substring(1).trim() : rawBadge).toUpperCase();
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.94,
@@ -194,13 +195,17 @@ class _TemplateRealPreviewModalState extends State<TemplateRealPreviewModal> {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            badge.toString().toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.8,
-                              color: Color(0xFF4F46E5),
+                          Flexible(
+                            child: Text(
+                              cleanBadge,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.8,
+                                color: Color(0xFF4F46E5),
+                              ),
                             ),
                           ),
                         ],
@@ -208,6 +213,8 @@ class _TemplateRealPreviewModalState extends State<TemplateRealPreviewModal> {
                       const SizedBox(height: 2),
                       Text(
                         name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.w800,
@@ -217,6 +224,8 @@ class _TemplateRealPreviewModalState extends State<TemplateRealPreviewModal> {
                       ),
                       Text(
                         industry,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 12,
                           color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -351,16 +360,20 @@ class _TemplateRealPreviewModalState extends State<TemplateRealPreviewModal> {
                                       : (isDark ? const Color(0xFF0F172A) : Colors.white),
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  isLocked
-                                      ? 'templates_unlock_premium'.tr
-                                      : 'use_template'.tr,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    color: isLocked
-                                        ? Colors.white
-                                        : (isDark ? const Color(0xFF0F172A) : Colors.white),
+                                Flexible(
+                                  child: Text(
+                                    isLocked
+                                        ? 'templates_unlock_premium'.tr
+                                        : 'use_template'.tr,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: isLocked
+                                          ? Colors.white
+                                          : (isDark ? const Color(0xFF0F172A) : Colors.white),
+                                    ),
                                   ),
                                 ),
                               ],

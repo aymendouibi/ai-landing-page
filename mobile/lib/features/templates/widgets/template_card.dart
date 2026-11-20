@@ -23,7 +23,11 @@ class TemplateCard extends StatelessWidget {
 
     final name = template['name'] ?? 'Template';
     final industry = template['industry'] ?? 'Food & drink';
-    final badge = template['badge'] ?? "EDITOR'S PICK";
+    final rawBadge = (template['badge'] ?? "EDITOR'S PICK").toString().trim();
+    final cleanBadge = (rawBadge.startsWith('▸') || rawBadge.startsWith('✦'))
+        ? rawBadge.substring(1).trim()
+        : rawBadge;
+    final badge = cleanBadge.toUpperCase();
     final desc = template['description'] ?? '';
 
     // Extract document & preview details
@@ -109,13 +113,17 @@ class TemplateCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 5),
-            Text(
-              badge.toString().toUpperCase(),
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.8,
-                color: Color(0xFF3B82F6),
+            Flexible(
+              child: Text(
+                badge,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                  color: Color(0xFF3B82F6),
+                ),
               ),
             ),
             if (isLocked) ...[
