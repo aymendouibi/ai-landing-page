@@ -121,14 +121,11 @@ class DashboardScreen extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(9),
-                          child: Image.asset(
-                            'assets/images/app_logo.png',
-                            width: 32,
-                            height: 32,
-                            fit: BoxFit.cover,
-                          ),
+                        Image.asset(
+                          'assets/images/app_logo.png',
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.contain,
                         ),
                         const SizedBox(width: 10),
                         Flexible(
