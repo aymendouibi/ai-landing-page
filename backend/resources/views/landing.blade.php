@@ -10,21 +10,21 @@
     
     <!-- OpenGraph / Social Sharing -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="AI Landing Page — Your Landing Page. Live in 3 Minutes.">
+    <meta property="og:title" content="AI Landing Page — Live in 3 Minutes">
     <meta property="og:description" content="Describe your idea, generate your page, and publish it in minutes. Free forever, no watermarks, and instant edge publishing.">
     <meta property="og:url" content="https://www.ai-landing-page.xyz">
-    <meta property="og:image" content="https://www.ai-landing-page.xyz/images/landing/hero_3min.jpg">
+    <meta property="og:image" content="https://www.ai-landing-page.xyz/images/landing/projects_dashboard.jpg">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="AI Landing Page — Live in 3 Minutes">
     <meta name="twitter:description" content="Describe your idea, generate your page, and publish it in minutes. Free forever with zero watermarks.">
-    <meta name="twitter:image" content="https://www.ai-landing-page.xyz/images/landing/hero_3min.jpg">
+    <meta name="twitter:image" content="https://www.ai-landing-page.xyz/images/landing/projects_dashboard.jpg">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -58,12 +58,11 @@
                         'pulse-glow': 'pulseGlow 6s ease-in-out infinite',
                         'float-slow': 'floatSlow 6s ease-in-out infinite',
                         'float-reverse': 'floatReverse 7s ease-in-out infinite',
-                        'shimmer': 'shimmer 2.5s infinite',
                     },
                     keyframes: {
                         pulseGlow: {
                             '0%, 100%': { opacity: '0.35', transform: 'scale(1)' },
-                            '50%': { opacity: '0.6', transform: 'scale(1.08)' },
+                            '50%': { opacity: '0.65', transform: 'scale(1.06)' },
                         },
                         floatSlow: {
                             '0%, 100%': { transform: 'translateY(0px)' },
@@ -72,9 +71,6 @@
                         floatReverse: {
                             '0%, 100%': { transform: 'translateY(0px)' },
                             '50%': { transform: 'translateY(10px)' },
-                        },
-                        shimmer: {
-                            '100%': { transform: 'translateX(100%)' },
                         }
                     }
                 }
@@ -106,12 +102,58 @@
             box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.25);
         }
 
-        /* Device Showcase Frame */
-        .device-frame {
-            border-radius: 28px;
-            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.12);
-            overflow: hidden;
+        /* Realistic Portrait Mobile Frame */
+        .mobile-frame-portrait {
+            position: relative;
+            border-radius: 46px;
+            background: #090D16;
+            padding: 9px;
+            box-shadow: 
+                0 0 0 2px rgba(255, 255, 255, 0.12),
+                0 25px 60px -15px rgba(0, 0, 0, 0.85),
+                0 0 35px -5px rgba(99, 102, 241, 0.25);
+            border: 3px solid #1E293B;
+            transition: all 0.4s ease;
+        }
+        .mobile-frame-portrait:hover {
+            box-shadow: 
+                0 0 0 2px rgba(129, 140, 248, 0.3),
+                0 30px 70px -12px rgba(0, 0, 0, 0.95),
+                0 0 45px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Realistic Landscape Mobile Frame (for flipped site editor) */
+        .mobile-frame-landscape {
+            position: relative;
+            border-radius: 38px;
+            background: #090D16;
+            padding: 9px;
+            box-shadow: 
+                0 0 0 2px rgba(255, 255, 255, 0.12),
+                0 25px 60px -15px rgba(0, 0, 0, 0.85),
+                0 0 35px -5px rgba(99, 102, 241, 0.25);
+            border: 3px solid #1E293B;
+            transition: all 0.4s ease;
+        }
+        .mobile-frame-landscape:hover {
+            box-shadow: 
+                0 0 0 2px rgba(129, 140, 248, 0.3),
+                0 30px 70px -12px rgba(0, 0, 0, 0.95),
+                0 0 45px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Dynamic Island / Speaker Pill */
+        .dynamic-island {
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 84px;
+            height: 20px;
             background: #000;
+            border-radius: 20px;
+            z-index: 30;
+            box-shadow: 0 0 2px rgba(255, 255, 255, 0.2);
         }
 
         /* Text Gradients */
@@ -162,7 +204,7 @@
             <!-- Nav Links (Desktop) -->
             <nav class="hidden lg:flex items-center space-x-8 text-sm font-semibold text-slate-300">
                 <a href="#hero" class="hover:text-white transition-colors">Overview</a>
-                <a href="#workflow" class="hover:text-white transition-colors">How It Works</a>
+                <a href="#editor" class="hover:text-white transition-colors">Site Editor</a>
                 <a href="#templates" class="hover:text-white transition-colors">Templates</a>
                 <a href="#freedom" class="hover:text-white transition-colors">No Watermarks</a>
                 <a href="#showcase" class="hover:text-white transition-colors">Live Showcase</a>
@@ -188,31 +230,31 @@
     </header>
 
     <main>
-        <!-- ========================================== -->
-        <!-- SECTION 1: HERO (Matches hero_3min.jpg)     -->
-        <!-- ========================================== -->
-        <section id="hero" class="relative pt-12 pb-20 md:pt-20 md:pb-28 overflow-hidden bg-grid-pattern">
+        <!-- ======================================================== -->
+        <!-- SECTION 1: HERO SECTION                                   -->
+        <!-- ======================================================== -->
+        <section id="hero" class="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden bg-grid-pattern">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 
                 <!-- Announcement Pill -->
                 <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-300 text-xs sm:text-sm font-semibold mb-8 hover:bg-brand-500/15 transition-all">
                     <span class="flex h-2 w-2 rounded-full bg-brand-400 animate-ping"></span>
-                    <span>AI-Powered Landing Page Generator · Free Edge Hosting</span>
+                    <span>AI-Powered Landing Page Generator · Instant Edge Hosting</span>
                 </div>
 
-                <!-- Exact Headline from Image: "Your Landing Page. Live in 3 Minutes." -->
+                <!-- Hero Headline -->
                 <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-4xl mx-auto leading-[1.08]">
                     Your Landing Page.<br />
                     <span class="text-gradient">Live in 3 Minutes.</span>
                 </h1>
 
-                <!-- Exact Description from Image: "Describe your idea, generate your page, and publish it in minutes." -->
+                <!-- Subtitle -->
                 <p class="mt-6 text-lg sm:text-2xl text-slate-300 max-w-2xl mx-auto leading-relaxed font-medium">
                     Describe your idea, generate your page, and publish it in minutes.
                 </p>
 
                 <p class="mt-3 text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-                    Turn your concept into a responsive, high-converting website with visual touch controls, curated themes, and instant Cloudflare edge deployment.
+                    Built natively for mobile and web. Seamless visual editing, curated high-converting templates, and 1-tap Cloudflare edge deployment with zero watermarks.
                 </p>
 
                 <!-- Hero CTAs -->
@@ -224,7 +266,7 @@
                         <span>Start Building Free</span>
                     </a>
                     <a href="#pricing" class="w-full sm:w-auto px-8 py-4 rounded-xl glass-panel text-slate-200 hover:text-white hover:bg-white/[0.08] font-semibold text-base transition-all flex items-center justify-center gap-2 border border-white/10">
-                        <span>See Pricing ($4.9/mo)</span>
+                        <span>See Plans ($4.9/mo)</span>
                         <svg class="w-4 h-4 text-brand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                             <polyline points="12 5 19 12 12 19"></polyline>
@@ -252,173 +294,188 @@
                     </div>
                 </div>
 
-                <!-- HERO SHOWCASE CARD (hero_3min.jpg) -->
-                <div class="mt-16 sm:mt-20 relative max-w-5xl mx-auto">
+                <!-- HERO MOBILE FRAME SHOWCASE (Dual Showcase: Projects Dashboard & Templates Browser) -->
+                <div class="mt-16 sm:mt-24 relative max-w-5xl mx-auto">
                     <!-- Glow Behind Showcase -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-brand-600/30 via-purple-600/25 to-transparent rounded-[48px] blur-3xl -z-10"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-brand-600/30 via-purple-600/25 to-transparent rounded-[60px] blur-3xl -z-10"></div>
 
-                    <div class="relative glass-panel-glow p-4 sm:p-6 rounded-[36px] border border-brand-500/40 shadow-2xl overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-10 items-center justify-center">
                         
-                        <!-- Top Browser Bar Mockup -->
-                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/10 px-2">
-                            <div class="flex items-center space-x-2">
-                                <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
-                                <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
-                                <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
-                            </div>
-                            <div class="flex items-center space-x-2 bg-dark-base/80 px-4 py-1.5 rounded-full border border-white/10 text-xs font-mono text-slate-300">
-                                <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                <span>https://yourpage.com</span>
-                            </div>
-                            <div class="flex items-center space-x-3 text-xs font-bold text-slate-400">
-                                <span class="hidden sm:inline px-2.5 py-1 rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">Live in 3 Minutes</span>
+                        <!-- Centerpiece 1: Projects Dashboard in Portrait Mobile Frame -->
+                        <div class="md:col-span-6 lg:col-span-5 flex justify-center">
+                            <div class="mobile-frame-portrait max-w-[320px] w-full">
+                                <div class="dynamic-island"></div>
+                                <div class="rounded-[36px] overflow-hidden bg-black">
+                                    <img src="/images/landing/projects_dashboard.jpg" 
+                                         alt="AI Landing Page Projects Dashboard - Live Published Sites" 
+                                         class="w-full h-auto block" 
+                                         loading="eager">
+                                </div>
+                                <div class="mt-3 px-3 pb-1 text-left">
+                                    <div class="text-xs font-bold text-white flex items-center justify-between">
+                                        <span class="flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            Projects Control Center
+                                        </span>
+                                        <span class="text-[10px] text-brand-300 font-mono">1-Tap Live URL</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Manage live deployments, copy custom URLs & track revisions</p>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Image 1 Showcase -->
-                        <div class="relative rounded-2xl overflow-hidden border border-white/10 bg-slate-900 group">
-                            <img src="/images/landing/hero_3min.jpg" 
-                                 alt="Your Landing Page. Live in 3 Minutes. Describe your idea, generate your page, and publish it in minutes." 
-                                 class="w-full h-auto object-cover max-h-[640px] object-top group-hover:scale-[1.01] transition-transform duration-700" 
-                                 loading="eager">
-                            
-                            <!-- Floating Badges over Image -->
-                            <div class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-auto sm:max-w-md glass-panel p-4 rounded-2xl border border-white/15 text-left shadow-2xl backdrop-blur-md">
-                                <div class="flex items-center gap-2 text-xs font-bold text-white mb-1">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                    <span>AI Visual Canvas & 1-Tap Publish</span>
+                        <!-- Centerpiece 2: Templates Browser in Portrait Mobile Frame -->
+                        <div class="md:col-span-6 lg:col-span-7 flex flex-col justify-center text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-brand-500/10 text-brand-300 text-xs font-bold uppercase tracking-wider mb-4 border border-brand-500/20 w-fit">
+                                Curated Edit · Trending 2026
+                            </div>
+                            <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                                Your next idea, <br>
+                                <span class="text-gradient">beautifully started.</span>
+                            </h2>
+                            <p class="text-slate-300 mt-3 text-sm sm:text-base leading-relaxed">
+                                Distinctive designs. Ready to make your own. Deploy high-conversion websites in 60 seconds with tailored typography, animations, and responsive layout structures.
+                            </p>
+
+                            <!-- Mobile Frame Preview of Template Browser -->
+                            <div class="mt-6 flex items-center gap-6">
+                                <div class="mobile-frame-portrait max-w-[260px] w-full shrink-0 hidden sm:block">
+                                    <div class="dynamic-island"></div>
+                                    <div class="rounded-[36px] overflow-hidden bg-black">
+                                        <img src="/images/landing/templates_browser.jpg" 
+                                             alt="Templates Browser - Trending 2026 Nexus AI" 
+                                             class="w-full h-auto block" 
+                                             loading="eager">
+                                    </div>
                                 </div>
-                                <p class="text-xs text-slate-300 leading-relaxed">
-                                    Describe your concept, tap to edit text, swap photos, and hit the purple Publish rocket to go live worldwide.
-                                </p>
+
+                                <div class="space-y-3.5 text-xs sm:text-sm text-slate-300">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center font-bold text-xs shrink-0">✓</div>
+                                        <span><strong>Nexus AI:</strong> "Linear speed. Superhuman intelligence."</span>
+                                    </div>
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center font-bold text-xs shrink-0">✓</div>
+                                        <span><strong>Category Filters:</strong> Startups, Business, Weddings, Personal</span>
+                                    </div>
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center font-bold text-xs shrink-0">✓</div>
+                                        <span><strong>1-Click Action:</strong> Deploy in 60 seconds to Cloudflare edge</span>
+                                    </div>
+                                    <div class="pt-2">
+                                        <a href="/canvas" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 text-white font-bold text-xs uppercase tracking-wider hover:brightness-110 transition-all shadow-md">
+                                            <span>Explore All Templates</span>
+                                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
             </div>
         </section>
 
-        <!-- ======================================================== -->
-        <!-- SECTION 2: WORKFLOW (Matches create_publish_share.jpg)   -->
-        <!-- ======================================================== -->
-        <section id="workflow" class="py-20 md:py-32 border-t border-white/[0.08] relative">
+        <!-- ========================================================================= -->
+        <!-- SECTION 2: FLIPPED SITE EDITOR IN LANDSCAPE MOBILE FRAME                   -->
+        <!-- ========================================================================= -->
+        <section id="editor" class="py-20 md:py-32 border-t border-white/[0.08] relative bg-dark-surface/30">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-                    
-                    <!-- Left: Exact Match Image -->
-                    <div class="lg:col-span-5 flex justify-center order-2 lg:order-1">
-                        <div class="relative group">
-                            <div class="absolute -inset-2 bg-gradient-to-r from-brand-500 to-purple-600 rounded-[38px] blur-xl opacity-30 group-hover:opacity-60 transition duration-500"></div>
-                            <div class="device-frame max-w-[340px] relative border-2 border-brand-500/30">
-                                <img src="/images/landing/create_publish_share.jpg" 
-                                     alt="Create It. Publish It. Share It. Drag onto your page, or tap to add below the selection." 
-                                     class="w-full h-auto block" 
-                                     loading="lazy">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-xs font-bold uppercase tracking-wider text-brand-400 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20">
+                        Flipped & Optimized Visual Canvas
+                    </span>
+                    <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight mt-4 text-white">
+                        Create It. Publish It. Share It.
+                    </h2>
+                    <p class="mt-4 text-base sm:text-lg text-slate-300">
+                        Drag onto your page, or tap to add below the selection. Full visual control with direct manipulation and live responsive simulations.
+                    </p>
+                </div>
+
+                <!-- Landscape Mobile Frame for Flipped Site Editor -->
+                <div class="max-w-4xl mx-auto">
+                    <div class="mobile-frame-landscape w-full relative">
+                        <!-- Landscape Camera / Notch dot on the left -->
+                        <div class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-black/80 border border-white/20 z-30 hidden sm:block"></div>
+                        
+                        <div class="rounded-[28px] overflow-hidden bg-black border border-white/10">
+                            <img src="/images/landing/site_editor.jpg" 
+                                 alt="AI Landing Page Flipped Site Editor - Drag onto your page or tap to add below the selection" 
+                                 class="w-full h-auto block" 
+                                 loading="lazy">
+                        </div>
+
+                        <!-- Highlights bar below the frame -->
+                        <div class="mt-4 p-3 px-4 glass-panel rounded-2xl flex flex-wrap items-center justify-between gap-4 text-xs">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                                <span class="font-bold text-white">Live Split Canvas:</span>
+                                <span class="text-slate-300">"Together is a beautiful place" · Tuscany Wedding Live Preview</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-slate-400 font-mono">
+                                <span>Tabs: Add · Edit · Layers · Design</span>
+                                <span class="text-slate-600">|</span>
+                                <span class="text-brand-300 font-bold">1-Tap Publish Button</span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Right: Exact Headline & Content -->
-                    <div class="lg:col-span-7 order-1 lg:order-2">
-                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-brand-500/10 text-brand-300 text-xs font-bold uppercase tracking-wider mb-4 border border-brand-500/20">
-                            Modular Visual Architecture
-                        </div>
+                <!-- 6 Building Block Cards matching the image -->
+                <div class="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 max-w-5xl mx-auto">
+                    <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center hover:border-brand-500/40 transition-colors">
+                        <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-300 flex items-center justify-center mx-auto mb-2 font-bold text-xs">01</div>
+                        <h4 class="text-xs font-bold text-white">Hero</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Impact headlines</p>
+                    </div>
 
-                        <!-- Exact Headline from Image -->
-                        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                            Create It.<br />
-                            Publish It.<br />
-                            <span class="text-gradient">Share It.</span>
-                        </h2>
+                    <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center hover:border-brand-500/40 transition-colors">
+                        <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-300 flex items-center justify-center mx-auto mb-2 font-bold text-xs">02</div>
+                        <h4 class="text-xs font-bold text-white">Products</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Pricing & features</p>
+                    </div>
 
-                        <!-- Exact Subtitle from Image -->
-                        <p class="text-lg sm:text-xl text-slate-300 mt-4 font-medium">
-                            Drag onto your page, or tap to add below the selection.
-                        </p>
+                    <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center hover:border-brand-500/40 transition-colors">
+                        <div class="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-300 flex items-center justify-center mx-auto mb-2 font-bold text-xs">03</div>
+                        <h4 class="text-xs font-bold text-white">Story</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Founder journey</p>
+                    </div>
 
-                        <p class="text-slate-400 mt-2 text-sm sm:text-base leading-relaxed">
-                            Effortlessly stack modular blocks to build complete, high-converting digital storefronts and landing pages. Everything you need is right at your fingertips.
-                        </p>
+                    <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center hover:border-brand-500/40 transition-colors">
+                        <div class="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-300 flex items-center justify-center mx-auto mb-2 font-bold text-xs">04</div>
+                        <h4 class="text-xs font-bold text-white">Gallery</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Masonry grids</p>
+                    </div>
 
-                        <!-- Components Breakdown matching image (Hero, Products, Story, Gallery, Text, Call to action) -->
-                        <div class="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
-                            <div class="glass-panel p-3.5 rounded-xl border border-white/10 hover:border-brand-500/40 transition-colors">
-                                <div class="text-xs font-bold text-white flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded bg-brand-400"></span>
-                                    <span>Hero Sections</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400 mt-1">High-impact headlines & primary call-to-actions.</p>
-                            </div>
+                    <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center hover:border-brand-500/40 transition-colors">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-300 flex items-center justify-center mx-auto mb-2 font-bold text-xs">05</div>
+                        <h4 class="text-xs font-bold text-white">Text</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Rich editorial</p>
+                    </div>
 
-                            <div class="glass-panel p-3.5 rounded-xl border border-white/10 hover:border-brand-500/40 transition-colors">
-                                <div class="text-xs font-bold text-white flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded bg-purple-400"></span>
-                                    <span>Products & Pricing</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400 mt-1">Pricing tiers, feature matrix, and checkout links.</p>
-                            </div>
-
-                            <div class="glass-panel p-3.5 rounded-xl border border-white/10 hover:border-brand-500/40 transition-colors">
-                                <div class="text-xs font-bold text-white flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded bg-amber-400"></span>
-                                    <span>Story & About</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400 mt-1">Founder notes, brand mission, and origin story.</p>
-                            </div>
-
-                            <div class="glass-panel p-3.5 rounded-xl border border-white/10 hover:border-brand-500/40 transition-colors">
-                                <div class="text-xs font-bold text-white flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded bg-pink-400"></span>
-                                    <span>Photo Gallery</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400 mt-1">Dynamic masonry grids and responsive carousels.</p>
-                            </div>
-
-                            <div class="glass-panel p-3.5 rounded-xl border border-white/10 hover:border-brand-500/40 transition-colors">
-                                <div class="text-xs font-bold text-white flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded bg-sky-400"></span>
-                                    <span>Rich Text & FAQs</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400 mt-1">Editorial columns, quotes, and accordion items.</p>
-                            </div>
-
-                            <div class="glass-panel p-3.5 rounded-xl border border-white/10 hover:border-brand-500/40 transition-colors">
-                                <div class="text-xs font-bold text-white flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded bg-emerald-400"></span>
-                                    <span>Call to Action</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400 mt-1">Conversion buttons, newsletter signups & forms.</p>
-                            </div>
-                        </div>
-
-                        <!-- Add, Edit, Layers, Design Workflow -->
-                        <div class="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-300">
-                            <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">1. Add Block</span>
-                            <span class="text-slate-500">→</span>
-                            <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">2. Edit Text & Images</span>
-                            <span class="text-slate-500">→</span>
-                            <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">3. Organize Layers</span>
-                            <span class="text-slate-500">→</span>
-                            <span class="px-3 py-1.5 rounded-lg bg-brand-500/20 text-brand-300 border border-brand-500/30">4. 1-Tap Publish</span>
-                        </div>
-
+                    <div class="glass-panel p-4 rounded-2xl border border-white/10 text-center hover:border-brand-500/40 transition-colors">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-300 flex items-center justify-center mx-auto mb-2 font-bold text-xs">06</div>
+                        <h4 class="text-xs font-bold text-white">Call to action</h4>
+                        <p class="text-[11px] text-slate-400 mt-1">Conversion buttons</p>
                     </div>
                 </div>
 
             </div>
         </section>
 
-        <!-- ============================================================================== -->
-        <!-- SECTION 3: TEMPLATES (Matches modern_elegant_templates.jpg & designed_for_...)  -->
-        <!-- ============================================================================== -->
-        <section id="templates" class="py-20 md:py-32 border-t border-white/[0.08] bg-dark-surface/40 relative">
+        <!-- ========================================================================= -->
+        <!-- SECTION 3: TEMPLATES SHOWCASE IN PORTRAIT MOBILE FRAMES                   -->
+        <!-- ========================================================================= -->
+        <section id="templates" class="py-20 md:py-32 border-t border-white/[0.08] relative">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <div class="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
                     <span class="text-xs font-bold uppercase tracking-wider text-purple-400 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20">
-                        Curated Design System
+                        Curated Editorial System
                     </span>
                     <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight mt-4 text-white">
                         Modern, Elegant Templates.
@@ -428,202 +485,78 @@
                     </p>
                 </div>
 
-                <!-- Showcase Item A: Modern, Elegant Templates (Image 3) -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center mb-28">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                     
-                    <div class="lg:col-span-6">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-pink-500/10 text-pink-300 text-xs font-bold uppercase tracking-wider mb-4 border border-pink-500/20">
-                            Made for Moments · Editorial Luxury
-                        </div>
-                        <h3 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                            Modern, Elegant Templates.
-                        </h3>
-                        <p class="text-slate-300 mt-4 text-base sm:text-lg leading-relaxed">
-                            From intimate wedding celebrations to Michelin-starred fine dining destinations, AI Landing Page delivers elevated editorial aesthetics that captivate your audience.
-                        </p>
-
-                        <div class="mt-6 space-y-4">
-                            <div class="glass-panel p-4 rounded-2xl border border-white/10 flex items-start gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/20 font-bold">
-                                    ✦
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-white">Made for Moments: Weddings & Milestone Events</h4>
-                                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                                        As featured in <em>Ana & Teo</em>: Romantic serif typography, custom story timelines ("Eight Years of Adventure"), RSVP capture, and venue guides.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="glass-panel p-4 rounded-2xl border border-white/10 flex items-start gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20 font-bold">
-                                    ★
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-white">Michelin Guide 2026: Hospitality & Fine Dining</h4>
-                                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                                        As featured in <em>Solstice Fine Dining</em>: Dark luxury themes, seasonal tasting menu cards, reservation buttons, and wine pairing showcases.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-8 flex items-center gap-4">
-                            <a href="/canvas" class="px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 text-white font-bold text-xs uppercase tracking-wider hover:brightness-110 transition-all">
-                                Use These Templates
-                            </a>
-                            <button onclick="openLiveModal('/sites/studiomarlow', 'Studio Marlow Luxury Architecture')" class="px-5 py-3 rounded-xl glass-panel text-slate-300 hover:text-white text-xs font-semibold transition-all">
-                                Live Interactive Preview →
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-6 flex justify-center">
-                        <div class="relative group">
-                            <div class="absolute -inset-2 bg-gradient-to-tr from-pink-500 to-purple-600 rounded-[38px] blur-xl opacity-30 group-hover:opacity-50 transition duration-500"></div>
-                            <div class="device-frame max-w-[340px] relative border-2 border-purple-500/30">
-                                <img src="/images/landing/modern_elegant_templates.jpg" 
-                                     alt="Modern, Elegant Templates. Made for Moments, Ana & Teo Weddings, Michelin Guide Solstice Fine Dining." 
+                    <!-- Template Showcase 1: Ana & Teo Weddings -->
+                    <div class="glass-panel p-8 sm:p-10 rounded-[40px] border border-white/10 flex flex-col md:flex-row gap-8 items-center glass-card-hover">
+                        <div class="mobile-frame-portrait max-w-[260px] w-full shrink-0">
+                            <div class="dynamic-island"></div>
+                            <div class="rounded-[36px] overflow-hidden bg-black">
+                                <img src="/images/landing/template_wedding.jpg" 
+                                     alt="Made for Moments - Ana & Teo Weddings Template" 
                                      class="w-full h-auto block" 
                                      loading="lazy">
                             </div>
                         </div>
+
+                        <div class="flex-1 text-left">
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/10 text-pink-300 text-[11px] font-bold uppercase tracking-wider mb-3 border border-pink-500/20">
+                                ✦ Made for Moments
+                            </div>
+                            <h3 class="text-2xl font-extrabold text-white">
+                                Ana & Teo Weddings
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-1 font-mono">
+                                Weddings & Milestone Celebrations
+                            </p>
+                            <p class="text-sm text-slate-300 mt-3 leading-relaxed">
+                                Romantic editorial typography, love story timelines ("Eight Years of Adventures"), RSVP capture, and venue location guides.
+                            </p>
+                            <div class="mt-6 pt-6 border-t border-white/10 flex items-center justify-between">
+                                <button onclick="openLiveModal('/sites/studiomarlow', 'Ana & Teo Wedding Experience')" class="text-xs font-bold text-brand-400 hover:text-brand-300 flex items-center gap-1.5">
+                                    <span>Interactive Preview</span>
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                </button>
+                                <a href="/canvas" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider transition-all">
+                                    Use Template
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
-                </div>
-
-                <!-- Showcase Item B: Designed for Every Business (Image 4) -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-                    
-                    <div class="lg:col-span-6 flex justify-center order-2 lg:order-1">
-                        <div class="relative group">
-                            <div class="absolute -inset-2 bg-gradient-to-tr from-emerald-500 to-sky-600 rounded-[38px] blur-xl opacity-30 group-hover:opacity-50 transition duration-500"></div>
-                            <div class="device-frame max-w-[340px] relative border-2 border-emerald-500/30">
-                                <img src="/images/landing/designed_for_every_business.jpg" 
-                                     alt="Designed for Every Business. Next-Gen DevOps, DevFlow Cloud, Startups & Developer Tools, Restaurant Menu Highlights." 
+                    <!-- Template Showcase 2: Solstice Fine Dining -->
+                    <div class="glass-panel p-8 sm:p-10 rounded-[40px] border border-white/10 flex flex-col md:flex-row gap-8 items-center glass-card-hover">
+                        <div class="mobile-frame-portrait max-w-[260px] w-full shrink-0">
+                            <div class="dynamic-island"></div>
+                            <div class="rounded-[36px] overflow-hidden bg-black">
+                                <img src="/images/landing/template_dining.jpg" 
+                                     alt="Michelin Guide 2026 - Solstice Fine Dining Template" 
                                      class="w-full h-auto block" 
                                      loading="lazy">
                             </div>
                         </div>
-                    </div>
 
-                    <div class="lg:col-span-6 order-1 lg:order-2">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-500/20">
-                            High Conversion · Universal Flexibility
-                        </div>
-
-                        <!-- Exact Headline from Image 4 -->
-                        <h3 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                            Designed for Every Business.
-                        </h3>
-
-                        <p class="text-slate-300 mt-4 text-base sm:text-lg leading-relaxed">
-                            Whether you run a fast-paced tech startup or a bustling neighborhood bistro, AI Landing Page crafts copy, color palettes, and conversion funnels tailored to your exact niche.
-                        </p>
-
-                        <div class="mt-6 space-y-4">
-                            <div class="glass-panel p-4 rounded-2xl border border-white/10 flex items-start gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20 font-bold">
-                                    ⚡
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-white">Next-Gen DevOps & Developer Startups</h4>
-                                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                                        As featured in <em>DevFlow Cloud</em>: "Preview Environments on Every Git Commit", 200ms cold starts, GitHub integration, terminal commands, and metric benchmarks.
-                                    </p>
-                                </div>
+                        <div class="flex-1 text-left">
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-300 text-[11px] font-bold uppercase tracking-wider mb-3 border border-amber-500/20">
+                                ★ Michelin Guide 2026
                             </div>
-
-                            <div class="glass-panel p-4 rounded-2xl border border-white/10 flex items-start gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/20 font-bold">
-                                    🍽️
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-bold text-white">Culinary Arts, Bakeries & Retail</h4>
-                                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                                        As featured in <em>Menu Highlights</em>: High-resolution culinary photo galleries, daily fresh specialities, order links, and business hours.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-8 flex items-center gap-4">
-                            <a href="/canvas" class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs uppercase tracking-wider hover:brightness-110 transition-all">
-                                Build for Your Niche
-                            </a>
-                            <button onclick="openLiveModal('/sites/artisan-bakery', 'Artisan Sourdough Bakery')" class="px-5 py-3 rounded-xl glass-panel text-slate-300 hover:text-white text-xs font-semibold transition-all">
-                                Preview Bakery Demo →
-                            </button>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-        </section>
-
-        <!-- ========================================================== -->
-        <!-- SECTION 4: TEMPLATE LIBRARY (Matches curated_library.jpg)   -->
-        <!-- ========================================================== -->
-        <section id="library" class="py-20 md:py-32 border-t border-white/[0.08] relative">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-                    
-                    <div class="lg:col-span-6">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-brand-500/10 text-brand-300 text-xs font-bold uppercase tracking-wider mb-4 border border-brand-500/20">
-                            Extensive Template Catalog
-                        </div>
-
-                        <!-- Exact Headline from Image 5 -->
-                        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                            Your next idea,<br />
-                            <span class="text-gradient">beautifully started.</span>
-                        </h2>
-
-                        <!-- Exact Subtitle from Image 5 -->
-                        <p class="text-lg sm:text-xl text-slate-300 mt-4 font-medium">
-                            Distinctive designs. Ready to make your own. Deploy in 60 Seconds.
-                        </p>
-
-                        <p class="text-slate-400 mt-2 text-sm sm:text-base leading-relaxed">
-                            Explore our curated edit of 2026 trending aesthetics. From high-tech AI dark themes with linear gradients to warm minimalist portfolios, choose your starting point and let AI tailor it to your vision.
-                        </p>
-
-                        <!-- Highlights from image -->
-                        <div class="mt-8 space-y-3.5 text-sm text-slate-300">
-                            <div class="flex items-center gap-3">
-                                <div class="w-6 h-6 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center shrink-0 font-bold text-xs">✓</div>
-                                <span><strong>The Curated Edit (Trending 2026):</strong> Nexus AI ("Linear speed. Superhuman intelligence")</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-6 h-6 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center shrink-0 font-bold text-xs">✓</div>
-                                <span><strong>Smart Categories:</strong> Startups, Business, Weddings, Personal Brands & Portfolios</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-6 h-6 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center shrink-0 font-bold text-xs">✓</div>
-                                <span><strong>1-Tap "Deploy in 60 Seconds":</strong> Zero setup, instant edge hosting & preview</span>
-                            </div>
-                        </div>
-
-                        <div class="mt-8">
-                            <a href="/canvas" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-purple-600 text-white font-bold text-sm shadow-lg shadow-brand-500/25 hover:brightness-110 transition-all">
-                                <span>Browse All Templates</span>
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Right: Exact Curated Library Image -->
-                    <div class="lg:col-span-6 flex justify-center">
-                        <div class="relative group">
-                            <div class="absolute -inset-2 bg-gradient-to-r from-purple-500 via-brand-500 to-sky-500 rounded-[38px] blur-xl opacity-35 group-hover:opacity-60 transition duration-500"></div>
-                            <div class="device-frame max-w-[340px] relative border-2 border-brand-500/30">
-                                <img src="/images/landing/curated_library.jpg" 
-                                     alt="Your next idea, beautifully started. Distinctive designs. Ready to make your own. Deploy in 60 Seconds." 
-                                     class="w-full h-auto block" 
-                                     loading="lazy">
+                            <h3 class="text-2xl font-extrabold text-white">
+                                Solstice Fine Dining
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-1 font-mono">
+                                Restaurant & Luxury Hospitality
+                            </p>
+                            <p class="text-sm text-slate-300 mt-3 leading-relaxed">
+                                Dark luxury aesthetics, spring tasting menu cards, woodfire kitchen highlights, table reservations, and wine pairings.
+                            </p>
+                            <div class="mt-6 pt-6 border-t border-white/10 flex items-center justify-between">
+                                <button onclick="openLiveModal('/sites/artisan-bakery', 'Solstice Culinary Experience')" class="text-xs font-bold text-brand-400 hover:text-brand-300 flex items-center gap-1.5">
+                                    <span>Interactive Preview</span>
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                </button>
+                                <a href="/canvas" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider transition-all">
+                                    Use Template
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -634,81 +567,61 @@
         </section>
 
         <!-- ========================================================================= -->
-        <!-- SECTION 5: FREEDOM & NO WATERMARKS (Matches free_forever_no_watermarks.jpg)-->
+        <!-- SECTION 4: FREEDOM & NO WATERMARKS                                        -->
         <!-- ========================================================================= -->
         <section id="freedom" class="py-20 md:py-32 border-t border-white/[0.08] bg-dark-surface/60 relative overflow-hidden">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-                    
-                    <!-- Left: Exact Match Image -->
-                    <div class="lg:col-span-5 flex justify-center order-2 lg:order-1">
-                        <div class="relative group">
-                            <div class="absolute -inset-2 bg-gradient-to-r from-emerald-500 to-brand-500 rounded-[38px] blur-xl opacity-30 group-hover:opacity-55 transition duration-500"></div>
-                            <div class="device-frame max-w-[340px] relative border-2 border-emerald-500/40">
-                                <img src="/images/landing/free_forever_no_watermarks.jpg" 
-                                     alt="Free. Forever. No Watermarks. Together is a beautiful place. Ana & Teo Site Saved." 
-                                     class="w-full h-auto block" 
-                                     loading="lazy">
-                            </div>
-                        </div>
+                <div class="max-w-4xl mx-auto text-center">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-500/20">
+                        Uncompromised Ownership
                     </div>
 
-                    <!-- Right: Exact Headline & Guarantees -->
-                    <div class="lg:col-span-7 order-1 lg:order-2">
-                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-500/20">
-                            Uncompromised Ownership
+                    <h2 class="text-3xl sm:text-6xl font-black text-white tracking-tight leading-tight">
+                        Free. Forever.<br />
+                        <span class="text-gradient-brand">No Watermarks.</span>
+                    </h2>
+
+                    <p class="text-lg sm:text-xl text-slate-200 mt-4 font-semibold">
+                        "Together is a beautiful place." Your site should reflect your brand, not ours.
+                    </p>
+
+                    <p class="text-slate-400 mt-3 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
+                        Unlike traditional builders that inject giant "Made on..." badges or popups across your hard work, AI Landing Page keeps your published website 100% clean and unbranded on all plans.
+                    </p>
+
+                    <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+                        <div class="glass-panel p-5 rounded-2xl border border-white/10">
+                            <div class="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-2">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Zero Vendor Badges</span>
+                            </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">No promotional banners or third-party footers forced on your visitors.</p>
                         </div>
 
-                        <!-- Exact Headline from Image 6 -->
-                        <h2 class="text-3xl sm:text-6xl font-black text-white tracking-tight leading-tight">
-                            Free. Forever.<br />
-                            <span class="text-gradient-brand">No Watermarks.</span>
-                        </h2>
-
-                        <!-- Exact Subtitle from Image 6 -->
-                        <p class="text-lg sm:text-xl text-slate-200 mt-4 font-semibold">
-                            "Together is a beautiful place." Your site should reflect your brand, not ours.
-                        </p>
-
-                        <p class="text-slate-400 mt-3 text-sm sm:text-base leading-relaxed">
-                            Unlike traditional site builders that slap intrusive "Made with XYZ" badges, banners, and third-party advertising across your website, AI Landing Page gives you 100% clean, unbranded publishing from day one.
-                        </p>
-
-                        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="glass-panel p-4 rounded-2xl border border-white/10">
-                                <div class="text-emerald-400 font-bold text-sm flex items-center gap-2">
-                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                                    <span>Zero Vendor Badges</span>
-                                </div>
-                                <p class="text-xs text-slate-400 mt-1">No floating banners, no footer tags, and no popups ever forced on your visitors.</p>
+                        <div class="glass-panel p-5 rounded-2xl border border-white/10">
+                            <div class="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-2">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Full Code Ownership</span>
                             </div>
-
-                            <div class="glass-panel p-4 rounded-2xl border border-white/10">
-                                <div class="text-emerald-400 font-bold text-sm flex items-center gap-2">
-                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                                    <span>Full Code Ownership</span>
-                                </div>
-                                <p class="text-xs text-slate-400 mt-1">Export clean, production-ready static HTML/CSS/JS in a ZIP file whenever you want.</p>
-                            </div>
-
-                            <div class="glass-panel p-4 rounded-2xl border border-white/10">
-                                <div class="text-emerald-400 font-bold text-sm flex items-center gap-2">
-                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                                    <span>Global Edge Caching</span>
-                                </div>
-                                <p class="text-xs text-slate-400 mt-1">Served directly from Cloudflare’s worldwide edge CDN with sub-second speeds.</p>
-                            </div>
-
-                            <div class="glass-panel p-4 rounded-2xl border border-white/10">
-                                <div class="text-emerald-400 font-bold text-sm flex items-center gap-2">
-                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                                    <span>Free Custom Subdomains</span>
-                                </div>
-                                <p class="text-xs text-slate-400 mt-1">Your site goes live instantly at <code class="text-brand-300 font-mono">ai-landing-page.xyz/sites/...</code></p>
-                            </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">Export complete, standalone HTML, CSS, JavaScript & assets in a ZIP file.</p>
                         </div>
 
+                        <div class="glass-panel p-5 rounded-2xl border border-white/10">
+                            <div class="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-2">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Global Edge CDN</span>
+                            </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">High-performance edge distribution on Cloudflare with sub-second response times.</p>
+                        </div>
+
+                        <div class="glass-panel p-5 rounded-2xl border border-white/10">
+                            <div class="text-emerald-400 font-bold text-sm flex items-center gap-2 mb-2">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Instant Subdomains</span>
+                            </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">Free live hosting instantly accessible at <code class="text-brand-300 font-mono">ai-landing-page.xyz/sites/...</code></p>
+                        </div>
                     </div>
                 </div>
 
@@ -716,7 +629,7 @@
         </section>
 
         <!-- ========================================================================= -->
-        <!-- SECTION 6: PRICING (User requested: Monthly 4.9 USD & Yearly 39.9 USD)    -->
+        <!-- SECTION 5: PRICING ($4.9 USD Monthly & $39.9 USD Yearly)                  -->
         <!-- ========================================================================= -->
         <section id="pricing" class="py-20 md:py-32 border-t border-white/[0.08] relative">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -905,27 +818,11 @@
 
                 </div>
 
-                <!-- Price Comparison Callout -->
-                <div class="mt-12 max-w-4xl mx-auto glass-panel p-6 rounded-2xl border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-300 flex items-center justify-center shrink-0 font-bold">
-                            💡
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-bold text-white">Need multiple client websites?</h4>
-                            <p class="text-xs text-slate-400">Pro includes up to 25 live websites and unlimited ZIP exports with clean HTML/CSS.</p>
-                        </div>
-                    </div>
-                    <a href="/canvas" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap">
-                        Try It Live
-                    </a>
-                </div>
-
             </div>
         </section>
 
         <!-- ========================================================================= -->
-        <!-- SECTION 7: LIVE SHOWCASE (Interactive Deployment Gallery)                 -->
+        <!-- SECTION 6: LIVE GALLERY (Interactive Modal)                               -->
         <!-- ========================================================================= -->
         <section id="showcase" class="py-20 md:py-32 border-t border-white/[0.08] bg-dark-surface/40 relative">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1014,64 +911,6 @@
 
                 </div>
 
-            </div>
-        </section>
-
-        <!-- ========================================================================= -->
-        <!-- SECTION 8: FAQ ACCORDION                                                  -->
-        <!-- ========================================================================= -->
-        <section class="py-20 md:py-28 border-t border-white/[0.08]">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <span class="text-xs font-bold uppercase tracking-wider text-brand-400 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20">
-                        Got Questions?
-                    </span>
-                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-4">
-                        Frequently Asked Questions
-                    </h2>
-                </div>
-
-                <div class="space-y-4">
-                    <details class="glass-panel p-6 rounded-2xl border border-white/10 group cursor-pointer" open>
-                        <summary class="font-bold text-white text-base flex items-center justify-between list-none">
-                            <span>How does the Free plan have No Watermarks?</span>
-                            <span class="text-brand-400 text-xl font-bold group-open:rotate-45 transition-transform">+</span>
-                        </summary>
-                        <p class="text-sm text-slate-300 mt-3 leading-relaxed">
-                            We believe creators shouldn’t have their websites defaced with promotional banners. Our Starter plan is 100% free with no watermarks or forced ads, funded by our Pro subscription upgrades.
-                        </p>
-                    </details>
-
-                    <details class="glass-panel p-6 rounded-2xl border border-white/10 group cursor-pointer">
-                        <summary class="font-bold text-white text-base flex items-center justify-between list-none">
-                            <span>What is the difference between $4.9/mo and $39.9/yr?</span>
-                            <span class="text-brand-400 text-xl font-bold group-open:rotate-45 transition-transform">+</span>
-                        </summary>
-                        <p class="text-sm text-slate-300 mt-3 leading-relaxed">
-                            Both Pro plans provide the exact same premium feature set: custom domains, full source code ZIP exports, AI generation tokens, and ad-free usage. The Yearly plan ($39.9 USD) gives you a massive 32% discount, bringing the monthly cost down to just $3.32/mo!
-                        </p>
-                    </details>
-
-                    <details class="glass-panel p-6 rounded-2xl border border-white/10 group cursor-pointer">
-                        <summary class="font-bold text-white text-base flex items-center justify-between list-none">
-                            <span>Can I connect my own custom domain?</span>
-                            <span class="text-brand-400 text-xl font-bold group-open:rotate-45 transition-transform">+</span>
-                        </summary>
-                        <p class="text-sm text-slate-300 mt-3 leading-relaxed">
-                            Yes! With Pro ($4.9 USD/mo or $39.9 USD/yr), you can connect your existing domain (e.g. <code>yourcompany.com</code>). We automatically generate and renew SSL certificates for free.
-                        </p>
-                    </details>
-
-                    <details class="glass-panel p-6 rounded-2xl border border-white/10 group cursor-pointer">
-                        <summary class="font-bold text-white text-base flex items-center justify-between list-none">
-                            <span>Can I export the source code?</span>
-                            <span class="text-brand-400 text-xl font-bold group-open:rotate-45 transition-transform">+</span>
-                        </summary>
-                        <p class="text-sm text-slate-300 mt-3 leading-relaxed">
-                            Absolutely. With one click, you can export a full ZIP file containing clean, static HTML, CSS, JavaScript, and assets. You can host this file on GitHub Pages, Vercel, Netlify, or any traditional web host.
-                        </p>
-                    </details>
-                </div>
             </div>
         </section>
 
